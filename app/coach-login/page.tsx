@@ -7,7 +7,7 @@ export default function CoachLoginPage() {
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        router.push("/group-selection");
+        router.push("/coach");
     }
 
     return (
