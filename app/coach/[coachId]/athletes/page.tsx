@@ -37,7 +37,7 @@ export default async function CoachAthletesPage({ params }: PageProps) {
                     {athletes?.map((athlete) => (
                         <Link
                             key={athlete.id}
-                            href={`/athletes/${athlete.id}/plan`}
+                            href={`/coach/athletes/${athlete.id}/plan`}
                             className="rounded-xl bg-black px-4 py-4 text-center text-sm font-medium text-white hover:bg-zinc-800 transition"
                         >
                             {athlete.name}
