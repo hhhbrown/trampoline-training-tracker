@@ -9,24 +9,80 @@ type PlanItem = {
     target: number | null;
 };
 
-export default function EditPlanForm({ planItems }: { planItems: PlanItem[] }) {
-    const [items, setItems] = useState(planItems);
+type EditablePlanItem = PlanItem & {
+    isNew?: boolean;
+};
+
+export default function EditPlanForm({
+    planItems,
+    planId,
+}: {
+    planItems: PlanItem[];
+    planId: number;
+}) {
+    const [items, setItems] = useState<EditablePlanItem[]>(planItems);
+    const [deletedIds, setDeletedIds] = useState<number[]>([]);
+
+    function addRow() {
+        setItems([
+            ...items,
+            {
+                id: Date.now(),
+                name: "",
+                target: null,
+                isNew: true,
+            },
+        ]);
+    }
+
+    function deleteRow(item: EditablePlanItem) {
+        setItems(items.filter((currentItem) => currentItem.id !== item.id));
+
+        if (!item.isNew) {
+            setDeletedIds([...deletedIds, item.id]);
+        }
+    }
 
     async function handleSave() {
         const supabase = createClient();
 
-        for (const item of items) {
+        for (const id of deletedIds) {
             const { error } = await supabase
                 .from("plan_items")
-                .update({
-                    name: item.name,
-                    target: item.target,
-                })
-                .eq("id", item.id);
+                .delete()
+                .eq("id", id);
 
             if (error) {
-                alert(`Error saving ${item.name}: ${error.message}`);
+                alert(`Error deleting row: ${error.message}`);
                 return;
+            }
+        }
+
+        for (const item of items) {
+            if (item.isNew) {
+                const { error } = await supabase.from("plan_items").insert({
+                    plan_id: planId,
+                    name: item.name,
+                    target: item.target,
+                });
+
+                if (error) {
+                    alert(`Error adding ${item.name}: ${error.message}`);
+                    return;
+                }
+            } else {
+                const { error } = await supabase
+                    .from("plan_items")
+                    .update({
+                        name: item.name,
+                        target: item.target,
+                    })
+                    .eq("id", item.id);
+
+                if (error) {
+                    alert(`Error saving ${item.name}: ${error.message}`);
+                    return;
+                }
             }
         }
 
@@ -35,35 +91,56 @@ export default function EditPlanForm({ planItems }: { planItems: PlanItem[] }) {
 
     return (
         <section className="mt-10">
-            <h2 className="text-xl font-semibold text-black">Daily Plan</h2>
+            <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-black">Daily Plan</h2>
+
+                <button
+                    type="button"
+                    onClick={addRow}
+                    className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-black hover:bg-zinc-100"
+                >
+                    + Add Row
+                </button>
+            </div>
 
             <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-4">
                 <div className="space-y-3">
                     {items.map((item, index) => (
                         <div
                             key={item.id}
-                            className="flex items-center gap-3 border-b border-zinc-100 pb-3"
+                            className="grid grid-cols-[1fr_80px_auto] items-center gap-3 border-b border-zinc-100 pb-3"
                         >
                             <input
                                 value={item.name ?? ""}
+                                placeholder="Task name"
                                 onChange={(e) => {
                                     const newItems = [...items];
                                     newItems[index].name = e.target.value;
                                     setItems(newItems);
                                 }}
-                                className="flex-1 rounded border px-2 py-1 text-sm"
+                                className="rounded border px-2 py-1 text-sm"
                             />
 
                             <input
                                 type="number"
                                 value={item.target ?? ""}
+                                placeholder="0"
                                 onChange={(e) => {
                                     const newItems = [...items];
-                                    newItems[index].target = Number(e.target.value);
+                                    newItems[index].target =
+                                        e.target.value === "" ? null : Number(e.target.value);
                                     setItems(newItems);
                                 }}
-                                className="w-20 rounded border px-2 py-1 text-right text-sm"
+                                className="rounded border px-2 py-1 text-right text-sm"
                             />
+
+                            <button
+                                type="button"
+                                onClick={() => deleteRow(item)}
+                                className="rounded border border-red-200 px-2 py-1 text-sm text-red-600 hover:bg-red-50"
+                            >
+                                Delete
+                            </button>
                         </div>
                     ))}
                 </div>

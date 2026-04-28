@@ -42,7 +42,7 @@ export default async function CoachEditPlanPage({ params }: PageProps) {
                     {athlete?.level}
                 </div>
 
-                <EditPlanForm planItems={planItems ?? []} />
+                <EditPlanForm planItems={planItems ?? []} planId={plan!.id} />
             </div>
         </main>
     );
