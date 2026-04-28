@@ -16,16 +16,40 @@ export default function AddAthleteForm({ coaches }: { coaches: Coach[] }) {
     async function handleSave() {
         const supabase = createClient();
 
-        const { error } = await supabase.from("athletes").insert({
-            name,
-            level,
-            coach_id: Number(coachId),
-        });
+        const { data: newAthlete, error: athleteError } = await supabase
+            .from("athletes")
+            .insert({
+                name,
+                level,
+                coach_id: Number(coachId),
+            })
+            .select("id")
+            .single();
 
-        if (error) {
-            alert(`Error adding athlete: ${error.message}`);
+        if (athleteError) {
+            alert(`Error adding athlete: ${athleteError.message}`);
             return;
         }
+
+        const { data: newPlan, error: planError } = await supabase
+            .from("plans")
+            .insert({
+                athlete_id: newAthlete.id,
+                week: "Week 1",
+            })
+            .select("id")
+            .single();
+
+        if (planError) {
+            alert(`Athlete added, but plan was not created: ${planError.message}`);
+            return;
+        }
+
+        await supabase.from("plan_items").insert([
+            { plan_id: newPlan.id, name: "Daily Drills", target: null },
+            { plan_id: newPlan.id, name: "Compulsory", target: null },
+            { plan_id: newPlan.id, name: "Optional", target: null },
+        ]);
 
         alert("Athlete added!");
         setName("");
@@ -54,7 +78,7 @@ export default function AddAthleteForm({ coaches }: { coaches: Coach[] }) {
                     <input
                         value={level}
                         onChange={(e) => setLevel(e.target.value)}
-                        placeholder="Level 2"
+                        placeholder="Level"
                         className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-red-500"
                     />
                 </div>

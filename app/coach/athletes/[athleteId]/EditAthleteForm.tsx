@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 type Athlete = {
     id: number;
@@ -25,6 +26,31 @@ export default function EditAthleteForm({
     const [name, setName] = useState(athlete.name);
     const [level, setLevel] = useState(athlete.level ?? "");
     const [coachId, setCoachId] = useState(athlete.coach_id ?? "");
+
+    const router = useRouter();
+
+    async function handleDelete() {
+        const confirmed = window.confirm(
+            "Are you sure you want to delete this athlete? This cannot be undone."
+        );
+
+        if (!confirmed) return;
+
+        const supabase = createClient();
+
+        const { error } = await supabase
+            .from("athletes")
+            .delete()
+            .eq("id", athlete.id);
+
+        if (error) {
+            alert(`Error deleting athlete: ${error.message}`);
+            return;
+        }
+
+        alert("Athlete deleted.");
+        router.push("/coach");
+    }
 
     async function handleSave() {
         const supabase = createClient();
@@ -95,6 +121,13 @@ export default function EditAthleteForm({
                     className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
                 >
                     Save Athlete
+                </button>
+                <button
+                    type="button"
+                    onClick={handleDelete}
+                    className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+                >
+                    Delete Athlete
                 </button>
             </div>
         </section>

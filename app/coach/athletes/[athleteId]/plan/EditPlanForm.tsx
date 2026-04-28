@@ -97,7 +97,7 @@ export default function EditPlanForm({
                 <button
                     type="button"
                     onClick={addRow}
-                    className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-black hover:bg-zinc-100"
+                    className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-black font-medium text-black hover:bg-zinc-100"
                 >
                     + Add Row
                 </button>
@@ -112,13 +112,13 @@ export default function EditPlanForm({
                         >
                             <input
                                 value={item.name ?? ""}
-                                placeholder="Task name"
+                                placeholder="Turn"
                                 onChange={(e) => {
                                     const newItems = [...items];
                                     newItems[index].name = e.target.value;
                                     setItems(newItems);
                                 }}
-                                className="rounded border px-2 py-1 text-sm"
+                                className="rounded border px-2 py-1 text-black"
                             />
 
                             <input
@@ -131,7 +131,7 @@ export default function EditPlanForm({
                                         e.target.value === "" ? null : Number(e.target.value);
                                     setItems(newItems);
                                 }}
-                                className="rounded border px-2 py-1 text-right text-sm"
+                                className="rounded border px-2 py-1 text-right text-black"
                             />
 
                             <button

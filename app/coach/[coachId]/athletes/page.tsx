@@ -17,7 +17,7 @@ export default async function CoachAthletesPage({ params }: PageProps) {
         .order("name");
 
     return (
-        <main className="min-h-screen bg-zinc-50 px-4 py-10">
+        <main className="min-h-screen bg-gradient-to-b from-white to-red-400 px-4 py-10">
             <div className="mx-auto max-w-2xl">
                 <p className="text-sm font-medium uppercase tracking-wide text-red-600">
                     Coach View
@@ -37,35 +37,47 @@ export default async function CoachAthletesPage({ params }: PageProps) {
                     {athletes?.map((athlete) => (
                         <div
                             key={athlete.id}
-                            className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
+                            className="relative rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
                         >
+                            {/* Top right button */}
+                            <Link
+                                href={`/coach/athletes/${athlete.id}`}
+                                className="absolute top-4 right-4 rounded-lg bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700"
+                            >
+                                Edit Athlete
+                            </Link>
+
+                            {/* Athlete info */}
                             <h2 className="font-semibold text-black">{athlete.name}</h2>
                             <p className="mt-1 text-sm text-zinc-600">{athlete.level}</p>
 
-                            <div className="mt-4 flex gap-2">
+                            {/* Bottom buttons */}
+                            <div className="mt-6 space-y-2">
                                 <Link
-                                    href={`/coach/athletes/${athlete.id}`}
-                                    className="rounded-lg border border-zinc-300 px-3 py-2 text-sm font-medium text-black hover:bg-zinc-100"
+                                    href={`/coach/athletes/${athlete.id}/plan`}
+                                    className="block w-full rounded-lg bg-black px-4 py-2 text-sm font-medium text-white text-center hover:bg-zinc-800"
                                 >
-                                    Edit Athlete
+                                    Edit Plan
                                 </Link>
 
                                 <Link
-                                    href={`/coach/athletes/${athlete.id}/plan`}
-                                    className="rounded-lg bg-black px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+                                    href={`/coach/athletes/${athlete.id}/routines`}
+                                    className="block w-full rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-black text-center hover:bg-zinc-100"
                                 >
-                                    Edit Plan
+                                    Edit Routines
                                 </Link>
                             </div>
                         </div>
                     ))}
                 </div>
-                <Link
-                    href="/coach/athletes/new"
-                    className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                >
-                    + Add Athlete
-                </Link>
+                <div className="mt-10 flex justify-left">
+                    <Link
+                        href="/coach/athletes/new"
+                        className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                    >
+                        + Add Athlete
+                    </Link>
+                </div>
             </div>
         </main>
     );

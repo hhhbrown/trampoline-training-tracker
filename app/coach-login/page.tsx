@@ -16,29 +16,29 @@ export default function CoachLoginPage() {
             style={{ backgroundImage: "url('/images/mountainbackground.jpg')" }}
         >
             <div className="absolute inset-0 bg-white/80" >
-            <div className="mx-auto max-w-xs">
-                <div className="relative z-10 w-full max-w-sm text-center">
+                <div className="mx-auto max-w-xs">
+                    <div className="flex flex-col h-screen items-center justify-center relative z-10 w-full max-w-sm text-center">
 
-                    <h1 className="text-3xl font-bold text-black">
-                        Coach Portal
-                    </h1>
+                        <h1 className="text-3xl font-bold text-black">
+                            Coach Portal
+                        </h1>
 
-                    <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-                        <input
-                            type="password"
-                            placeholder="Enter password"
-                            className="w-full h-12 px-4 rounded-lg border border-zinc-300 bg-white text-sm outline-none focus:ring-2 focus:ring-red-500"
-                        />
+                        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+                            <input
+                                type="password"
+                                placeholder="Enter password"
+                                className="w-full h-12 px-4 rounded-lg border border-zinc-300 bg-white text-black outline-none focus:ring-2 focus:ring-red-500"
+                            />
 
-                        <button
-                            type="submit"
-                            className="w-full h-12 rounded-lg bg-black text-white text-sm font-medium hover:bg-zinc-800 transition"
-                        >
-                            Enter
-                        </button>
-                    </form>
+                            <button
+                                type="submit"
+                                className="w-full h-12 rounded-lg bg-black text-white text-sm font-medium hover:bg-zinc-800 transition"
+                            >
+                                Enter
+                            </button>
+                        </form>
+                    </div>
                 </div>
-            </div>
             </div>
         </main>
     );
