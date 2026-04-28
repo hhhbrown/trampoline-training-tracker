@@ -35,18 +35,37 @@ export default async function CoachAthletesPage({ params }: PageProps) {
 
                 <div className="mt-8 grid gap-4 sm:grid-cols-2">
                     {athletes?.map((athlete) => (
-                        <Link
+                        <div
                             key={athlete.id}
-                            href={`/coach/athletes/${athlete.id}/plan`}
-                            className="rounded-xl bg-black px-4 py-4 text-center text-sm font-medium text-white hover:bg-zinc-800 transition"
+                            className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
                         >
-                            {athlete.name}
-                            <span className="mt-1 block text-xs text-zinc-300">
-                                {athlete.level}
-                            </span>
-                        </Link>
+                            <h2 className="font-semibold text-black">{athlete.name}</h2>
+                            <p className="mt-1 text-sm text-zinc-600">{athlete.level}</p>
+
+                            <div className="mt-4 flex gap-2">
+                                <Link
+                                    href={`/coach/athletes/${athlete.id}`}
+                                    className="rounded-lg border border-zinc-300 px-3 py-2 text-sm font-medium text-black hover:bg-zinc-100"
+                                >
+                                    Edit Athlete
+                                </Link>
+
+                                <Link
+                                    href={`/coach/athletes/${athlete.id}/plan`}
+                                    className="rounded-lg bg-black px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+                                >
+                                    Edit Plan
+                                </Link>
+                            </div>
+                        </div>
                     ))}
                 </div>
+                <Link
+                    href="/coach/athletes/new"
+                    className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                >
+                    + Add Athlete
+                </Link>
             </div>
         </main>
     );
