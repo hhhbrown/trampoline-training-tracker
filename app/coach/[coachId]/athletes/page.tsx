@@ -18,6 +18,13 @@ export default async function CoachAthletesPage({ params }: PageProps) {
 
     return (
         <main className="min-h-screen bg-gradient-to-b from-white to-red-400 px-4 py-10">
+
+            <Link
+                href="/coach"
+                className="inline-flex items-center text-sm text-zinc-600 hover:text-black"
+            >
+                ← Back
+            </Link>
             <div className="mx-auto max-w-2xl">
                 <p className="text-sm font-medium uppercase tracking-wide text-red-600">
                     Coach View

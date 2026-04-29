@@ -61,13 +61,14 @@ export default function AddAthleteForm({ coaches }: { coaches: Coach[] }) {
         <section className="mt-8 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
             <div className="space-y-5">
                 <div>
-                    <label className="mb-1 block text-sm font-medium text-zinc-700">
+                    <label className="mb-1 block text-black font-medium text-zinc-700">
                         Name
                     </label>
                     <input
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-red-500"
+                        placeholder="Name"
+                        className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-black outline-none focus:ring-2 focus:ring-red-500"
                     />
                 </div>
 
@@ -79,7 +80,7 @@ export default function AddAthleteForm({ coaches }: { coaches: Coach[] }) {
                         value={level}
                         onChange={(e) => setLevel(e.target.value)}
                         placeholder="Level"
-                        className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-red-500"
+                        className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-black outline-none focus:ring-2 focus:ring-red-500"
                     />
                 </div>
 
@@ -90,7 +91,7 @@ export default function AddAthleteForm({ coaches }: { coaches: Coach[] }) {
                     <select
                         value={coachId}
                         onChange={(e) => setCoachId(e.target.value)}
-                        className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-red-500"
+                        className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-black outline-none focus:ring-2 focus:ring-red-500"
                     >
                         <option value="">Select coach</option>
                         {coaches.map((coach) => (

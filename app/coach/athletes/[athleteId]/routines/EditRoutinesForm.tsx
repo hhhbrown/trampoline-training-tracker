@@ -4,6 +4,13 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function EditRoutinesForm({ routines, athleteId }) {
+    const compulsoryOptions = [
+        "Level 1 Compulsory",
+        "Level 2 Compulsory",
+        "Level 3 Compulsory",
+        "Level 4 Compulsory",
+        "Level 5+"
+    ];
     const [compulsory, setCompulsory] = useState(routines?.compulsory ?? "");
     const [optionalA, setOptionalA] = useState(routines?.optional_a ?? "");
     const [optionalB, setOptionalB] = useState(routines?.optional_b ?? "");
@@ -12,19 +19,36 @@ export default function EditRoutinesForm({ routines, athleteId }) {
     async function handleSave() {
         const supabase = createClient();
 
-        const { error } = await supabase
-            .from("routines")
-            .upsert({
-                athlete_id: athleteId,
-                compulsory,
-                optional_a: optionalA,
-                optional_b: optionalB,
-                notes,
-            });
+        if (routines?.id) {
+            const { error } = await supabase
+                .from("routines")
+                .update({
+                    compulsory,
+                    optional_a: optionalA,
+                    optional_b: optionalB,
+                    notes,
+                })
+                .eq("id", routines.id);
 
-        if (error) {
-            alert(error.message);
-            return;
+            if (error) {
+                alert(error.message);
+                return;
+            }
+        } else {
+            const { error } = await supabase
+                .from("routines")
+                .insert({
+                    athlete_id: athleteId,
+                    compulsory,
+                    optional_a: optionalA,
+                    optional_b: optionalB,
+                    notes,
+                });
+
+            if (error) {
+                alert(error.message);
+                return;
+            }
         }
 
         alert("Routines saved!");
@@ -40,22 +64,30 @@ export default function EditRoutinesForm({ routines, athleteId }) {
                     <label className="mb-1 block text-sm font-medium text-zinc-700">
                         Compulsory
                     </label>
-                    <input
+                    <select
                         value={compulsory}
                         onChange={(e) => setCompulsory(e.target.value)}
-                        placeholder="Compulsory"
                         className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
-                    />
+                    >
+                        <option value="">Select Level</option>
+
+                        {compulsoryOptions.map((routine) => (
+                            <option key={routine} value={routine}>
+                                {routine}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div>
                     <label className="mb-1 block text-sm font-medium text-zinc-700">
                         Optional A
                     </label>
-                    <input
+                    <textarea
                         value={optionalA}
                         onChange={(e) => setOptionalA(e.target.value)}
-                        placeholder="Optional A"
+                        placeholder="One skill per line"
+                        rows={6}
                         className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
                     />
                 </div>
@@ -64,10 +96,11 @@ export default function EditRoutinesForm({ routines, athleteId }) {
                     <label className="mb-1 block text-sm font-medium text-zinc-700">
                         Optional B
                     </label>
-                    <input
+                    <textarea
                         value={optionalB}
                         onChange={(e) => setOptionalB(e.target.value)}
-                        placeholder="Optional B"
+                        placeholder="One skill per line"
+                        rows={6}
                         className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
                     />
                 </div>
