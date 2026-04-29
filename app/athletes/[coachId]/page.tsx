@@ -1,16 +1,24 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function CoachSelectionPage() {
+type PageProps = {
+    params: Promise<{
+        coachId: string;
+    }>;
+};
+
+export default async function CoachAthletesPage({ params }: PageProps) {
+    const { coachId } = await params;
     const supabase = await createClient();
 
-    const { data: coaches, error } = await supabase
-        .from("coaches")
-        .select("id, name")
+    const { data: athletes, error } = await supabase
+        .from("athletes")
+        .select("id, name, level")
+        .eq("coach_id", Number(coachId))
         .order("name");
 
     if (error) {
-        console.error(error);
+        return <p className="p-8 text-red-600">Error: {error.message}</p>;
     }
 
     return (
@@ -22,17 +30,17 @@ export default async function CoachSelectionPage() {
 
             <div className="relative z-10 w-full max-w-sm text-center">
                 <h1 className="mb-6 text-2xl font-semibold text-black">
-                    Select Coach
+                    Select Athlete
                 </h1>
 
                 <div className="grid grid-cols-2 gap-3">
-                    {coaches?.map((coach) => (
+                    {athletes?.map((athlete) => (
                         <Link
-                            key={coach.id}
-                            href={`/athletes/${coach.id}`}
-                            className="rounded-xl bg-black px-4 py-4 text-center text-sm font-medium text-white transition hover:bg-zinc-800"
+                            key={athlete.id}
+                            href={`/athletes/${coachId}/${athlete.id}`}
+                            className="rounded-xl bg-black px-4 py-4 text-center text-sm font-medium text-white hover:bg-zinc-800 transition"
                         >
-                            {coach.name}
+                            {athlete.name}
                         </Link>
                     ))}
                 </div>
