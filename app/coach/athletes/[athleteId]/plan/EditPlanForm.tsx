@@ -2,6 +2,14 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
+
+type EditPlanFormProps = {
+    coachId: string;
+    athleteId: string;
+    planItems: PlanItem[];
+    planId: number;
+};
 
 type PlanItem = {
     id: number;
@@ -14,12 +22,11 @@ type EditablePlanItem = PlanItem & {
 };
 
 export default function EditPlanForm({
+    coachId,
+    athleteId,
     planItems,
     planId,
-}: {
-    planItems: PlanItem[];
-    planId: number;
-}) {
+}: EditPlanFormProps) {
     const [items, setItems] = useState<EditablePlanItem[]>(planItems);
     const [deletedIds, setDeletedIds] = useState<number[]>([]);
 
@@ -91,6 +98,12 @@ export default function EditPlanForm({
 
     return (
         <section className="mt-10">
+            <Link
+                href={`/coach/${coachId}/athletes`}
+                className="inline-flex items-center text-sm text-zinc-600 hover:text-black"
+            >
+                ← Back
+            </Link>
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-black">Daily Plan</h2>
 

@@ -2,8 +2,26 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 
-export default function EditRoutinesForm({ routines, athleteId }) {
+type EditRoutinesFormProps = {
+    coachId: string;
+    athleteId: string;
+    routines: {
+        id: number;
+        athlete_id: number;
+        compulsory: string | null;
+        optional_a: string | null;
+        optional_b: string | null;
+        notes: string | null;
+    } | null;
+};
+
+export default function EditRoutinesForm({
+    coachId,
+    athleteId,
+    routines,
+}: EditRoutinesFormProps) {
     const compulsoryOptions = [
         "Level 1 Compulsory",
         "Level 2 Compulsory",
@@ -56,6 +74,12 @@ export default function EditRoutinesForm({ routines, athleteId }) {
 
     return (
         <section className="mt-10">
+            <Link
+                href={`/coach/${coachId}/athletes`}
+                className="inline-flex items-center text-sm text-zinc-600 hover:text-black"
+            >
+                ← Back
+            </Link>
             <h2 className="text-xl font-semibold text-black">Routines</h2>
 
             <div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm space-y-4">

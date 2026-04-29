@@ -11,7 +11,7 @@ export default async function CoachEditPlanPage({ params }: PageProps) {
 
     const { data: athlete } = await supabase
         .from("athletes")
-        .select("id, name, level")
+        .select("id, name, level, coach_id")
         .eq("id", Number(athleteId))
         .single();
 
@@ -22,13 +22,7 @@ export default async function CoachEditPlanPage({ params }: PageProps) {
         .single();
 
     if (!plan) {
-        return (
-            <main className="min-h-screen bg-zinc-50 px-4 py-10">
-                <div className="mx-auto max-w-2xl">
-                    <p className="text-red-600">No plan found for this athlete.</p>
-                </div>
-            </main>
-        );
+        return <p className="p-8 text-red-600">No plan found.</p>;
     }
 
     const { data: planItems } = await supabase
@@ -52,7 +46,12 @@ export default async function CoachEditPlanPage({ params }: PageProps) {
                     {athlete?.level}
                 </div>
 
-                <EditPlanForm planItems={planItems ?? []} planId={plan.id} />
+                <EditPlanForm
+                    coachId={String(athlete?.coach_id)}
+                    athleteId={athleteId}
+                    planId={plan.id}
+                    planItems={planItems ?? []}
+                />
             </div>
         </main>
     );
