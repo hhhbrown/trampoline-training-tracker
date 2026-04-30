@@ -1,7 +1,7 @@
 'use client';
 import { useRouter } from "next/navigation";
 
-export default function CoachLoginPage() {
+export default function AthleteLoginPage() {
     const router = useRouter();
 
     function handleSubmit(e: React.FormEvent) {
@@ -16,7 +16,7 @@ export default function CoachLoginPage() {
         >
             <div className="absolute inset-0 bg-white/80" >
                 <div className="mx-auto max-w-xs">
-                    <div className="relative z-10 w-full max-w-sm text-center">
+                    <div className="flex flex-col h-screen items-center justify-center relative z-10 w-full max-w-sm text-center">
 
                         <h1 className="text-3xl font-bold text-black">
                             Athlete Portal
@@ -26,8 +26,9 @@ export default function CoachLoginPage() {
                             <input
                                 type="password"
                                 placeholder="Enter password"
-                                className="w-full h-12 px-4 rounded-lg border border-zinc-300 bg-white text-sm outline-none focus:ring-2 focus:ring-red-500"
+                                className="w-full h-12 px-4 rounded-lg border border-zinc-300 bg-white text-black outline-none focus:ring-2 focus:ring-red-500"
                             />
+
                             <button
                                 type="submit"
                                 className="w-full h-12 rounded-lg bg-black text-white text-sm font-medium hover:bg-zinc-800 transition"

@@ -77,7 +77,7 @@ export default async function AthletePlanPage({ params }: PageProps) {
                                                 className="h-4 w-4 accent-red-600"
                                             />
 
-                                            <span className="text-sm text-zinc-700">
+                                            <span className="text-black text-zinc-700">
                                                 {item.name}
                                             </span>
                                         </div>
@@ -89,7 +89,7 @@ export default async function AthletePlanPage({ params }: PageProps) {
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-sm text-zinc-500">No plan available.</p>
+                            <p className="text-black text-zinc-500">No plan available.</p>
                         )}
                     </div>
 
@@ -97,7 +97,7 @@ export default async function AthletePlanPage({ params }: PageProps) {
                         <input
                             type="text"
                             placeholder="Enter comments"
-                            className="mt-4 h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-red-500"
+                            className="mt-4 h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-black outline-none focus:ring-2 focus:ring-red-500"
                         />
                     </div>
 
