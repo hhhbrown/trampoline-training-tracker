@@ -22,16 +22,10 @@ export default function AthleteLoginPage() {
                             Athlete Portal
                         </h1>
 
-                        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-                            <input
-                                type="password"
-                                placeholder="Enter password"
-                                className="w-full h-12 px-4 rounded-lg border border-zinc-300 bg-white text-black outline-none focus:ring-2 focus:ring-red-500"
-                            />
-
+                        <form onSubmit={handleSubmit} className="mt-8">
                             <button
                                 type="submit"
-                                className="w-full h-12 rounded-lg bg-black text-white text-sm font-medium hover:bg-zinc-800 transition"
+                                className="mx-auto block h-12 w-40 rounded-lg bg-black text-sm font-medium text-white transition hover:bg-zinc-800"
                             >
                                 Enter
                             </button>
