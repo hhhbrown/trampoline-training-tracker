@@ -1,0 +1,53 @@
+export const compulsorySkills: Record<string, string[]> = {
+    "Level 1 Compulsory": [
+        "Back Tuck",
+        "Tuck Jump",
+        "Seat Drop",
+        "Swivel Hips",
+        "Half Twist to Feet",
+        "Pike Jump",
+        "Front Drop",
+        "To Feet",
+        "Straddle Jump",
+        "Tuck Barani OR Front Pike",
+    ],
+
+    "Level 2 Compulsory": [
+        "Back Layout",
+        "Back Tuck",
+        "Tuck Barani",
+        "Tuck Jump",
+        "Pike Barani",
+        "Back Pike",
+        "Seat Drop",
+        "Half Twist to Feet",
+        "Pike Jump",
+        "Layout Barani",
+    ],
+
+    "Level 3 Compulsory": [
+        "Layout Barani",
+        "Back Pike",
+        "Back Layout",
+        "Tuck Jump",
+        "Tuck Barani",
+        "Back Tuck",
+        "Pike Barani",
+        "Pike Jump",
+        "Front 3/4",
+        "Barani Ball Out",
+    ],
+
+    "Level 4 Compulsory": [
+        "Tuck Jump",
+        "Back 3/4",
+        "Cody",
+        "Back Tuck",
+        "Tuck Barani",
+        "Back Pike",
+        "Back Layout",
+        "Layout Barani",
+        "Back Full",
+        "Rudi",
+    ],
+};

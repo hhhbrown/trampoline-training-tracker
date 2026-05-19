@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { compulsorySkills } from "@/lib/compulsories";
 
 type PageProps = {
     params: Promise<{
@@ -32,6 +33,8 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
         return <p className="p-8 text-red-600">Error: {routinesError.message}</p>;
     }
 
+    const skills = compulsorySkills[routines?.compulsory ?? ""] ?? [];
+
     return (
         <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-red-400 px-4 py-10">
             <div className="mx-auto max-w-2xl">
@@ -60,7 +63,26 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
                     <h2 className="text-xl font-semibold text-black">Routines</h2>
 
                     <div className="mt-4 space-y-4">
-                        <RoutineCard title="Compulsory" value={routines?.compulsory} />
+                        <div className="rounded-xl border border-zinc-200 bg-white p-4">
+                            <h3 className="text-base font-semibold text-black">
+                                {routines?.compulsory ?? "Compulsory"}
+                            </h3>
+
+                            {skills.length > 0 ? (
+                                <ul className="mt-3 space-y-2">
+                                    {skills.map((skill) => (
+                                        <li key={skill} className="text-sm text-zinc-700">
+                                            • {skill}
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="mt-2 text-sm text-zinc-400">
+                                    No compulsory routine selected yet.
+                                </p>
+                            )}
+                        </div>
+
                         <RoutineCard title="Optional A" value={routines?.optional_a} />
                         <RoutineCard title="Optional B" value={routines?.optional_b} />
                         <RoutineCard title="Notes" value={routines?.notes} />
