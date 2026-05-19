@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Trampoline Training Tracker
 
-## Getting Started
+A full-stack web application designed for trampoline gymnastics coaches and athletes to manage daily training plans, routines, and athlete workflows.
 
-First, run the development server:
+Built with Next.js, TypeScript, Tailwind CSS, and Supabase.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
+### Athlete Flow
+- Coach selection page
+- Athlete selection filtered by coach
+- Athlete dashboard: View daily plans, View routines
+### Coach Flow
+- Coach dashboard
+- Add athletes
+- Edit daily plans
+- Edit routines
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- Supabase
+- Vercel
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Future Improvements
+- Athlete training log submissions
+- Coach analytics dashboard
+- Weekly printable plans
+- Group plan printing
+- PDF export
+- Email integration for coaches
+- Authentication with Supabase Auth
+- Skill progression tracking
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Purpose
 
-## Learn More
+This project was designed to solve real workflow challenges faced by coaches:
 
-To learn more about Next.js, take a look at the following resources:
+- reducing paper management
+- organizing athlete plans
+- simplifying communication
+- creating printable training sheets for younger athletes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+It also serves as a portfolio project demonstrating:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- full-stack development
+- relational database design
+- dynamic routing
+- CRUD operations
+- responsive UI development
+- deployment workflows
