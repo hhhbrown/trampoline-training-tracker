@@ -2,16 +2,15 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 type PageProps = {
-  params: Promise<{
-    coachId: string;
-    athleteId: string;
-  }>;
+    params: Promise<{
+        coachId: string;
+        athleteId: string;
+    }>;
 };
 
-export default async function AthletePlanPage({ params }: PageProps) {
-  const { coachId, athleteId } = await params;
-  const supabase = await createClient();
-
+export default async function AthleteRoutinesPage({ params }: PageProps) {
+    const { coachId, athleteId } = await params;
+    const supabase = await createClient();
 
     const { data: athlete, error: athleteError } = await supabase
         .from("athletes")
@@ -23,11 +22,15 @@ export default async function AthletePlanPage({ params }: PageProps) {
         return <p className="p-8 text-red-600">Error: {athleteError.message}</p>;
     }
 
-    const { data: routines } = await supabase
+    const { data: routines, error: routinesError } = await supabase
         .from("routines")
-        .select("id, name, skills")
+        .select("id, athlete_id, compulsory, optional_a, optional_b, notes")
         .eq("athlete_id", Number(athleteId))
-        .order("id");
+        .maybeSingle();
+
+    if (routinesError) {
+        return <p className="p-8 text-red-600">Error: {routinesError.message}</p>;
+    }
 
     return (
         <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-red-400 px-4 py-10">
@@ -57,31 +60,35 @@ export default async function AthletePlanPage({ params }: PageProps) {
                     <h2 className="text-xl font-semibold text-black">Routines</h2>
 
                     <div className="mt-4 space-y-4">
-                        {routines && routines.length > 0 ? (
-                            routines.map((routine) => (
-                                <div
-                                    key={routine.id}
-                                    className="rounded-xl border border-zinc-200 bg-white p-4"
-                                >
-                                    <h3 className="text-base font-semibold text-black">
-                                        {routine.name}
-                                    </h3>
-
-                                    <p className="mt-2 text-sm leading-6 text-zinc-700">
-                                        {routine.skills}
-                                    </p>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="rounded-xl border border-zinc-200 bg-white p-4">
-                                <p className="text-sm text-zinc-500">
-                                    No routines available.
-                                </p>
-                            </div>
-                        )}
+                        <RoutineCard title="Compulsory" value={routines?.compulsory} />
+                        <RoutineCard title="Optional A" value={routines?.optional_a} />
+                        <RoutineCard title="Optional B" value={routines?.optional_b} />
+                        <RoutineCard title="Notes" value={routines?.notes} />
                     </div>
                 </section>
             </div>
         </main>
+    );
+}
+
+function RoutineCard({
+    title,
+    value,
+}: {
+    title: string;
+    value: string | null | undefined;
+}) {
+    return (
+        <div className="rounded-xl border border-zinc-200 bg-white p-4">
+            <h3 className="text-base font-semibold text-black">{title}</h3>
+
+            {value ? (
+                <p className="mt-2 whitespace-pre-line text-sm leading-6 text-zinc-700">
+                    {value}
+                </p>
+            ) : (
+                <p className="mt-2 text-sm text-zinc-400">Not added yet.</p>
+            )}
+        </div>
     );
 }

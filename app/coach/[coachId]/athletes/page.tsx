@@ -46,7 +46,6 @@ export default async function CoachAthletesPage({ params }: PageProps) {
                             key={athlete.id}
                             className="relative rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
                         >
-                            {/* Top right button */}
                             <Link
                                 href={`/coach/athletes/${athlete.id}`}
                                 className="absolute top-4 right-4 rounded-lg bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700"
@@ -54,11 +53,9 @@ export default async function CoachAthletesPage({ params }: PageProps) {
                                 Edit Athlete
                             </Link>
 
-                            {/* Athlete info */}
                             <h2 className="font-semibold text-black">{athlete.name}</h2>
                             <p className="mt-1 text-sm text-zinc-600">{athlete.level}</p>
 
-                            {/* Bottom buttons */}
                             <div className="mt-6 space-y-2">
                                 <Link
                                     href={`/coach/athletes/${athlete.id}/plan`}
