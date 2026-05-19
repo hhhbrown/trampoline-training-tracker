@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type EditRoutinesFormProps = {
     coachId: string;
@@ -22,6 +23,7 @@ export default function EditRoutinesForm({
     athleteId,
     routines,
 }: EditRoutinesFormProps) {
+    const router = useRouter();
     const compulsoryOptions = [
         "Level 1 Compulsory",
         "Level 2 Compulsory",
@@ -37,39 +39,29 @@ export default function EditRoutinesForm({
     async function handleSave() {
         const supabase = createClient();
 
-        if (routines?.id) {
-            const { error } = await supabase
-                .from("routines")
-                .update({
-                    compulsory,
-                    optional_a: optionalA,
-                    optional_b: optionalB,
-                    notes,
-                })
-                .eq("id", routines.id);
+        const payload = {
+            athlete_id: Number(athleteId),
+            compulsory,
+            optional_a: optionalA,
+            optional_b: optionalB,
+            notes,
+        };
 
-            if (error) {
-                alert(error.message);
-                return;
-            }
-        } else {
-            const { error } = await supabase
-                .from("routines")
-                .insert({
-                    athlete_id: athleteId,
-                    compulsory,
-                    optional_a: optionalA,
-                    optional_b: optionalB,
-                    notes,
-                });
+        const { data, error } = await supabase
+            .from("routines")
+            .upsert(payload, { onConflict: "athlete_id" })
+            .select()
+            .single();
 
-            if (error) {
-                alert(error.message);
-                return;
-            }
+        if (error) {
+            console.error(error);
+            alert(error.message);
+            return;
         }
 
+        console.log("Saved routine:", data);
         alert("Routines saved!");
+        router.refresh();
     }
 
     return (
