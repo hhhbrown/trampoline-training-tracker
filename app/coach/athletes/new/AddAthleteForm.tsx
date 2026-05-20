@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 type Coach = {
     id: number;
@@ -12,6 +13,7 @@ export default function AddAthleteForm({ coaches }: { coaches: Coach[] }) {
     const [name, setName] = useState("");
     const [level, setLevel] = useState("");
     const [coachId, setCoachId] = useState("");
+    const router = useRouter();
 
     async function handleSave() {
         const supabase = createClient();
@@ -52,9 +54,9 @@ export default function AddAthleteForm({ coaches }: { coaches: Coach[] }) {
         ]);
 
         alert("Athlete added!");
-        setName("");
-        setLevel("");
-        setCoachId("");
+
+        router.push(`/coach/${coachId}/athletes`);
+        router.refresh();
     }
 
     return (
