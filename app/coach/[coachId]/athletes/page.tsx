@@ -76,7 +76,7 @@ export default async function CoachAthletesPage({ params }: PageProps) {
                 </div>
                 <div className="mt-10 flex justify-left">
                     <Link
-                        href="/coach/athletes/new"
+                        href={`/coach/${coachId}/athletes/new`}
                         className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
                     >
                         + Add Athlete
