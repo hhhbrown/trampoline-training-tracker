@@ -28,22 +28,33 @@ export default async function CoachAthletesPage({ params }: PageProps) {
         >
             <div className="absolute inset-0 bg-white/80" />
 
-            <div className="relative z-10 w-full max-w-sm text-center">
-                <h1 className="mb-6 text-2xl font-semibold text-black">
-                    Select Athlete
-                </h1>
+            <div className="relative z-10 w-full max-w-sm">
 
-                <div className="grid grid-cols-2 gap-3">
-                    {athletes?.map((athlete) => (
-                        <Link
-                            key={athlete.id}
-                            href={`/athletes/${coachId}/${athlete.id}`}
-                            className="rounded-xl bg-black px-4 py-4 text-center text-sm font-medium text-white hover:bg-zinc-800 transition"
-                        >
-                            {athlete.name}
-                        </Link>
-                    ))}
+                <Link
+                    href="/athletes"
+                    className="absolute left-0 top-0 text-sm font-medium text-red-600 underline"
+                >
+                    ← Back to Coaches
+                </Link>
+
+                <div className="pt-10 text-center">
+                    <h1 className="mb-6 text-2xl font-semibold text-black">
+                        Select Athlete
+                    </h1>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        {athletes?.map((athlete) => (
+                            <Link
+                                key={athlete.id}
+                                href={`/athletes/${coachId}/${athlete.id}`}
+                                className="rounded-xl bg-black px-4 py-4 text-center text-sm font-medium text-white hover:bg-zinc-800 transition"
+                            >
+                                {athlete.name}
+                            </Link>
+                        ))}
+                    </div>
                 </div>
+
             </div>
         </main>
     );
