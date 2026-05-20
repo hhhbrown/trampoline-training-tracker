@@ -2,15 +2,15 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 type PageProps = {
-  params: Promise<{
-    coachId: string;
-    athleteId: string;
-  }>;
+    params: Promise<{
+        coachId: string;
+        athleteId: string;
+    }>;
 };
 
 export default async function AthletePlanPage({ params }: PageProps) {
-  const { coachId, athleteId } = await params;
-  const supabase = await createClient();
+    const { coachId, athleteId } = await params;
+    const supabase = await createClient();
 
     const { data: athlete, error: athleteError } = await supabase
         .from("athletes")

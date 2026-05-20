@@ -33,7 +33,7 @@ export default async function RoutinesPage({ params }: PageProps) {
                 <EditRoutinesForm
                     coachId={String(coachId)}
                     athleteId={athleteId}
-                    athleteName= {athlete?.name ?? ""}
+                    athleteName={athlete?.name ?? ""}
                     routines={routines}
                 />
             </div>

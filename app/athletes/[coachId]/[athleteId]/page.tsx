@@ -3,10 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 
 type PageProps = {
     params: Promise<{
-      coachId: string;
-      athleteId: string;
+        coachId: string;
+        athleteId: string;
     }>;
-  };
+};
 
 export default async function AthleteDashboardPage({ params }: PageProps) {
     const { coachId, athleteId } = await params;
