@@ -32,63 +32,66 @@ export default function EditAthleteForm({
     async function handleDelete(athleteId: number) {
         const supabase = createClient();
         const id = Number(athleteId);
-      
+
         const { data: plans, error: plansFetchError } = await supabase
-          .from("plans")
-          .select("id")
-          .eq("athlete_id", id);
-      
+            .from("plans")
+            .select("id")
+            .eq("athlete_id", id);
+
         if (plansFetchError) {
-          alert(`Error finding plans: ${plansFetchError.message}`);
-          return;
-        }
-      
-        const planIds = plans?.map((plan) => plan.id) ?? [];
-      
-        if (planIds.length > 0) {
-          const { error: planItemsError } = await supabase
-            .from("plan_items")
-            .delete()
-            .in("plan_id", planIds);
-      
-          if (planItemsError) {
-            alert(`Error deleting plan items: ${planItemsError.message}`);
+            alert(`Error finding plans: ${plansFetchError.message}`);
             return;
-          }
         }
-      
+
+        const planIds = plans?.map((plan) => plan.id) ?? [];
+
+        if (planIds.length > 0) {
+            const { error: planItemsError } = await supabase
+                .from("plan_items")
+                .delete()
+                .in("plan_id", planIds);
+
+            if (planItemsError) {
+                alert(`Error deleting plan items: ${planItemsError.message}`);
+                return;
+            }
+        }
+
         const { error: plansError } = await supabase
-          .from("plans")
-          .delete()
-          .eq("athlete_id", id);
-      
+            .from("plans")
+            .delete()
+            .eq("athlete_id", id);
+
         if (plansError) {
-          alert(`Error deleting plans: ${plansError.message}`);
-          return;
+            alert(`Error deleting plans: ${plansError.message}`);
+            return;
         }
-      
+
         const { error: routinesError } = await supabase
-          .from("routines")
-          .delete()
-          .eq("athlete_id", id);
-      
+            .from("routines")
+            .delete()
+            .eq("athlete_id", id);
+
         if (routinesError) {
-          alert(`Error deleting routines: ${routinesError.message}`);
-          return;
+            alert(`Error deleting routines: ${routinesError.message}`);
+            return;
         }
-      
+
         const { error: athleteError } = await supabase
-          .from("athletes")
-          .delete()
-          .eq("id", id);
-      
+            .from("athletes")
+            .delete()
+            .eq("id", id);
+
         if (athleteError) {
-          alert(`Error deleting athlete: ${athleteError.message}`);
-          return;
+            alert(`Error deleting athlete: ${athleteError.message}`);
+            return;
         }
-      
+
         alert("Athlete deleted!");
-      }
+
+        router.push(`/coach/${athlete.coach_id}/athletes`);
+        router.refresh();
+    }
 
     async function handleSave() {
         const supabase = createClient();

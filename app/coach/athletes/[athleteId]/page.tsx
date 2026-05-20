@@ -28,12 +28,16 @@ export default async function CoachEditAthletePage({ params }: PageProps) {
         <main className="min-h-screen bg-zinc-50 px-4 py-10">
             <div className="mx-auto max-w-2xl">
                 <p className="text-sm font-medium uppercase tracking-wide text-red-600">
-                    Coach Edit
+                    Coach View
                 </p>
 
                 <h1 className="mt-2 text-3xl font-bold text-black">
                     Edit Athlete
                 </h1>
+
+                <h2 className="mt-2 text-1xl font-bold text-black">
+                    {athlete?.name}
+                </h2>
 
                 <EditAthleteForm athlete={athlete} coaches={coaches ?? []} />
             </div>
