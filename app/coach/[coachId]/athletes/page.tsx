@@ -27,7 +27,7 @@ export default async function CoachAthletesPage({ params }: PageProps) {
             </Link>
             <div className="mx-auto max-w-2xl">
                 <p className="text-sm font-medium uppercase tracking-wide text-red-600">
-                    Coach View
+                    Shasta Trampoline Club
                 </p>
 
                 <h1 className="mt-2 text-3xl font-bold text-black">
