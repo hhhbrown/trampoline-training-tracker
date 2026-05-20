@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 type EditRoutinesFormProps = {
     coachId: string;
     athleteId: string;
+    athleteName: string;
     routines: {
         id: number;
         athlete_id: number;
@@ -21,6 +22,7 @@ type EditRoutinesFormProps = {
 export default function EditRoutinesForm({
     coachId,
     athleteId,
+    athleteName,
     routines,
 }: EditRoutinesFormProps) {
     const router = useRouter();
@@ -68,11 +70,11 @@ export default function EditRoutinesForm({
         <section className="mt-10">
             <Link
                 href={`/coach/${coachId}/athletes`}
-                className="inline-flex items-center text-sm text-zinc-600 hover:text-black"
+                className="inline-flex items-center text-red-500 text-red-600 hover:text-black"
             >
                 ← Back
             </Link>
-            <h2 className="text-xl font-semibold text-black">Routines</h2>
+            <h2 className="text-2xl font-semibold text-black">{athleteName}</h2>
 
             <div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm space-y-4">
 
