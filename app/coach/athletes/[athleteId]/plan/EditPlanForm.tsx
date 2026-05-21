@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type EditPlanFormProps = {
     coachId: string;
@@ -29,6 +30,7 @@ export default function EditPlanForm({
 }: EditPlanFormProps) {
     const [items, setItems] = useState<EditablePlanItem[]>(planItems);
     const [deletedIds, setDeletedIds] = useState<number[]>([]);
+    const router = useRouter();
 
     function addRow() {
         setItems([
@@ -94,6 +96,7 @@ export default function EditPlanForm({
         }
 
         alert("Plan saved!");
+        router.push(`/coach/${coachId}/athletes`);
     }
 
     return (

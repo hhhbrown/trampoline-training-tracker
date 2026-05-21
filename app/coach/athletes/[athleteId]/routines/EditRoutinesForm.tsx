@@ -63,7 +63,7 @@ export default function EditRoutinesForm({
 
         console.log("Saved routine:", data);
         alert("Routines saved!");
-        router.refresh();
+        router.push(`/coach/${coachId}/athletes`);
     }
 
     return (

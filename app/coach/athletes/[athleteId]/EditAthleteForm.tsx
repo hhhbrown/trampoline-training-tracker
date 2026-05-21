@@ -111,6 +111,7 @@ export default function EditAthleteForm({
         }
 
         alert("Athlete saved!");
+        router.push(`/coach/${coachId}/athletes`);
     }
 
     return (
