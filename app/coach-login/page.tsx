@@ -1,4 +1,5 @@
 'use client';
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function CoachLoginPage() {
@@ -15,29 +16,35 @@ export default function CoachLoginPage() {
             className="relative min-h-screen flex items-center justify-center px-4 bg-cover bg-center"
             style={{ backgroundImage: "url('/images/mountainbackground.jpg')" }}
         >
-            <div className="absolute inset-0 bg-white/80" >
-                <div className="mx-auto max-w-xs">
-                    <div className="flex flex-col h-screen items-center justify-center relative z-10 w-full max-w-sm text-center">
+            <div className="absolute inset-0 bg-white/80" />
 
-                        <h1 className="text-3xl font-bold text-black">
-                            Coach Portal
-                        </h1>
+            <div className="relative z-10 w-full max-w-sm">
+                <Link
+                    href="/"
+                    className="absolute left-0 top-0 inline-flex items-center text-sm text-zinc-600 hover:text-black"
+                >
+                    ← Home
+                </Link>
 
-                        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-                            <input
-                                type="password"
-                                placeholder="Enter password"
-                                className="w-full h-12 px-4 rounded-lg border border-zinc-300 bg-white text-black outline-none focus:ring-2 focus:ring-red-500"
-                            />
+                <div className="pt-10 text-center">
+                    <h1 className="text-3xl font-bold text-black">
+                        Coach Portal
+                    </h1>
 
-                            <button
-                                type="submit"
-                                className="w-full h-12 rounded-lg bg-black text-white text-sm font-medium hover:bg-zinc-800 transition"
-                            >
-                                Enter
-                            </button>
-                        </form>
-                    </div>
+                    <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+                        <input
+                            type="password"
+                            placeholder="Enter password"
+                            className="h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 text-black outline-none focus:ring-2 focus:ring-red-500"
+                        />
+
+                        <button
+                            type="submit"
+                            className="h-12 w-full rounded-lg bg-black text-sm font-medium text-white transition hover:bg-zinc-800"
+                        >
+                            Enter
+                        </button>
+                    </form>
                 </div>
             </div>
         </main>

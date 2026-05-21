@@ -1,4 +1,5 @@
 'use client';
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function AthleteLoginPage() {
@@ -14,24 +15,32 @@ export default function AthleteLoginPage() {
             className="relative min-h-screen flex items-center justify-center px-4 bg-cover bg-center"
             style={{ backgroundImage: "url('/images/mountainbackground.jpg')" }}
         >
-            <div className="absolute inset-0 bg-white/80" >
-                <div className="mx-auto max-w-xs">
-                    <div className="flex flex-col h-screen items-center justify-center relative z-10 w-full max-w-sm text-center">
+            <div className="absolute inset-0 bg-white/80" />
 
-                        <h1 className="text-3xl font-bold text-black">
-                            Athlete Portal
-                        </h1>
+            <div className="relative z-10 w-full max-w-sm">
 
-                        <form onSubmit={handleSubmit} className="mt-8">
-                            <button
-                                type="submit"
-                                className="mx-auto block h-12 w-40 rounded-lg bg-black text-sm font-medium text-white transition hover:bg-zinc-800"
-                            >
-                                Enter
-                            </button>
-                        </form>
-                    </div>
+                <Link
+                    href="/"
+                    className="absolute left-0 top-0 inline-flex items-center text-sm text-zinc-600 hover:text-black"
+                >
+                    ← Home
+                </Link>
+
+                <div className="pt-10 text-center">
+                    <h1 className="text-3xl font-bold text-black">
+                        Athlete Portal
+                    </h1>
+
+                    <form onSubmit={handleSubmit} className="mt-8">
+                        <button
+                            type="submit"
+                            className="mx-auto block h-12 w-40 rounded-lg bg-black text-sm font-medium text-white transition hover:bg-zinc-800"
+                        >
+                            Enter
+                        </button>
+                    </form>
                 </div>
+
             </div>
         </main>
     );

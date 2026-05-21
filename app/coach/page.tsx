@@ -17,24 +17,33 @@ export default async function CoachPage() {
         >
             <div className="absolute inset-0 bg-white/80" />
 
-            <div className="relative z-10 w-full max-w-sm text-center">
+            <div className="relative z-10 w-full max-w-sm">
 
-                <h1 className="text-2xl font-semibold text-black mb-6">
-                    Select Coach
-                </h1>
+                <Link
+                    href="/"
+                    className="absolute left-0 top-0 inline-flex items-center text-sm text-zinc-600 hover:text-black"
+                >
+                    ← Home
+                </Link>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="pt-10 text-center">
+                    <h1 className="mb-6 text-2xl font-semibold text-black">
+                        Select Coach
+                    </h1>
 
-                    {coaches?.map((coach) => (
-                        <Link
-                            key={coach.id}
-                            href={`/coach/${coach.id}/athletes`}
-                            className="rounded-xl bg-black px-4 py-4 text-center text-sm font-medium text-white hover:bg-zinc-800 transition"
-                        >
-                            {coach.name}
-                        </Link>
-                    ))}
+                    <div className="grid grid-cols-2 gap-3">
+                        {coaches?.map((coach) => (
+                            <Link
+                                key={coach.id}
+                                href={`/coach/${coach.id}/athletes`}
+                                className="rounded-xl bg-black px-4 py-4 text-center text-sm font-medium text-white hover:bg-zinc-800 transition"
+                            >
+                                {coach.name}
+                            </Link>
+                        ))}
+                    </div>
                 </div>
+
             </div>
         </main>
     );
