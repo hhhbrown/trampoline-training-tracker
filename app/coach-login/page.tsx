@@ -1,13 +1,32 @@
-'use client';
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 
 export default function CoachLoginPage() {
-
     const router = useRouter();
 
-    function handleSubmit(e: React.FormEvent) {
+    const [password, setPassword] = useState("");
+
+    async function handleSubmit(
+        e: React.FormEvent<HTMLFormElement>
+    ) {
         e.preventDefault();
+
+        const supabase = createClient();
+
+        const { error } = await supabase.auth.signInWithPassword({
+            email: "shastatrampolinehb@gmail.com",
+            password,
+        });
+
+        if (error) {
+            alert(error.message);
+            return;
+        }
+
         router.push("/coach");
     }
 
@@ -34,7 +53,9 @@ export default function CoachLoginPage() {
                     <form onSubmit={handleSubmit} className="mt-8 space-y-4">
                         <input
                             type="password"
-                            placeholder="Enter password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             className="h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 text-black outline-none focus:ring-2 focus:ring-red-500"
                         />
 
