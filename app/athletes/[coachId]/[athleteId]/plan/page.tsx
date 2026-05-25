@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import DailyPlanForm from "./DailyPlanForm";
 
 type PageProps = {
     params: Promise<{
@@ -36,6 +37,26 @@ export default async function AthletePlanPage({ params }: PageProps) {
             .order("id")
         : { data: [] };
 
+    const { data: logs } = await supabase
+        .from("training_logs")
+        .select("plan_item_id, completed, comments, created_at")
+        .eq("athlete_id", Number(athleteId))
+        .order("created_at", { ascending: false });
+
+    const latestByItem = new Map();
+
+    logs?.forEach((log) => {
+        if (!latestByItem.has(log.plan_item_id)) {
+            latestByItem.set(log.plan_item_id, log);
+        }
+    });
+
+    const initialCheckedItems = Array.from(latestByItem.values())
+        .filter((log) => log.completed)
+        .map((log) => log.plan_item_id);
+
+    const initialComments = logs?.[0]?.comments ?? "";
+
     return (
         <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-red-400 px-4 py-10">
             <div className="mx-auto max-w-2xl">
@@ -63,49 +84,12 @@ export default async function AthletePlanPage({ params }: PageProps) {
                 <section>
                     <h2 className="text-xl font-semibold text-black">Daily Plan</h2>
 
-                    <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-4">
-                        {planItems && planItems.length > 0 ? (
-                            <div className="divide-y divide-zinc-100">
-                                {planItems.map((item) => (
-                                    <div
-                                        key={item.id}
-                                        className="flex items-center justify-between py-3"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <input
-                                                type="checkbox"
-                                                className="h-4 w-4 accent-red-600"
-                                            />
-
-                                            <span className="text-black text-zinc-700">
-                                                {item.name}
-                                            </span>
-                                        </div>
-
-                                        <span className="text-lg font-semibold text-black">
-                                            {item.target ?? "—"}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-black text-zinc-500">No plan available.</p>
-                        )}
-                    </div>
-
-                    <div>
-                        <input
-                            type="text"
-                            placeholder="Enter comments"
-                            className="mt-4 h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-black outline-none focus:ring-2 focus:ring-red-500"
-                        />
-                    </div>
-
-                    <div>
-                        <button className="mt-4 rounded-lg bg-black px-4 py-2 text-sm text-white transition hover:bg-zinc-800">
-                            Submit
-                        </button>
-                    </div>
+                    <DailyPlanForm
+                        athleteId={athleteId}
+                        planItems={planItems ?? []}
+                        initialCheckedItems={initialCheckedItems}
+                        initialComments={initialComments}
+                    />
                 </section>
             </div>
         </main>
