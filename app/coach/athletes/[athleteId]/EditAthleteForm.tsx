@@ -30,66 +30,27 @@ export default function EditAthleteForm({
     const router = useRouter();
 
     async function handleDelete(athleteId: number) {
+        const confirmed = confirm(
+            "Delete this athlete and all associated data?"
+        );
+
+        if (!confirmed) return;
+
         const supabase = createClient();
-        const id = Number(athleteId);
 
-        const { data: plans, error: plansFetchError } = await supabase
-            .from("plans")
-            .select("id")
-            .eq("athlete_id", id);
-
-        if (plansFetchError) {
-            alert(`Error finding plans: ${plansFetchError.message}`);
-            return;
-        }
-
-        const planIds = plans?.map((plan) => plan.id) ?? [];
-
-        if (planIds.length > 0) {
-            const { error: planItemsError } = await supabase
-                .from("plan_items")
-                .delete()
-                .in("plan_id", planIds);
-
-            if (planItemsError) {
-                alert(`Error deleting plan items: ${planItemsError.message}`);
-                return;
-            }
-        }
-
-        const { error: plansError } = await supabase
-            .from("plans")
-            .delete()
-            .eq("athlete_id", id);
-
-        if (plansError) {
-            alert(`Error deleting plans: ${plansError.message}`);
-            return;
-        }
-
-        const { error: routinesError } = await supabase
-            .from("routines")
-            .delete()
-            .eq("athlete_id", id);
-
-        if (routinesError) {
-            alert(`Error deleting routines: ${routinesError.message}`);
-            return;
-        }
-
-        const { error: athleteError } = await supabase
+        const { error } = await supabase
             .from("athletes")
             .delete()
-            .eq("id", id);
+            .eq("id", athleteId);
 
-        if (athleteError) {
-            alert(`Error deleting athlete: ${athleteError.message}`);
+        if (error) {
+            alert(`Error deleting athlete: ${error.message}`);
             return;
         }
 
         alert("Athlete deleted!");
 
-        router.push(`/coach/${athlete.coach_id}/athletes`);
+        router.push(`/coach/${coachId}/athletes`);
         router.refresh();
     }
 
