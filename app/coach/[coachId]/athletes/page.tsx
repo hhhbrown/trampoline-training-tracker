@@ -15,6 +15,12 @@ export default async function CoachAthletesPage({ params }: PageProps) {
         .select("id, name, level")
         .eq("coach_id", Number(coachId))
         .order("name");
+    
+    const { data : coach } = await supabase
+        .from("coaches")
+        .select("name")
+        .eq("id", Number(coachId))
+        .single();
 
     return (
         <main className="min-h-screen bg-gradient-to-b from-white to-red-400 px-4 py-10">
@@ -32,7 +38,7 @@ export default async function CoachAthletesPage({ params }: PageProps) {
                 </p>
 
                 <h1 className="mt-2 text-3xl font-bold text-black">
-                    Athlete Group
+                    {coach?.name }'s Group
                 </h1>
                 <Link
                     href={`/coach/${coachId}/print-plans`}
