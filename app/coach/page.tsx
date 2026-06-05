@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
+export const dynamic = "force-dynamic";
+
 export default async function CoachPage() {
     const supabase = await createClient();
 
