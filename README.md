@@ -2,7 +2,7 @@
 
 A full-stack web application designed for trampoline gymnastics coaches and athletes to manage daily training plans, routines, and athlete workflows.
 
-Built with Next.js, TypeScript, Tailwind CSS, and Supabase.
+Built with Next.js, TypeScript, Tailwind CSS, and Supabase (PostgreSQL).
 
 ## Features
 ### Athlete Flow
@@ -11,25 +11,23 @@ Built with Next.js, TypeScript, Tailwind CSS, and Supabase.
 - Athlete dashboard: View daily plans, View routines
 ### Coach Flow
 - Coach dashboard
-- Add athletes
+- List of athletes
+    - Edit athletes (level changes, delete athlete etc.)
 - Edit daily plans
 - Edit routines
+- Add athletes
 
 ## Tech Stack
 - Next.js App Router
 - TypeScript
 - Tailwind CSS
-- Supabase
+- Supabase (PostgreSQL)
 - Vercel
 
 ## Future Improvements
 - Athlete training log submissions
 - Coach analytics dashboard
-- Weekly printable plans
-- Group plan printing
-- PDF export
 - Email integration for coaches
-- Authentication with Supabase Auth
 - Skill progression tracking
 
 ## Purpose
@@ -38,7 +36,7 @@ This project was designed to solve real workflow challenges faced by coaches:
 
 - reducing paper management
 - organizing athlete plans
-- simplifying communication
+- simplifying communication between coaches and subs
 - creating printable training sheets for younger athletes
 
 It also serves as a portfolio project demonstrating:
