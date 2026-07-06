@@ -1,49 +1,46 @@
 # Trampoline Training Tracker
 
-A full-stack web application designed for trampoline gymnastics coaches and athletes to manage daily training plans, routines, and athlete workflows.
+A full-stack web application for trampoline gymnastics coaches and athletes to manage training plans, routines, and athlete workflows.
 
-Built with Next.js, TypeScript, Tailwind CSS, and Supabase (PostgreSQL).
+The project was built to solve real coaching workflow challenges and explore full-stack web development with modern React technologies.
 
 ## Features
-### Athlete Flow
-- Coach selection page
-- Athlete selection filtered by coach
-- Athlete dashboard: View daily plans, View routines
-### Coach Flow
-- Coach dashboard
-- List of athletes
-    - Edit athletes (level changes, delete athlete etc.)
-- Edit daily plans
-- Edit routines
-- Add athletes
+
+### Athlete
+
+- Select a coach
+- View assigned training plans
+- View routines
+- Check turns for the day
+- Submit training log
+
+### Coach
+
+- Add and remove athletes
+- Edit athlete information
+- Create and update daily training plans
+- Create and update routines
 
 ## Tech Stack
-- Next.js App Router
+
+- Next.js (App Router)
 - TypeScript
 - Tailwind CSS
 - Supabase (PostgreSQL)
 - Vercel
 
-## Future Improvements
-- Athlete training log submissions
-- Coach analytics dashboard
-- Email integration for coaches
-- Skill progression tracking
-
 ## Purpose
 
-This project was designed to solve real workflow challenges faced by coaches:
+This project simplifies common coaching workflows by:
 
-- reducing paper management
-- organizing athlete plans
-- simplifying communication between coaches and subs
-- creating printable training sheets for younger athletes
+- Reducing paper-based training plans
+- Organizing athlete training information
+- Simplifying communication between coaches
+- Creating printable training sheets for younger athletes
 
-It also serves as a portfolio project demonstrating:
+## Future Improvements
 
-- full-stack development
-- relational database design
-- dynamic routing
-- CRUD operations
-- responsive UI development
-- deployment workflows
+- Email athlete training log submissions
+- Coach analytics dashboard
+- Drag and drop plan editing
+- Drill bank
