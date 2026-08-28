@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
+import BackLink from "@/components/BackLink";
 
 export default function CoachLoginPage() {
     const router = useRouter();
@@ -38,14 +38,11 @@ export default function CoachLoginPage() {
             <div className="absolute inset-0 bg-white/80" />
 
             <div className="relative z-10 w-full max-w-sm">
-                <Link
-                    href="/"
-                    className="absolute left-0 top-0 inline-flex items-center text-sm text-zinc-600 hover:text-black"
-                >
-                    ← Home
-                </Link>
+                <BackLink href="/">
+                    Home
+                </BackLink>
 
-                <div className="pt-10 text-center">
+                <div className="text-center">
                     <h1 className="text-3xl font-bold text-black">
                         Coach Portal
                     </h1>

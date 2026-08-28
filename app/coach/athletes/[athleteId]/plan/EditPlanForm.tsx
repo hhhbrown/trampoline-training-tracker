@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import BackLink from "@/components/BackLink";
 
 type EditPlanFormProps = {
     coachId: string;
@@ -101,12 +101,11 @@ export default function EditPlanForm({
 
     return (
         <section className="mt-10">
-            <Link
+            <BackLink
                 href={`/coach/${coachId}/athletes`}
-                className="inline-flex items-center text-sm text-zinc-600 hover:text-black"
             >
-                ← Back
-            </Link>
+                Back
+            </BackLink>
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-black">Daily Plan</h2>
 

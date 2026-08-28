@@ -1,5 +1,5 @@
 'use client';
-import Link from "next/link";
+import BackLink from "@/components/BackLink";
 import { useRouter } from "next/navigation";
 
 export default function AthleteLoginPage() {
@@ -19,14 +19,11 @@ export default function AthleteLoginPage() {
 
             <div className="relative z-10 w-full max-w-sm">
 
-                <Link
-                    href="/"
-                    className="absolute left-0 top-0 inline-flex items-center text-sm text-zinc-600 hover:text-black"
-                >
-                    ← Home
-                </Link>
+                <BackLink href="/">
+                    Home
+                </BackLink>
 
-                <div className="pt-10 text-center">
+                <div className="text-center">
                     <h1 className="text-3xl font-bold text-black">
                         Athlete Portal
                     </h1>

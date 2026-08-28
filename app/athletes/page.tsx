@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import BackLink from "@/components/BackLink";
 
 export default async function CoachSelectionPage() {
     const supabase = await createClient();
@@ -22,14 +23,11 @@ export default async function CoachSelectionPage() {
 
             <div className="relative z-10 w-full max-w-sm">
 
-                <Link
-                    href="/"
-                    className="absolute left-0 top-0 inline-flex items-center text-sm text-zinc-600 hover:text-black"
-                >
-                    ← Home
-                </Link>
+                <BackLink href="/">
+                    Home
+                </BackLink>
 
-                <div className="pt-10 text-center">
+                <div className="text-center">
                     <h1 className="mb-6 text-2xl font-semibold text-black">
                         Select Coach
                     </h1>

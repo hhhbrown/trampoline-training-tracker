@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import BackLink from "@/components/BackLink";
 
 type PageProps = {
     params: Promise<{ coachId: string }>;
@@ -23,14 +24,13 @@ export default async function CoachAthletesPage({ params }: PageProps) {
         .single();
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-white to-red-400 px-4 py-10">
+        <main className="min-h-screen bg-gradient-to-b from-white to-red-400 px-4 pb-10 pt-24">
 
-            <Link
+            <BackLink
                 href="/coach"
-                className="inline-flex items-center text-sm text-zinc-600 hover:text-black"
             >
-                ← Back
-            </Link>
+                Back
+            </BackLink>
 
             <div className="mx-auto max-w-2xl">
                 <p className="text-sm font-medium uppercase tracking-wide text-red-600">
@@ -38,7 +38,7 @@ export default async function CoachAthletesPage({ params }: PageProps) {
                 </p>
 
                 <h1 className="mt-2 text-3xl font-bold text-black">
-                    {coach?.name }'s Group
+                    {coach?.name}&apos;s Group
                 </h1>
                 <Link
                     href={`/coach/${coachId}/print-plans`}

@@ -32,7 +32,7 @@ export default async function CoachEditPlanPage({ params }: PageProps) {
         .order("id");
 
     return (
-        <main className="min-h-screen bg-zinc-50 px-4 py-10">
+        <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24">
             <div className="mx-auto max-w-2xl">
                 <p className="text-sm font-medium uppercase tracking-wide text-red-600">
                     Coach Edit

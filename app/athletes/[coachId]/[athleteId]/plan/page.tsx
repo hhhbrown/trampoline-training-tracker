@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import DailyPlanForm from "./DailyPlanForm";
+import BackLink from "@/components/BackLink";
 
 type PageProps = {
     params: Promise<{
@@ -58,14 +58,11 @@ export default async function AthletePlanPage({ params }: PageProps) {
     const initialComments = logs?.[0]?.comments ?? "";
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-red-400 px-4 py-10">
+        <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-red-400 px-4 pb-10 pt-24">
             <div className="mx-auto max-w-2xl">
-                <Link
-                    href={`/athletes/${coachId}/${athleteId}`}
-                    className="mb-6 inline-block text-sm font-medium text-red-600 underline"
-                >
-                    ← Back to Dashboard
-                </Link>
+                <BackLink href={`/athletes/${coachId}/${athleteId}`}>
+                    Back to Dashboard
+                </BackLink>
 
                 <div className="mb-8">
                     <p className="text-sm font-medium uppercase tracking-wide text-red-600">

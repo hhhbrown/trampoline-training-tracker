@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import BackLink from "@/components/BackLink";
 
 type EditRoutinesFormProps = {
     coachId: string;
@@ -68,12 +68,11 @@ export default function EditRoutinesForm({
 
     return (
         <section className="mt-10">
-            <Link
+            <BackLink
                 href={`/coach/${coachId}/athletes`}
-                className="inline-flex items-center text-red-500 text-red-600 hover:text-black"
             >
-                ← Back
-            </Link>
+                Back
+            </BackLink>
             <h2 className="text-2xl font-semibold text-black">{athleteName}</h2>
 
             <div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm space-y-4">

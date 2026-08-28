@@ -24,7 +24,7 @@ export default async function RoutinesPage({ params }: PageProps) {
         .single();
 
     return (
-        <main className="min-h-screen bg-zinc-50 px-4 py-10">
+        <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24">
             <div className="mx-auto max-w-2xl">
                 <h1 className="text-3xl font-bold text-black">
                     Edit Routines
