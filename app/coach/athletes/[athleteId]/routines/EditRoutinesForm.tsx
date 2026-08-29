@@ -15,7 +15,9 @@ type EditRoutinesFormProps = {
         compulsory: string | null;
         custom_compulsory: string | null;
         optional_a: string | null;
+        optional_a_difficulty: number | null;
         optional_b: string | null;
+        optional_b_difficulty: number | null;
         notes: string | null;
     } | null;
 };
@@ -39,7 +41,13 @@ export default function EditRoutinesForm({
         routines?.custom_compulsory ?? ""
     );
     const [optionalA, setOptionalA] = useState(routines?.optional_a ?? "");
+    const [optionalADifficulty, setOptionalADifficulty] = useState(
+        routines?.optional_a_difficulty?.toString() ?? ""
+    );
     const [optionalB, setOptionalB] = useState(routines?.optional_b ?? "");
+    const [optionalBDifficulty, setOptionalBDifficulty] = useState(
+        routines?.optional_b_difficulty?.toString() ?? ""
+    );
     const [notes, setNotes] = useState(routines?.notes ?? "");
 
     async function handleSave() {
@@ -51,7 +59,11 @@ export default function EditRoutinesForm({
             custom_compulsory:
                 compulsory === "Level 5+" ? customCompulsory.trim() || null : null,
             optional_a: optionalA,
+            optional_a_difficulty:
+                optionalADifficulty === "" ? null : Number(optionalADifficulty),
             optional_b: optionalB,
+            optional_b_difficulty:
+                optionalBDifficulty === "" ? null : Number(optionalBDifficulty),
             notes,
         };
 
@@ -128,6 +140,18 @@ export default function EditRoutinesForm({
                         rows={6}
                         className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
                     />
+                    <label className="mt-3 mb-1 block text-sm font-medium text-zinc-700">
+                        Degree of Difficulty
+                    </label>
+                    <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={optionalADifficulty}
+                        onChange={(e) => setOptionalADifficulty(e.target.value)}
+                        placeholder="e.g. 8.4"
+                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
+                    />
                 </div>
 
                 <div>
@@ -139,6 +163,18 @@ export default function EditRoutinesForm({
                         onChange={(e) => setOptionalB(e.target.value)}
                         placeholder="One skill per line"
                         rows={6}
+                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                    <label className="mt-3 mb-1 block text-sm font-medium text-zinc-700">
+                        Degree of Difficulty
+                    </label>
+                    <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={optionalBDifficulty}
+                        onChange={(e) => setOptionalBDifficulty(e.target.value)}
+                        placeholder="e.g. 8.4"
                         className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
                     />
                 </div>

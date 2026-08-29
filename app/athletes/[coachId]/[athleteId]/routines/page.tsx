@@ -25,7 +25,7 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
 
     const { data: routines, error: routinesError } = await supabase
         .from("routines")
-        .select("id, athlete_id, compulsory, custom_compulsory, optional_a, optional_b, notes")
+        .select("id, athlete_id, compulsory, custom_compulsory, optional_a, optional_a_difficulty, optional_b, optional_b_difficulty, notes")
         .eq("athlete_id", Number(athleteId))
         .maybeSingle();
 
@@ -88,8 +88,16 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
                             )}
                         </div>
 
-                        <RoutineCard title="Optional A" value={routines?.optional_a} />
-                        <RoutineCard title="Optional B" value={routines?.optional_b} />
+                        <RoutineCard
+                            title="Optional A"
+                            value={routines?.optional_a}
+                            difficulty={routines?.optional_a_difficulty}
+                        />
+                        <RoutineCard
+                            title="Optional B"
+                            value={routines?.optional_b}
+                            difficulty={routines?.optional_b_difficulty}
+                        />
                         <RoutineCard title="Notes" value={routines?.notes} />
                     </div>
                 </section>
@@ -101,13 +109,21 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
 function RoutineCard({
     title,
     value,
+    difficulty,
 }: {
     title: string;
     value: string | null | undefined;
+    difficulty?: number | null;
 }) {
     return (
         <div className="rounded-xl border border-zinc-200 bg-white p-4">
             <h3 className="text-base font-semibold text-black">{title}</h3>
+
+            {difficulty != null && (
+                <p className="mt-1 text-sm font-medium text-red-600">
+                    DD: {difficulty}
+                </p>
+            )}
 
             {value ? (
                 <p className="mt-2 whitespace-pre-line text-sm leading-6 text-zinc-700">
