@@ -18,6 +18,10 @@ type EditRoutinesFormProps = {
         optional_a_difficulty: number | null;
         optional_b: string | null;
         optional_b_difficulty: number | null;
+        double_mini_set_a: string | null;
+        double_mini_set_a_difficulty: number | null;
+        double_mini_set_b: string | null;
+        double_mini_set_b_difficulty: number | null;
         notes: string | null;
     } | null;
 };
@@ -48,6 +52,18 @@ export default function EditRoutinesForm({
     const [optionalBDifficulty, setOptionalBDifficulty] = useState(
         routines?.optional_b_difficulty?.toString() ?? ""
     );
+    const [doubleMiniSetA, setDoubleMiniSetA] = useState(
+        routines?.double_mini_set_a ?? ""
+    );
+    const [doubleMiniSetADifficulty, setDoubleMiniSetADifficulty] = useState(
+        routines?.double_mini_set_a_difficulty?.toString() ?? ""
+    );
+    const [doubleMiniSetB, setDoubleMiniSetB] = useState(
+        routines?.double_mini_set_b ?? ""
+    );
+    const [doubleMiniSetBDifficulty, setDoubleMiniSetBDifficulty] = useState(
+        routines?.double_mini_set_b_difficulty?.toString() ?? ""
+    );
     const [notes, setNotes] = useState(routines?.notes ?? "");
 
     async function handleSave() {
@@ -64,6 +80,16 @@ export default function EditRoutinesForm({
             optional_b: optionalB,
             optional_b_difficulty:
                 optionalBDifficulty === "" ? null : Number(optionalBDifficulty),
+            double_mini_set_a: doubleMiniSetA,
+            double_mini_set_a_difficulty:
+                doubleMiniSetADifficulty === ""
+                    ? null
+                    : Number(doubleMiniSetADifficulty),
+            double_mini_set_b: doubleMiniSetB,
+            double_mini_set_b_difficulty:
+                doubleMiniSetBDifficulty === ""
+                    ? null
+                    : Number(doubleMiniSetBDifficulty),
             notes,
         };
 
@@ -179,7 +205,57 @@ export default function EditRoutinesForm({
                     />
                 </div>
 
+                <div className="border-t border-zinc-200 pt-4">
+                    <label className="mb-1 block text-sm font-medium text-zinc-700">
+                        Double Mini Set A
+                    </label>
+                    <textarea
+                        value={doubleMiniSetA}
+                        onChange={(e) => setDoubleMiniSetA(e.target.value)}
+                        placeholder="One skill per line"
+                        rows={4}
+                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                    <label className="mt-3 mb-1 block text-sm font-medium text-zinc-700">
+                        Degree of Difficulty
+                    </label>
+                    <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={doubleMiniSetADifficulty}
+                        onChange={(e) => setDoubleMiniSetADifficulty(e.target.value)}
+                        placeholder="e.g. 4.8"
+                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                </div>
+
                 <div>
+                    <label className="mb-1 block text-sm font-medium text-zinc-700">
+                        Double Mini Set B
+                    </label>
+                    <textarea
+                        value={doubleMiniSetB}
+                        onChange={(e) => setDoubleMiniSetB(e.target.value)}
+                        placeholder="One skill per line"
+                        rows={4}
+                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                    <label className="mt-3 mb-1 block text-sm font-medium text-zinc-700">
+                        Degree of Difficulty
+                    </label>
+                    <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={doubleMiniSetBDifficulty}
+                        onChange={(e) => setDoubleMiniSetBDifficulty(e.target.value)}
+                        placeholder="e.g. 4.8"
+                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                </div>
+
+                <div className="border-t border-zinc-200 pt-4">
                     <label className="mb-1 block text-sm font-medium text-zinc-700">
                         Notes
                     </label>

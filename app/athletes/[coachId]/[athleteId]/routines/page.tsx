@@ -25,7 +25,7 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
 
     const { data: routines, error: routinesError } = await supabase
         .from("routines")
-        .select("id, athlete_id, compulsory, custom_compulsory, optional_a, optional_a_difficulty, optional_b, optional_b_difficulty, notes")
+        .select("id, athlete_id, compulsory, custom_compulsory, optional_a, optional_a_difficulty, optional_b, optional_b_difficulty, double_mini_set_a, double_mini_set_a_difficulty, double_mini_set_b, double_mini_set_b_difficulty, notes")
         .eq("athlete_id", Number(athleteId))
         .maybeSingle();
 
@@ -97,6 +97,16 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
                             title="Optional B"
                             value={routines?.optional_b}
                             difficulty={routines?.optional_b_difficulty}
+                        />
+                        <RoutineCard
+                            title="Double Mini Set A"
+                            value={routines?.double_mini_set_a}
+                            difficulty={routines?.double_mini_set_a_difficulty}
+                        />
+                        <RoutineCard
+                            title="Double Mini Set B"
+                            value={routines?.double_mini_set_b}
+                            difficulty={routines?.double_mini_set_b_difficulty}
                         />
                         <RoutineCard title="Notes" value={routines?.notes} />
                     </div>

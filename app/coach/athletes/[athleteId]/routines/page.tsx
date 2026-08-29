@@ -19,7 +19,7 @@ export default async function RoutinesPage({ params }: PageProps) {
 
     const { data: routines } = await supabase
         .from("routines")
-        .select("id, athlete_id, compulsory, custom_compulsory, optional_a, optional_a_difficulty, optional_b, optional_b_difficulty, notes")
+        .select("id, athlete_id, compulsory, custom_compulsory, optional_a, optional_a_difficulty, optional_b, optional_b_difficulty, double_mini_set_a, double_mini_set_a_difficulty, double_mini_set_b, double_mini_set_b_difficulty, notes")
         .eq("athlete_id", Number(athleteId))
         .single();
 
