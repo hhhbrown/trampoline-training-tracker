@@ -20,6 +20,7 @@ type Routines = {
     optional_b: string | null;
     optional_b_difficulty: number | null;
     double_mini_set_a: string | null;
+    skills: string | null;
     notes: string | null;
 } | null;
 
@@ -107,6 +108,11 @@ export default function PrintablePlanSheet({
                             className="border border-black p-1 align-top"
                         >
                             <p className="font-semibold">Skills to work on:</p>
+                            {routines?.skills && (
+                                <p className="mt-1 whitespace-pre-line">
+                                    {routines.skills}
+                                </p>
+                            )}
                         </td>
                     </tr>
 

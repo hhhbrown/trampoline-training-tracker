@@ -39,7 +39,7 @@ export default async function PrintPlansPage({ params }: PageProps) {
 
           const { data: routines } = await supabase
             .from("routines")
-            .select("compulsory, custom_compulsory, optional_a, optional_a_difficulty, optional_b, optional_b_difficulty, double_mini_set_a, notes")
+            .select("compulsory, custom_compulsory, optional_a, optional_a_difficulty, optional_b, optional_b_difficulty, double_mini_set_a, skills, notes")
             .eq("athlete_id", athlete.id)
             .maybeSingle();
 
