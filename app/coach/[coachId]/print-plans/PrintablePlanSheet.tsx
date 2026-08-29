@@ -14,8 +14,12 @@ type PlanItem = {
 
 type Routines = {
     compulsory: string | null;
+    custom_compulsory: string | null;
     optional_a: string | null;
+    optional_a_difficulty: number | null;
     optional_b: string | null;
+    optional_b_difficulty: number | null;
+    double_mini_set_a: string | null;
     notes: string | null;
 } | null;
 
@@ -31,9 +35,13 @@ export default function PrintablePlanSheet({
     const today = new Date().toLocaleDateString("en-CA");
     const rows = Array.from({ length: 15 }, (_, index) => planItems[index]);
 
-    const compulsory = compulsorySkills[routines?.compulsory ?? ""] ?? [];
-    const optionalA = routines?.optional_a?.split("\n") ?? [];
-    const optionalB = routines?.optional_b?.split("\n") ?? [];
+    const compulsory =
+        routines?.compulsory === "Level 5+"
+            ? splitRoutine(routines.custom_compulsory)
+            : compulsorySkills[routines?.compulsory ?? ""] ?? [];
+    const optionalA = splitRoutine(routines?.optional_a);
+    const optionalB = splitRoutine(routines?.optional_b);
+    const doubleMiniSetA = splitRoutine(routines?.double_mini_set_a);
 
     return (
         <section className="mx-auto mb-4 w-[7.75in] min-h-[10in] bg-white p-2 text-black print:mb-0 print:break-after-page">
@@ -53,9 +61,15 @@ export default function PrintablePlanSheet({
                         </th>
                         <th className="border border-black bg-yellow-300 p-1 text-left">
                             Optional A
+                            <span className="block font-normal">
+                                DD: {routines?.optional_a_difficulty ?? ""}
+                            </span>
                         </th>
                         <th className="border border-black bg-yellow-300 p-1 text-left">
                             Optional B
+                            <span className="block font-normal">
+                                DD: {routines?.optional_b_difficulty ?? ""}
+                            </span>
                         </th>
                         <th className="border border-black bg-yellow-300 p-1"></th>
                     </tr>
@@ -89,7 +103,7 @@ export default function PrintablePlanSheet({
                         </td>
                         <td
                             colSpan={2}
-                            rowSpan={3}
+                            rowSpan={5}
                             className="border border-black p-1 align-top"
                         >
                             <p className="font-semibold">Skills to work on:</p>
@@ -101,8 +115,9 @@ export default function PrintablePlanSheet({
                             <td className="border border-black bg-zinc-100 p-1 text-center">
                                 {index + 1}
                             </td>
-                            <td className="border border-black p-1"></td>
-                            <td className="border border-black p-1"></td>
+                            <td colSpan={2} className="border border-black p-1">
+                                {doubleMiniSetA[index] ?? ""}
+                            </td>
                         </tr>
                     ))}
 
@@ -144,4 +159,11 @@ export default function PrintablePlanSheet({
             </table>
         </section>
     );
+}
+
+function splitRoutine(value: string | null | undefined) {
+    return (value ?? "")
+        .split("\n")
+        .map((skill) => skill.trim())
+        .filter(Boolean);
 }
