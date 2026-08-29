@@ -13,6 +13,7 @@ type EditRoutinesFormProps = {
         id: number;
         athlete_id: number;
         compulsory: string | null;
+        custom_compulsory: string | null;
         optional_a: string | null;
         optional_b: string | null;
         notes: string | null;
@@ -34,6 +35,9 @@ export default function EditRoutinesForm({
         "Level 5+"
     ];
     const [compulsory, setCompulsory] = useState(routines?.compulsory ?? "");
+    const [customCompulsory, setCustomCompulsory] = useState(
+        routines?.custom_compulsory ?? ""
+    );
     const [optionalA, setOptionalA] = useState(routines?.optional_a ?? "");
     const [optionalB, setOptionalB] = useState(routines?.optional_b ?? "");
     const [notes, setNotes] = useState(routines?.notes ?? "");
@@ -44,6 +48,8 @@ export default function EditRoutinesForm({
         const payload = {
             athlete_id: Number(athleteId),
             compulsory,
+            custom_compulsory:
+                compulsory === "Level 5+" ? customCompulsory.trim() || null : null,
             optional_a: optionalA,
             optional_b: optionalB,
             notes,
@@ -95,6 +101,21 @@ export default function EditRoutinesForm({
                         ))}
                     </select>
                 </div>
+
+                {compulsory === "Level 5+" && (
+                    <div>
+                        <label className="mb-1 block text-sm font-medium text-zinc-700">
+                            Custom Compulsory
+                        </label>
+                        <textarea
+                            value={customCompulsory}
+                            onChange={(e) => setCustomCompulsory(e.target.value)}
+                            placeholder="One skill per line"
+                            rows={10}
+                            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
+                        />
+                    </div>
+                )}
 
                 <div>
                     <label className="mb-1 block text-sm font-medium text-zinc-700">

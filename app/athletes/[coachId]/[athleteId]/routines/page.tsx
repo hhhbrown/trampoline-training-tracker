@@ -25,7 +25,7 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
 
     const { data: routines, error: routinesError } = await supabase
         .from("routines")
-        .select("id, athlete_id, compulsory, optional_a, optional_b, notes")
+        .select("id, athlete_id, compulsory, custom_compulsory, optional_a, optional_b, notes")
         .eq("athlete_id", Number(athleteId))
         .maybeSingle();
 
@@ -33,7 +33,13 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
         return <p className="p-8 text-red-600">Error: {routinesError.message}</p>;
     }
 
-    const skills = compulsorySkills[routines?.compulsory ?? ""] ?? [];
+    const skills: string[] =
+        routines?.compulsory === "Level 5+"
+            ? (routines.custom_compulsory ?? "")
+                .split("\n")
+                .map((skill: string) => skill.trim())
+                .filter(Boolean)
+            : compulsorySkills[routines?.compulsory ?? ""] ?? [];
 
     return (
         <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-red-400 px-4 pb-10 pt-24">
@@ -62,13 +68,15 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
                     <div className="mt-4 space-y-4">
                         <div className="rounded-xl border border-zinc-200 bg-white p-4">
                             <h3 className="text-base font-semibold text-black">
-                                {routines?.compulsory ?? "Compulsory"}
+                                {routines?.compulsory === "Level 5+"
+                                    ? "Compulsory"
+                                    : routines?.compulsory ?? "Compulsory"}
                             </h3>
 
                             {skills.length > 0 ? (
                                 <ul className="mt-3 space-y-2">
-                                    {skills.map((skill) => (
-                                        <li key={skill} className="text-sm text-zinc-700">
+                                    {skills.map((skill, index) => (
+                                        <li key={`${index}-${skill}`} className="text-sm text-zinc-700">
                                             • {skill}
                                         </li>
                                     ))}
