@@ -40,12 +40,20 @@ export default async function CoachAthletesPage({ params }: PageProps) {
                 <h1 className="mt-2 text-3xl font-bold text-black">
                     {coach?.name}&apos;s Group
                 </h1>
-                <Link
-                    href={`/coach/${coachId}/print-plans`}
-                    className="mb-8 inline-block rounded-lg bg-black px-4 py-2 text-white"
-                >
-                    Print Plans
-                </Link>
+                <div className="mt-5 mb-8 flex flex-wrap gap-3">
+                    <Link
+                        href={`/coach/${coachId}/conditioning`}
+                        className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                    >
+                        Conditioning
+                    </Link>
+                    <Link
+                        href={`/coach/${coachId}/print-plans`}
+                        className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+                    >
+                        Print Plans
+                    </Link>
+                </div>
                 {error && (
                     <p className="mt-4 text-red-600">
                         Error: {error.message}
