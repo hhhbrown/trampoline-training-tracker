@@ -22,6 +22,7 @@ type EditRoutinesFormProps = {
         double_mini_set_a_difficulty: number | null;
         double_mini_set_b: string | null;
         double_mini_set_b_difficulty: number | null;
+        skills: string | null;
         notes: string | null;
     } | null;
 };
@@ -64,6 +65,7 @@ export default function EditRoutinesForm({
     const [doubleMiniSetBDifficulty, setDoubleMiniSetBDifficulty] = useState(
         routines?.double_mini_set_b_difficulty?.toString() ?? ""
     );
+    const [skills, setSkills] = useState(routines?.skills ?? "");
     const [notes, setNotes] = useState(routines?.notes ?? "");
 
     async function handleSave() {
@@ -90,6 +92,7 @@ export default function EditRoutinesForm({
                 doubleMiniSetBDifficulty === ""
                     ? null
                     : Number(doubleMiniSetBDifficulty),
+            skills,
             notes,
         };
 
@@ -256,6 +259,19 @@ export default function EditRoutinesForm({
                 </div>
 
                 <div className="border-t border-zinc-200 pt-4">
+                    <label className="mb-1 block text-sm font-medium text-zinc-700">
+                        Skills
+                    </label>
+                    <textarea
+                        value={skills}
+                        onChange={(e) => setSkills(e.target.value)}
+                        placeholder="One skill per line"
+                        rows={6}
+                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                </div>
+
+                <div>
                     <label className="mb-1 block text-sm font-medium text-zinc-700">
                         Notes
                     </label>
