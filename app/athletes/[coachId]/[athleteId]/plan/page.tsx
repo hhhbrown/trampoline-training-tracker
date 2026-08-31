@@ -43,6 +43,35 @@ export default async function AthletePlanPage({ params }: PageProps) {
         .eq("athlete_id", Number(athleteId))
         .order("created_at", { ascending: false });
 
+    const { data: routines, error: routinesError } = await supabase
+        .from("routines")
+        .select("optional_a, optional_a_difficulty, optional_b, optional_b_difficulty")
+        .eq("athlete_id", Number(athleteId))
+        .maybeSingle();
+
+    if (routinesError) {
+        return <p className="p-8 text-red-600">Error: {routinesError.message}</p>;
+    }
+
+    const splitRoutine = (value: string | null | undefined) =>
+        (value ?? "")
+            .split("\n")
+            .map((skill) => skill.trim())
+            .filter(Boolean);
+
+    const optionalRoutines = [
+        {
+            planItemName: "optional a" as const,
+            skills: splitRoutine(routines?.optional_a),
+            difficulty: routines?.optional_a_difficulty ?? null,
+        },
+        {
+            planItemName: "optional b" as const,
+            skills: splitRoutine(routines?.optional_b),
+            difficulty: routines?.optional_b_difficulty ?? null,
+        },
+    ].filter((routine) => routine.skills.length > 0);
+
     const latestByItem = new Map();
 
     logs?.forEach((log) => {
@@ -86,6 +115,10 @@ export default async function AthletePlanPage({ params }: PageProps) {
                         planItems={planItems ?? []}
                         initialCheckedItems={initialCheckedItems}
                         initialComments={initialComments}
+                        optionalRoutines={optionalRoutines.map((routine) => ({
+                            planItemName: routine.planItemName,
+                            difficulty: routine.difficulty,
+                        }))}
                     />
                 </section>
             </div>

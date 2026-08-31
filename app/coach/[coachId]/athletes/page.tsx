@@ -90,6 +90,13 @@ export default async function CoachAthletesPage({ params }: PageProps) {
                                 >
                                     Edit Routines
                                 </Link>
+
+                                <Link
+                                    href={`/coach/athletes/${athlete.id}/progress`}
+                                    className="block w-full rounded-lg border border-zinc-300 px-4 py-2 text-center text-sm font-medium text-black hover:bg-zinc-100"
+                                >
+                                    View Progress
+                                </Link>
                             </div>
                         </div>
                     ))}

@@ -9,16 +9,23 @@ type PlanItem = {
     target: number | null;
 };
 
+type OptionalRoutine = {
+    planItemName: "optional a" | "optional b";
+    difficulty: number | null;
+};
+
 export default function DailyPlanForm({
     athleteId,
     planItems,
     initialCheckedItems,
     initialComments,
+    optionalRoutines,
 }: {
     athleteId: string;
     planItems: PlanItem[];
     initialCheckedItems: number[];
     initialComments: string;
+    optionalRoutines: OptionalRoutine[];
 }) {
     const [checkedItems, setCheckedItems] = useState<number[]>(initialCheckedItems);
     const [comments, setComments] = useState(initialComments);
@@ -56,6 +63,42 @@ export default function DailyPlanForm({
 
     async function handleSubmit() {
         const supabase = createClient();
+
+        const checkedPlanItems = planItems.filter((item) =>
+            checkedItems.includes(item.id)
+        );
+
+        const completedCount = (planItemName: string) =>
+            checkedPlanItems.filter(
+                (item) => item.name?.trim().toLowerCase() === planItemName
+            ).length;
+
+        const recordedAt = new Date().toISOString();
+        const progressRows = [
+            {
+                athlete_id: Number(athleteId),
+                recorded_at: recordedAt,
+                routine_type: "compulsory",
+                difficulty: null,
+                completed_count: completedCount("compulsory"),
+            },
+            ...optionalRoutines.map((routine) => ({
+                athlete_id: Number(athleteId),
+                recorded_at: recordedAt,
+                routine_type: "optional",
+                difficulty: routine.difficulty,
+                completed_count: completedCount(routine.planItemName),
+            })),
+        ];
+
+        const { error: progressError } = await supabase
+            .from("routine_progress")
+            .insert(progressRows);
+
+        if (progressError) {
+            alert(progressError.message);
+            return;
+        }
 
         const { error } = await supabase
             .from("training_logs")

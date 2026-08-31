@@ -66,6 +66,16 @@ export default async function AthleteDashboardPage({ params }: PageProps) {
                     </Link>
 
                     <Link
+                        href={`/athletes/${coachId}/${athleteId}/progress`}
+                        className="rounded-xl border border-zinc-200 bg-white p-5 transition hover:bg-zinc-50"
+                    >
+                        <h2 className="text-lg font-semibold text-black">Progress</h2>
+                        <p className="mt-1 text-sm text-zinc-600">
+                            View your compulsory and optional routine history.
+                        </p>
+                    </Link>
+
+                    <Link
                         href={`/athletes/${coachId}/conditioning`}
                         className="rounded-xl border border-zinc-200 bg-white p-5 transition hover:bg-zinc-50"
                     >
