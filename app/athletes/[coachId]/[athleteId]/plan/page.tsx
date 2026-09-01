@@ -111,6 +111,7 @@ export default async function AthletePlanPage({ params }: PageProps) {
                     <h2 className="text-xl font-semibold text-black">Daily Plan</h2>
 
                     <DailyPlanForm
+                        coachId={coachId}
                         athleteId={athleteId}
                         planItems={planItems ?? []}
                         initialCheckedItems={initialCheckedItems}

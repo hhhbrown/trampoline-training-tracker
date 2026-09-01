@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 type PlanItem = {
     id: number;
@@ -15,12 +16,14 @@ type OptionalRoutine = {
 };
 
 export default function DailyPlanForm({
+    coachId,
     athleteId,
     planItems,
     initialCheckedItems,
     initialComments,
     optionalRoutines,
 }: {
+    coachId: string;
     athleteId: string;
     planItems: PlanItem[];
     initialCheckedItems: number[];
@@ -29,6 +32,7 @@ export default function DailyPlanForm({
 }) {
     const [checkedItems, setCheckedItems] = useState<number[]>(initialCheckedItems);
     const [comments, setComments] = useState(initialComments);
+    const router = useRouter();
 
     async function toggleItem(id: number) {
         const supabase = createClient();
@@ -73,6 +77,8 @@ export default function DailyPlanForm({
                 (item) => item.name?.trim().toLowerCase() === planItemName
             ).length;
 
+        const genericOptionalCount = completedCount("optional");
+
         const recordedAt = new Date().toISOString();
         const progressRows = [
             {
@@ -82,12 +88,14 @@ export default function DailyPlanForm({
                 difficulty: null,
                 completed_count: completedCount("compulsory"),
             },
-            ...optionalRoutines.map((routine) => ({
+            ...optionalRoutines.map((routine, index) => ({
                 athlete_id: Number(athleteId),
                 recorded_at: recordedAt,
                 routine_type: "optional",
                 difficulty: routine.difficulty,
-                completed_count: completedCount(routine.planItemName),
+                completed_count:
+                    completedCount(routine.planItemName) +
+                    (index === 0 ? genericOptionalCount : 0),
             })),
         ];
 
@@ -117,6 +125,7 @@ export default function DailyPlanForm({
         setComments("");
 
         alert("Training submitted!");
+        router.push(`/athletes/${coachId}/${athleteId}/progress`);
     }
 
     return (
