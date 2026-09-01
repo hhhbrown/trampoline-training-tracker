@@ -74,13 +74,9 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
                             </h3>
 
                             {skills.length > 0 ? (
-                                <ul className="mt-3 space-y-2">
-                                    {skills.map((skill, index) => (
-                                        <li key={`${index}-${skill}`} className="text-sm text-zinc-700">
-                                            • {skill}
-                                        </li>
-                                    ))}
-                                </ul>
+                                <p className="mt-2 whitespace-pre-line text-sm leading-6 text-zinc-700">
+                                    {skills.join("\n")}
+                                </p>
                             ) : (
                                 <p className="mt-2 text-sm text-zinc-400">
                                     No compulsory routine selected yet.
