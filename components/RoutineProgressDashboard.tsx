@@ -20,76 +20,66 @@ export default function RoutineProgressDashboard({
     progress: RoutineProgress[];
     tenBounceRecords: TenBounceRecord[];
 }) {
-    const compulsoryTotal = totalFor(progress, "compulsory");
-    const optional = progress.filter((entry) => entry.routine_type === "optional");
-    const optionalTotal = totalFor(progress, "optional");
-    const total = compulsoryTotal + optionalTotal;
-    const difficulties = optional
-        .map((entry) => entry.difficulty)
-        .filter((value): value is number => value != null);
-    const averageDd = difficulties.length
-        ? difficulties.reduce((sum, value) => sum + value, 0) / difficulties.length
-        : null;
-    const optionalPercent = total ? Math.round((optionalTotal / total) * 100) : 0;
     const activity = getWeeklyActivity(progress);
-    const peak = Math.max(...activity.map((day) => day.count), 1);
+    const peak = Math.max(
+        ...activity.flatMap((day) => [day.compulsory, day.optional]),
+        1
+    );
     const personalBest = tenBounceRecords.length
         ? Math.min(...tenBounceRecords.map((entry) => entry.difficulty))
+        : null;
+    const latestRecordedAt = progress[0]?.recorded_at;
+    const latestProgress = latestRecordedAt
+        ? progress.filter((entry) => entry.recorded_at === latestRecordedAt)
+        : [];
+    const latestTenBounce = latestRecordedAt
+        ? tenBounceRecords.find(
+              (entry) => entry.recorded_at === latestRecordedAt
+          )
+        : undefined;
+    const recordedDifficulties = progress
+        .filter(
+            (entry) =>
+                entry.routine_type === "optional" && entry.completed_count > 0
+        )
+        .map((entry) => entry.difficulty)
+        .filter((difficulty): difficulty is number => difficulty != null);
+    const difficultyRecord = recordedDifficulties.length
+        ? Math.max(...recordedDifficulties)
         : null;
 
     return (
         <div className="mt-7 space-y-5">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <MetricCard featured label="Total completions" value={total} note={`${progress.length} progress records`} />
-                <MetricCard label="Compulsory" value={compulsoryTotal} note="Completed routines" />
-                <MetricCard label="Optional" value={optionalTotal} note="Completed routines" />
-                <MetricCard label="Average DD" value={averageDd?.toFixed(2) ?? "—"} note="Across optional records" />
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
+                <LatestTrainingCard
+                    recordedAt={latestRecordedAt}
+                    progress={latestProgress}
+                    tenBounce={latestTenBounce}
+                />
+                <DifficultyRecordCard difficulty={difficultyRecord} />
             </div>
 
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
-                <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm sm:p-7">
-                    <PanelHeading title="Weekly activity" subtitle="Routine completions over the last 7 days" />
+            <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm sm:p-7">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                        <PanelHeading title="Last week" subtitle="Compulsory and optional routines completed each day" />
+                        <div className="flex gap-4 text-xs font-medium text-zinc-500">
+                            <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-red-300" />Compulsory</span>
+                            <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-red-700" />Optional</span>
+                        </div>
+                    </div>
 
                     <div className="mt-8 flex h-64 items-end gap-3 border-b border-zinc-100 sm:gap-5">
-                        {activity.map((day, index) => (
-                            <div key={day.date} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end" title={`${day.date}: ${day.count}`}>
-                                <span className="mb-2 text-xs font-semibold text-zinc-700">{day.count}</span>
-                                <div
-                                    className={`w-full max-w-14 rounded-t-2xl ${index % 2 ? "bg-red-700" : "bg-red-400"}`}
-                                    style={{ height: `${Math.max(day.count ? (day.count / peak) * 78 : 3, 3)}%` }}
-                                />
+                        {activity.map((day) => (
+                            <div key={day.date} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end" title={`${day.date}: ${day.compulsory} compulsory, ${day.optional} optional`}>
+                                <div className="flex h-full w-full items-end justify-center gap-1 sm:gap-2">
+                                    <Bar value={day.compulsory} peak={peak} color="bg-red-300" />
+                                    <Bar value={day.optional} peak={peak} color="bg-red-700" />
+                                </div>
                                 <span className="mt-3 pb-3 text-sm font-medium text-zinc-500">{day.label}</span>
                             </div>
                         ))}
                     </div>
-
-                    <div className="mt-5 flex justify-between text-sm text-zinc-500">
-                        <span>Total: <strong className="text-zinc-950">{activity.reduce((sum, day) => sum + day.count, 0)}</strong></span>
-                        <span>Peak: <strong className="text-red-700">{Math.max(...activity.map((day) => day.count))}</strong></span>
-                    </div>
-                </section>
-
-                <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm sm:p-7">
-                    <PanelHeading title="Routine mix" subtitle="Optional share of all completions" />
-                    <div className="flex min-h-64 items-center justify-center">
-                        <div
-                            className="grid h-44 w-44 place-items-center rounded-full"
-                            style={{ background: `conic-gradient(rgb(185 28 28) 0 ${optionalPercent}%, rgb(254 202 202) ${optionalPercent}% 100%)` }}
-                        >
-                            <div className="grid h-32 w-32 place-items-center rounded-full bg-white text-center">
-                                <div>
-                                    <p className="text-4xl font-bold text-zinc-950">{optionalPercent}%</p>
-                                    <p className="mt-1 text-xs font-medium uppercase tracking-wide text-zinc-500">Optional</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                        <Legend color="bg-red-200" label="Compulsory" value={compulsoryTotal} />
-                        <Legend color="bg-red-700" label="Optional" value={optionalTotal} />
-                    </div>
-                </section>
-            </div>
+            </section>
 
             <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
                 <TenBounceChart data={tenBounceRecords} />
@@ -208,30 +198,97 @@ function TenBounceChart({ data }: { data: TenBounceRecord[] }) {
     );
 }
 
-function MetricCard({ label, value, note, featured = false }: { label: string; value: string | number; note: string; featured?: boolean }) {
+function LatestTrainingCard({
+    recordedAt,
+    progress,
+    tenBounce,
+}: {
+    recordedAt?: string;
+    progress: RoutineProgress[];
+    tenBounce?: TenBounceRecord;
+}) {
+    const completed = progress.filter((entry) => entry.completed_count > 0);
+
     return (
-        <div className={`flex min-h-48 flex-col justify-between rounded-[28px] border p-6 shadow-sm ${featured ? "border-red-700 bg-red-700 text-white" : "border-zinc-200 bg-white text-zinc-950"}`}>
-            <div className="flex items-center justify-between">
-                <p className={`text-sm font-medium ${featured ? "text-red-100" : "text-zinc-600"}`}>{label}</p>
-                <span className={`grid h-9 w-9 place-items-center rounded-full text-lg ${featured ? "bg-white/15" : "bg-red-700 text-white"}`}>↗</span>
+        <section className="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm sm:p-7">
+            <div className="flex items-start justify-between gap-4">
+                <PanelHeading
+                    title="Last submitted training"
+                    subtitle={recordedAt ? formatDate(recordedAt) : "No training submitted yet"}
+                />
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-red-700 text-lg text-white">↗</span>
             </div>
-            <p className="text-5xl font-bold tracking-tight">{value}</p>
-            <p className={`text-sm ${featured ? "text-red-100" : "text-zinc-500"}`}>{note}</p>
+            {recordedAt ? (
+                <div className="mt-6">
+                    <div className="flex flex-wrap gap-2">
+                        {completed.map((entry) => (
+                            <span key={entry.id} className="rounded-full bg-red-50 px-4 py-2 text-sm font-semibold capitalize text-red-800">
+                                {entry.completed_count} × {entry.routine_type}
+                                {entry.routine_type === "optional" && entry.difficulty != null
+                                    ? ` (${entry.difficulty.toFixed(2)} DD)`
+                                    : ""}
+                            </span>
+                        ))}
+                        {tenBounce && (
+                            <span className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-semibold text-zinc-800">
+                                {tenBounce.difficulty.toFixed(3)} second 10-bounce
+                            </span>
+                        )}
+                        {completed.length === 0 && !tenBounce && (
+                            <span className="text-sm text-zinc-500">No completed routines or 10-bounce time.</span>
+                        )}
+                    </div>
+                    <div className="mt-6 border-t border-zinc-100 pt-5">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Notes</p>
+                        <p className="mt-2 text-sm leading-6 text-zinc-700">
+                            {tenBounce?.notes || "No notes added."}
+                        </p>
+                    </div>
+                </div>
+            ) : null}
+        </section>
+    );
+}
+
+function DifficultyRecordCard({ difficulty }: { difficulty: number | null }) {
+    return (
+        <section className="flex min-h-64 flex-col justify-between rounded-[28px] border border-red-700 bg-red-700 p-6 text-white shadow-sm sm:p-7">
+            <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-sm font-medium text-red-100">Personal record</p>
+                    <h3 className="mt-1 text-xl font-bold">DD record</h3>
+                </div>
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-lg">↗</span>
+            </div>
+            <div className="mt-8">
+                <strong className="text-6xl tracking-tight">
+                    {difficulty?.toFixed(2) ?? "—"}
+                </strong>
+                <p className="mt-3 text-sm text-red-100">
+                    {difficulty == null
+                        ? "No optional difficulty recorded yet."
+                        : "Highest optional DD ever submitted."}
+                </p>
+            </div>
+        </section>
+    );
+}
+
+function Bar({ value, peak, color }: { value: number; peak: number; color: string }) {
+    return (
+        <div
+            className={`relative w-full max-w-10 rounded-t-xl ${color}`}
+            style={{ height: `${Math.max(value ? (value / peak) * 78 : 3, 3)}%` }}
+        >
+            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[11px] font-semibold text-zinc-600">
+                {value}
+            </span>
         </div>
     );
 }
 
 function PanelHeading({ title, subtitle }: { title: string; subtitle: string }) {
     return <div><h3 className="text-xl font-bold text-zinc-950">{title}</h3><p className="mt-1 text-sm text-zinc-500">{subtitle}</p></div>;
-}
-
-function Legend({ color, label, value }: { color: string; label: string; value: number }) {
-    return (
-        <div className="rounded-2xl bg-zinc-50 p-3">
-            <div className="flex items-center gap-2 text-xs text-zinc-500"><span className={`h-2.5 w-2.5 rounded-full ${color}`} />{label}</div>
-            <p className="mt-2 text-xl font-bold text-zinc-950">{value}</p>
-        </div>
-    );
 }
 
 function ProgressTable({ progress }: { progress: RoutineProgress[] }) {
@@ -254,18 +311,22 @@ function ProgressTable({ progress }: { progress: RoutineProgress[] }) {
     );
 }
 
-function totalFor(progress: RoutineProgress[], type: string) {
-    return progress.filter((entry) => entry.routine_type === type).reduce((sum, entry) => sum + entry.completed_count, 0);
-}
-
 function getWeeklyActivity(progress: RoutineProgress[]) {
     const now = new Date();
     return Array.from({ length: 7 }, (_, index) => {
         const date = new Date(now);
         date.setHours(0, 0, 0, 0);
         date.setDate(date.getDate() - (6 - index));
-        const count = progress.filter((entry) => sameDay(new Date(entry.recorded_at), date)).reduce((sum, entry) => sum + entry.completed_count, 0);
-        return { label: new Intl.DateTimeFormat("en-CA", { weekday: "narrow" }).format(date), date: new Intl.DateTimeFormat("en-CA", { month: "short", day: "numeric" }).format(date), count };
+        const entries = progress.filter((entry) =>
+            sameDay(new Date(entry.recorded_at), date)
+        );
+        const compulsory = entries
+            .filter((entry) => entry.routine_type === "compulsory")
+            .reduce((sum, entry) => sum + entry.completed_count, 0);
+        const optional = entries
+            .filter((entry) => entry.routine_type === "optional")
+            .reduce((sum, entry) => sum + entry.completed_count, 0);
+        return { label: new Intl.DateTimeFormat("en-CA", { weekday: "narrow" }).format(date), date: new Intl.DateTimeFormat("en-CA", { month: "short", day: "numeric" }).format(date), compulsory, optional };
     });
 }
 

@@ -126,6 +126,7 @@ export default function DailyPlanForm({
                     athlete_id: Number(athleteId),
                     recorded_at: recordedAt,
                     difficulty: tenBounceValue,
+                    notes: comments.trim() || null,
                 });
 
             if (tenBounceError) {
