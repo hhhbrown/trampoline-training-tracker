@@ -32,6 +32,7 @@ export default function DailyPlanForm({
 }) {
     const [checkedItems, setCheckedItems] = useState<number[]>(initialCheckedItems);
     const [comments, setComments] = useState(initialComments);
+    const [tenBounceSeconds, setTenBounceSeconds] = useState("");
     const router = useRouter();
 
     async function toggleItem(id: number) {
@@ -78,6 +79,16 @@ export default function DailyPlanForm({
             ).length;
 
         const genericOptionalCount = completedCount("optional");
+        const tenBounceValue =
+            tenBounceSeconds.trim() === "" ? null : Number(tenBounceSeconds);
+
+        if (
+            tenBounceValue != null &&
+            (!Number.isFinite(tenBounceValue) || tenBounceValue <= 0)
+        ) {
+            alert("Enter a valid 10-bounce time greater than 0.");
+            return;
+        }
 
         const recordedAt = new Date().toISOString();
         const progressRows = [
@@ -108,6 +119,21 @@ export default function DailyPlanForm({
             return;
         }
 
+        if (tenBounceValue != null) {
+            const { error: tenBounceError } = await supabase
+                .from("ten_bounce_records")
+                .insert({
+                    athlete_id: Number(athleteId),
+                    recorded_at: recordedAt,
+                    difficulty: tenBounceValue,
+                });
+
+            if (tenBounceError) {
+                alert(tenBounceError.message);
+                return;
+            }
+        }
+
         const { error } = await supabase
             .from("training_logs")
             .update({
@@ -123,6 +149,7 @@ export default function DailyPlanForm({
 
         setCheckedItems([]);
         setComments("");
+        setTenBounceSeconds("");
 
         alert("Training submitted!");
         router.push(`/athletes/${coachId}/${athleteId}/progress`);
@@ -169,6 +196,32 @@ export default function DailyPlanForm({
                 onChange={(e) => setComments(e.target.value)}
                 className="mt-4 h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-black outline-none focus:ring-2 focus:ring-red-500"
             />
+
+            <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-4">
+                <label
+                    htmlFor="ten-bounce-seconds"
+                    className="block text-sm font-semibold text-black"
+                >
+                    10-bounce time
+                </label>
+                <p className="mt-1 text-sm text-zinc-500">
+                    Optional. Enter the athlete&apos;s time in seconds.
+                </p>
+                <div className="mt-3 flex items-center gap-3">
+                    <input
+                        id="ten-bounce-seconds"
+                        type="number"
+                        min="0.001"
+                        step="0.001"
+                        inputMode="decimal"
+                        placeholder="e.g. 16.420"
+                        value={tenBounceSeconds}
+                        onChange={(event) => setTenBounceSeconds(event.target.value)}
+                        className="h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-black outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                    <span className="text-sm font-medium text-zinc-500">seconds</span>
+                </div>
+            </div>
 
             <button
                 type="button"

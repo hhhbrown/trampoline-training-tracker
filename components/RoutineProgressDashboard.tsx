@@ -6,7 +6,20 @@ type RoutineProgress = {
     completed_count: number;
 };
 
-export default function RoutineProgressDashboard({ progress }: { progress: RoutineProgress[] }) {
+type TenBounceRecord = {
+    id: number;
+    recorded_at: string;
+    difficulty: number;
+    notes: string | null;
+};
+
+export default function RoutineProgressDashboard({
+    progress,
+    tenBounceRecords,
+}: {
+    progress: RoutineProgress[];
+    tenBounceRecords: TenBounceRecord[];
+}) {
     const compulsoryTotal = totalFor(progress, "compulsory");
     const optional = progress.filter((entry) => entry.routine_type === "optional");
     const optionalTotal = totalFor(progress, "optional");
@@ -20,6 +33,9 @@ export default function RoutineProgressDashboard({ progress }: { progress: Routi
     const optionalPercent = total ? Math.round((optionalTotal / total) * 100) : 0;
     const activity = getWeeklyActivity(progress);
     const peak = Math.max(...activity.map((day) => day.count), 1);
+    const personalBest = tenBounceRecords.length
+        ? Math.min(...tenBounceRecords.map((entry) => entry.difficulty))
+        : null;
 
     return (
         <div className="mt-7 space-y-5">
@@ -75,6 +91,30 @@ export default function RoutineProgressDashboard({ progress }: { progress: Routi
                 </section>
             </div>
 
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
+                <TenBounceChart data={tenBounceRecords} />
+                <section className="flex min-h-80 flex-col justify-between rounded-[28px] border border-zinc-900 bg-zinc-950 p-7 text-white shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-medium text-zinc-400">Personal best</p>
+                            <h3 className="mt-1 text-xl font-bold">10-bounce PB</h3>
+                        </div>
+                        <span className="grid h-10 w-10 place-items-center rounded-full bg-red-600 text-xl">↘</span>
+                    </div>
+                    <div>
+                        <p className="text-5xl font-bold tracking-tight">
+                            {personalBest?.toFixed(3) ?? "—"}
+                        </p>
+                        <p className="mt-2 text-sm text-zinc-400">
+                            {personalBest == null ? "No time recorded yet" : "seconds"}
+                        </p>
+                    </div>
+                    <p className="text-sm text-zinc-400">
+                        Based on {tenBounceRecords.length} recorded {tenBounceRecords.length === 1 ? "time" : "times"}
+                    </p>
+                </section>
+            </div>
+
             <section className="overflow-hidden rounded-[28px] border border-zinc-200 bg-white shadow-sm">
                 <div className="px-5 py-5 sm:px-7">
                     <PanelHeading title="Recent activity" subtitle="Every routine record, newest first" />
@@ -84,6 +124,87 @@ export default function RoutineProgressDashboard({ progress }: { progress: Routi
                 )}
             </section>
         </div>
+    );
+}
+
+function TenBounceChart({ data }: { data: TenBounceRecord[] }) {
+    const points = data.slice(-12);
+
+    if (points.length === 0) {
+        return (
+            <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm sm:p-7">
+                <PanelHeading
+                    title="10-Bounce Progress"
+                    subtitle="Recorded times in seconds"
+                />
+                <div className="grid min-h-64 place-items-center text-sm text-zinc-500">
+                    No 10-bounce times recorded yet.
+                </div>
+            </section>
+        );
+    }
+
+    const values = points.map((entry) => entry.difficulty);
+    const minimum = Math.min(...values);
+    const maximum = Math.max(...values);
+    const range = maximum - minimum || 1;
+    const coordinates = points.map((entry, index) => ({
+        x: points.length === 1 ? 300 : 35 + (index / (points.length - 1)) * 530,
+        y: 175 - ((entry.difficulty - minimum) / range) * 130,
+        entry,
+    }));
+
+    return (
+        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm sm:p-7">
+            <PanelHeading
+                title="10-bounce over time"
+                subtitle="Last 12 recorded times in seconds · lower is faster"
+            />
+            <div className="mt-6 overflow-hidden">
+                <svg
+                    viewBox="0 0 600 220"
+                    role="img"
+                    aria-label="10-bounce times over time"
+                    className="h-64 w-full"
+                >
+                    {[45, 110, 175].map((y) => (
+                        <line
+                            key={y}
+                            x1="30"
+                            x2="575"
+                            y1={y}
+                            y2={y}
+                            stroke="rgb(228 228 231)"
+                            strokeDasharray="5 7"
+                        />
+                    ))}
+                    {coordinates.length > 1 && (
+                        <polyline
+                            points={coordinates.map(({ x, y }) => `${x},${y}`).join(" ")}
+                            fill="none"
+                            stroke="rgb(185 28 28)"
+                            strokeWidth="5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                    )}
+                    {coordinates.map(({ x, y, entry }) => (
+                        <g key={entry.id}>
+                            <circle cx={x} cy={y} r="7" fill="white" stroke="rgb(185 28 28)" strokeWidth="4" />
+                            <text x={x} y={y - 14} textAnchor="middle" className="fill-zinc-700 text-[12px] font-semibold">
+                                {entry.difficulty.toFixed(3)}
+                            </text>
+                        </g>
+                    ))}
+                    <text x="35" y="210" className="fill-zinc-500 text-[12px]">
+                        {formatShortDate(points[0].recorded_at)}
+                    </text>
+                    <text x="565" y="210" textAnchor="end" className="fill-zinc-500 text-[12px]">
+                        {formatShortDate(points[points.length - 1].recorded_at)}
+                    </text>
+                </svg>
+            </div>
+        </section>
     );
 }
 
@@ -154,4 +275,11 @@ function sameDay(left: Date, right: Date) {
 
 function formatDate(value: string) {
     return new Intl.DateTimeFormat("en-CA", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+}
+
+function formatShortDate(value: string) {
+    return new Intl.DateTimeFormat("en-CA", {
+        month: "short",
+        day: "numeric",
+    }).format(new Date(value));
 }

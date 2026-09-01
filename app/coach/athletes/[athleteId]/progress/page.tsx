@@ -30,6 +30,16 @@ export default async function CoachAthleteProgressPage({ params }: PageProps) {
         return <p className="p-8 text-red-600">Error: {progressError.message}</p>;
     }
 
+    const { data: tenBounceRecords, error: tenBounceError } = await supabase
+        .from("ten_bounce_records")
+        .select("id, recorded_at, difficulty, notes")
+        .eq("athlete_id", Number(athleteId))
+        .order("recorded_at", { ascending: true });
+
+    if (tenBounceError) {
+        return <p className="p-8 text-red-600">Error: {tenBounceError.message}</p>;
+    }
+
     return (
         <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-red-400 px-4 pb-10 pt-24">
             <div className="mx-auto max-w-7xl">
@@ -56,7 +66,10 @@ export default async function CoachAthleteProgressPage({ params }: PageProps) {
                     <p className="mt-2 text-zinc-600">
                         Track routine volume, difficulty, and recent training activity.
                     </p>
-                    <RoutineProgressDashboard progress={progress ?? []} />
+                    <RoutineProgressDashboard
+                        progress={progress ?? []}
+                        tenBounceRecords={tenBounceRecords ?? []}
+                    />
                 </section>
             </div>
         </main>
