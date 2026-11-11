@@ -74,9 +74,21 @@ export default function DailyPlanForm({
         );
 
         const completedCount = (planItemName: string) =>
-            checkedPlanItems.filter(
-                (item) => item.name?.trim().toLowerCase() === planItemName
-            ).length;
+            checkedPlanItems.filter((item) => {
+                const name = item.name ?? "";
+
+                if (planItemName === "compulsory") {
+                    return /\bcompulsory\b/i.test(name);
+                }
+
+                const optional = name.match(/\boptionals?\b(?:\s+([ab])\b)?/i);
+                if (!optional) return false;
+
+                const routineName = optional[1]
+                    ? `optional ${optional[1].toLowerCase()}`
+                    : "optional";
+                return routineName === planItemName;
+            }).length;
 
         const genericOptionalCount = completedCount("optional");
         const tenBounceValue =
