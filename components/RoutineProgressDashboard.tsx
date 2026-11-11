@@ -26,7 +26,7 @@ export default function RoutineProgressDashboard({
         1
     );
     const personalBest = tenBounceRecords.length
-        ? Math.min(...tenBounceRecords.map((entry) => entry.difficulty))
+        ? Math.max(...tenBounceRecords.map((entry) => entry.difficulty))
         : null;
     const latestRecordedAt = progress[0]?.recorded_at;
     const latestProgress = latestRecordedAt
@@ -148,7 +148,7 @@ function TenBounceChart({ data }: { data: TenBounceRecord[] }) {
         <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm sm:p-7">
             <PanelHeading
                 title="10-bounce over time"
-                subtitle="Last 12 recorded times in seconds · lower is faster"
+                subtitle="Last 12 recorded times in seconds · higher is better"
             />
             <div className="mt-6 overflow-hidden">
                 <svg
