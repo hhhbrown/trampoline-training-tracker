@@ -38,7 +38,7 @@ export default function EditPlanForm({
             {
                 id: Date.now(),
                 name: "",
-                target: null,
+                target: 1,
                 isNew: true,
             },
         ]);
@@ -53,6 +53,11 @@ export default function EditPlanForm({
     }
 
     async function handleSave() {
+        if (items.some((item) => !Number.isInteger(item.target) || (item.target ?? 0) < 1)) {
+            alert("Enter a whole-number turn count of 1 or more for every row.");
+            return;
+        }
+
         const supabase = createClient();
 
         for (const id of deletedIds) {
@@ -138,8 +143,11 @@ export default function EditPlanForm({
 
                             <input
                                 type="number"
+                                min="1"
+                                step="1"
+                                required
                                 value={item.target ?? ""}
-                                placeholder="0"
+                                placeholder="1"
                                 onChange={(e) => {
                                     const newItems = [...items];
                                     newItems[index].target =
