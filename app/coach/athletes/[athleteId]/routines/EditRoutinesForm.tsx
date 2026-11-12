@@ -113,184 +113,87 @@ export default function EditRoutinesForm({
         router.push(`/coach/${coachId}/athletes`);
     }
 
+    const fieldStyle = "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base leading-6 text-zinc-950 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-700";
+
     return (
-        <section className="mt-10">
-            <BackLink
-                href={`/coach/${coachId}/athletes`}
-            >
-                Back
-            </BackLink>
-            <h2 className="text-2xl font-semibold text-black">{athleteName}</h2>
+        <section className="mt-6">
+            <BackLink href={`/coach/${coachId}/athletes`}>Back</BackLink>
+            <h2 className="break-words text-2xl font-bold text-zinc-950">{athleteName}</h2>
 
-            <div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm space-y-4">
-
-                <div>
-                    <label className="mb-1 block text-sm font-medium text-zinc-700">
-                        Compulsory
-                    </label>
-                    <select
-                        value={compulsory}
-                        onChange={(e) => setCompulsory(e.target.value)}
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
-                    >
-                        <option value="">Select Level</option>
-
-                        {compulsoryOptions.map((routine) => (
-                            <option key={routine} value={routine}>
-                                {routine}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                {compulsory === "Level 5+" && (
-                    <div>
-                        <label className="mb-1 block text-sm font-medium text-zinc-700">
-                            Custom Compulsory
-                        </label>
-                        <textarea
-                            value={customCompulsory}
-                            onChange={(e) => setCustomCompulsory(e.target.value)}
-                            placeholder="One skill per line"
-                            rows={10}
-                            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
-                        />
+            <div className="mt-6 space-y-7">
+                <section aria-labelledby="trampoline-edit-heading">
+                    <h3 id="trampoline-edit-heading" className="mb-3 text-xl font-bold text-red-900">Trampoline</h3>
+                    <div className="overflow-hidden rounded-xl border border-red-100 bg-white shadow-sm">
+                        <div className="border-b border-red-100 bg-red-50 px-4 py-3">
+                            <label htmlFor="routine-compulsory" className="text-base font-bold text-red-900">Compulsory</label>
+                        </div>
+                        <div className="p-4">
+                        <select id="routine-compulsory" value={compulsory} onChange={(e) => setCompulsory(e.target.value)} className={fieldStyle}>
+                            <option value="">Select Level</option>
+                            {compulsoryOptions.map((routine) => <option key={routine} value={routine}>{routine}</option>)}
+                        </select>
+                        {compulsory === "Level 5+" && (
+                            <div className="mt-4">
+                                <label htmlFor="routine-custom-compulsory" className="mb-2 block text-sm font-semibold text-zinc-700">Custom Compulsory</label>
+                                <textarea id="routine-custom-compulsory" value={customCompulsory} onChange={(e) => setCustomCompulsory(e.target.value)} placeholder="One skill per line" rows={10} className={fieldStyle} />
+                            </div>
+                        )}
+                        </div>
                     </div>
-                )}
+                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                        <RoutineEditor id="optional-a" title="Optional A" value={optionalA} onChange={setOptionalA} difficulty={optionalADifficulty} onDifficultyChange={setOptionalADifficulty} rows={Math.max(10, optionalA.split("\n").length)} />
+                        <RoutineEditor id="optional-b" title="Optional B" value={optionalB} onChange={setOptionalB} difficulty={optionalBDifficulty} onDifficultyChange={setOptionalBDifficulty} rows={Math.max(10, optionalB.split("\n").length)} />
+                    </div>
+                </section>
 
-                <div>
-                    <label className="mb-1 block text-sm font-medium text-zinc-700">
-                        Optional A
-                    </label>
-                    <textarea
-                        value={optionalA}
-                        onChange={(e) => setOptionalA(e.target.value)}
-                        placeholder="One skill per line"
-                        rows={6}
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
-                    />
-                    <label className="mt-3 mb-1 block text-sm font-medium text-zinc-700">
-                        Degree of Difficulty
-                    </label>
-                    <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={optionalADifficulty}
-                        onChange={(e) => setOptionalADifficulty(e.target.value)}
-                        placeholder="e.g. 8.4"
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
-                    />
-                </div>
+                <section aria-labelledby="double-mini-edit-heading">
+                    <h3 id="double-mini-edit-heading" className="mb-3 text-xl font-bold text-red-900">Double Mini</h3>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <RoutineEditor id="double-mini-a" title="Set A" value={doubleMiniSetA} onChange={setDoubleMiniSetA} difficulty={doubleMiniSetADifficulty} onDifficultyChange={setDoubleMiniSetADifficulty} rows={4} />
+                        <RoutineEditor id="double-mini-b" title="Set B" value={doubleMiniSetB} onChange={setDoubleMiniSetB} difficulty={doubleMiniSetBDifficulty} onDifficultyChange={setDoubleMiniSetBDifficulty} rows={4} />
+                    </div>
+                </section>
 
-                <div>
-                    <label className="mb-1 block text-sm font-medium text-zinc-700">
-                        Optional B
-                    </label>
-                    <textarea
-                        value={optionalB}
-                        onChange={(e) => setOptionalB(e.target.value)}
-                        placeholder="One skill per line"
-                        rows={6}
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
-                    />
-                    <label className="mt-3 mb-1 block text-sm font-medium text-zinc-700">
-                        Degree of Difficulty
-                    </label>
-                    <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={optionalBDifficulty}
-                        onChange={(e) => setOptionalBDifficulty(e.target.value)}
-                        placeholder="e.g. 8.4"
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
-                    />
-                </div>
-
-                <div className="border-t border-zinc-200 pt-4">
-                    <label className="mb-1 block text-sm font-medium text-zinc-700">
-                        Double Mini Set A
-                    </label>
-                    <textarea
-                        value={doubleMiniSetA}
-                        onChange={(e) => setDoubleMiniSetA(e.target.value)}
-                        placeholder="One skill per line"
-                        rows={4}
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
-                    />
-                    <label className="mt-3 mb-1 block text-sm font-medium text-zinc-700">
-                        Degree of Difficulty
-                    </label>
-                    <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={doubleMiniSetADifficulty}
-                        onChange={(e) => setDoubleMiniSetADifficulty(e.target.value)}
-                        placeholder="e.g. 4.8"
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
-                    />
-                </div>
-
-                <div>
-                    <label className="mb-1 block text-sm font-medium text-zinc-700">
-                        Double Mini Set B
-                    </label>
-                    <textarea
-                        value={doubleMiniSetB}
-                        onChange={(e) => setDoubleMiniSetB(e.target.value)}
-                        placeholder="One skill per line"
-                        rows={4}
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
-                    />
-                    <label className="mt-3 mb-1 block text-sm font-medium text-zinc-700">
-                        Degree of Difficulty
-                    </label>
-                    <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={doubleMiniSetBDifficulty}
-                        onChange={(e) => setDoubleMiniSetBDifficulty(e.target.value)}
-                        placeholder="e.g. 4.8"
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
-                    />
-                </div>
-
-                <div className="border-t border-zinc-200 pt-4">
-                    <label className="mb-1 block text-sm font-medium text-zinc-700">
-                        Skills
-                    </label>
-                    <textarea
-                        value={skills}
-                        onChange={(e) => setSkills(e.target.value)}
-                        placeholder="One skill per line"
-                        rows={6}
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
-                    />
-                </div>
-
-                <div>
-                    <label className="mb-1 block text-sm font-medium text-zinc-700">
-                        Notes
-                    </label>
-                    <textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        placeholder="Coaching notes"
-                        rows={4}
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-red-500"
-                    />
-                </div>
+                <section aria-labelledby="skills-edit-heading">
+                    <h3 id="skills-edit-heading" className="mb-3 text-xl font-bold text-red-900">Skills & Notes</h3>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <RoutineEditor id="skills" title="Skills" value={skills} onChange={setSkills} />
+                        <RoutineEditor id="notes" title="Notes" value={notes} onChange={setNotes} placeholder="Coaching notes" />
+                    </div>
+                </section>
             </div>
 
-            <button
-                onClick={handleSave}
-                className="mt-6 w-full rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
-            >
+            <button type="button" onClick={handleSave} className="mt-6 rounded-lg bg-red-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2">
                 Save Routines
             </button>
         </section>
+    );
+}
+
+function RoutineEditor({ id, title, value, onChange, difficulty, onDifficultyChange, rows = 6, placeholder = "One skill per line" }: {
+    id: string;
+    title: string;
+    value: string;
+    onChange: (value: string) => void;
+    difficulty?: string;
+    onDifficultyChange?: (value: string) => void;
+    rows?: number;
+    placeholder?: string;
+}) {
+    return (
+        <div className="min-w-0 overflow-hidden rounded-xl border border-red-100 bg-white shadow-sm">
+            <div className="border-b border-red-100 bg-red-50 px-4 py-3">
+                <label htmlFor={`routine-${id}`} className="text-base font-bold text-red-900">{title}</label>
+            </div>
+            <div className="p-4">
+                <textarea id={`routine-${id}`} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={rows} className="w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base leading-7 text-zinc-950 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-700" />
+                {onDifficultyChange && (
+                    <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg bg-red-50 p-3">
+                        <label htmlFor={`routine-${id}-dd`} className="flex-1 text-sm font-semibold text-red-900">Degree of Difficulty</label>
+                        <input id={`routine-${id}-dd`} type="number" min="0" step="0.01" value={difficulty ?? ""} onChange={(event) => onDifficultyChange(event.target.value)} placeholder="0.00" className="w-24 rounded-lg border border-red-200 bg-white px-2 py-2 text-center text-base font-bold tabular-nums text-red-900 focus:outline-none focus:ring-2 focus:ring-red-700" />
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }
