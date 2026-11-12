@@ -63,12 +63,6 @@ export default async function AthleteProgressPage({ params }: PageProps) {
                 </div>
 
                 <section>
-                    <h2 className="text-3xl font-bold tracking-tight text-black">
-                        Routine dashboard
-                    </h2>
-                    <p className="mt-2 text-zinc-600">
-                        Track routine volume, difficulty, and recent training activity.
-                    </p>
                     <RoutineProgressDashboard
                         progress={progress ?? []}
                         tenBounceRecords={tenBounceRecords ?? []}

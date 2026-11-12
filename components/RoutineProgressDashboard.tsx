@@ -1,3 +1,5 @@
+import ActivityCalendar from "./ActivityCalendar";
+
 type RoutineProgress = {
     id: number;
     recorded_at: string;
@@ -21,6 +23,7 @@ export default function RoutineProgressDashboard({
     tenBounceRecords: TenBounceRecord[];
 }) {
     const activity = getWeeklyActivity(progress);
+    const monthly = getMonthlyActivity(progress);
     const peak = Math.max(
         ...activity.flatMap((day) => [day.compulsory, day.optional]),
         1
@@ -55,6 +58,11 @@ export default function RoutineProgressDashboard({
                 href="https://cdn-uicons.flaticon.com/4.0.0/uicons-regular-straight/css/uicons-regular-straight.css"
                 precedence="default"
             />
+            <link
+                rel="stylesheet"
+                href="https://cdn-uicons.flaticon.com/4.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css"
+                precedence="default"
+            />
             <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
                 <LatestTrainingCard
                     recordedAt={latestRecordedAt}
@@ -87,14 +95,15 @@ export default function RoutineProgressDashboard({
             </section>
 
             <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
-                <TenBounceChart data={tenBounceRecords} />
+                <MonthlyRoutinesCard monthly={monthly} />
                 <section className="flex min-h-80 flex-col justify-between rounded-[28px] border border-zinc-900 bg-zinc-950 p-7 text-white shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-zinc-400">Personal best</p>
-                            <h3 className="mt-1 text-xl font-bold">10-bounce PB</h3>
+                            <h3 className="text-2xl font-extrabold tracking-tight sm:text-3xl">10-bounce PB</h3>
                         </div>
-                        <span className="grid h-10 w-10 place-items-center rounded-full bg-red-600 text-xl">↘</span>
+                        <span className="grid h-10 w-10 place-items-center rounded-full bg-red-600 text-xl">
+                            <i aria-hidden="true" className="fi fi-sr-arrow-trend-up inline-flex text-xl" />
+                        </span>
                     </div>
                     <div>
                         <p className="text-5xl font-bold tracking-tight">
@@ -110,94 +119,47 @@ export default function RoutineProgressDashboard({
                 </section>
             </div>
 
-            <section className="overflow-hidden rounded-[28px] border border-zinc-200 bg-white shadow-sm">
-                <div className="px-5 py-5 sm:px-7">
-                    <PanelHeading title="Recent activity" subtitle="Every routine record, newest first" />
-                </div>
-                {progress.length ? <ProgressTable progress={progress} /> : (
-                    <p className="border-t border-zinc-100 px-7 py-10 text-sm text-zinc-500">No routine progress has been submitted yet.</p>
-                )}
-            </section>
+            <ActivityCalendar
+                progress={progress}
+                tenBounceRecords={tenBounceRecords}
+                today={new Intl.DateTimeFormat("en-CA", { timeZone: "America/Vancouver", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())}
+            />
         </div>
     );
 }
 
-function TenBounceChart({ data }: { data: TenBounceRecord[] }) {
-    const points = data.slice(-12);
-
-    if (points.length === 0) {
-        return (
-            <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm sm:p-7">
-                <PanelHeading
-                    title="10-Bounce Progress"
-                    subtitle="Recorded times in seconds"
-                />
-                <div className="grid min-h-64 place-items-center text-sm text-zinc-500">
-                    No 10-bounce times recorded yet.
-                </div>
-            </section>
-        );
-    }
-
-    const values = points.map((entry) => entry.difficulty);
-    const minimum = Math.min(...values);
-    const maximum = Math.max(...values);
-    const range = maximum - minimum || 1;
-    const coordinates = points.map((entry, index) => ({
-        x: points.length === 1 ? 300 : 35 + (index / (points.length - 1)) * 530,
-        y: 175 - ((entry.difficulty - minimum) / range) * 130,
-        entry,
-    }));
-
+function MonthlyRoutinesCard({ monthly }: { monthly: ReturnType<typeof getMonthlyActivity> }) {
     return (
-        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm sm:p-7">
-            <PanelHeading
-                title="10-bounce over time"
-                subtitle="Last 12 recorded times in seconds · higher is better"
-            />
-            <div className="mt-6 overflow-hidden">
-                <svg
-                    viewBox="0 0 600 220"
-                    role="img"
-                    aria-label="10-bounce times over time"
-                    className="h-64 w-full"
-                >
-                    {[45, 110, 175].map((y) => (
-                        <line
-                            key={y}
-                            x1="30"
-                            x2="575"
-                            y1={y}
-                            y2={y}
-                            stroke="rgb(228 228 231)"
-                            strokeDasharray="5 7"
-                        />
-                    ))}
-                    {coordinates.length > 1 && (
-                        <polyline
-                            points={coordinates.map(({ x, y }) => `${x},${y}`).join(" ")}
-                            fill="none"
-                            stroke="rgb(185 28 28)"
-                            strokeWidth="5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-                    )}
-                    {coordinates.map(({ x, y, entry }) => (
-                        <g key={entry.id}>
-                            <circle cx={x} cy={y} r="7" fill="white" stroke="rgb(185 28 28)" strokeWidth="4" />
-                            <text x={x} y={y - 14} textAnchor="middle" className="fill-zinc-700 text-[12px] font-semibold">
-                                {entry.difficulty.toFixed(3)}
-                            </text>
-                        </g>
-                    ))}
-                    <text x="35" y="210" className="fill-zinc-500 text-[12px]">
-                        {formatShortDate(points[0].recorded_at)}
-                    </text>
-                    <text x="565" y="210" textAnchor="end" className="fill-zinc-500 text-[12px]">
-                        {formatShortDate(points[points.length - 1].recorded_at)}
-                    </text>
-                </svg>
+        <section aria-labelledby="monthly-routines-heading" className="rounded-[28px] border border-red-200 bg-white p-6 shadow-sm sm:p-7">
+            <h2 id="monthly-routines-heading" className="text-2xl font-extrabold tracking-tight text-zinc-950 sm:text-3xl">Routines this month</h2>
+            <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                {([
+                    ["compulsory", "Compulsories"],
+                    ["optional", "Optionals"],
+                ] as const).map(([type, title]) => {
+                    const current = monthly.current[type];
+                    const previous = monthly.previous[type];
+                    const remaining = Math.max(previous - current, 0);
+                    return (
+                        <div key={type} className="rounded-2xl border border-red-100 p-5">
+                            <h3 className="text-lg font-bold text-zinc-950">{title}</h3>
+                            <p className="mt-4 text-5xl font-bold tabular-nums tracking-tight text-red-700">{current}</p>
+                            <p className="mt-2 text-sm font-medium text-zinc-600">{monthly.currentLabel} so far</p>
+                            <p className="mt-4 text-sm text-zinc-700">
+                                {monthly.previousLabel}: <span className="font-bold tabular-nums">{previous}</span>
+                            </p>
+                            <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-semibold leading-6 text-red-900">
+                                {remaining > 0
+                                    ? `${remaining} more to match last month`
+                                    : current > previous
+                                      ? `${current - previous} more than last month!`
+                                      : current > 0
+                                        ? "You’ve matched last month!"
+                                        : "No routines completed this month or last month yet."}
+                            </p>
+                        </div>
+                    );
+                })}
             </div>
         </section>
     );
@@ -222,7 +184,7 @@ function LatestTrainingCard({
                     subtitle={recordedAt ? formatDate(recordedAt) : "No training submitted yet"}
                 />
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-red-700 text-lg text-white">
-                    <i aria-hidden="true" className="fi fi-rs-dumbbell-horizontal inline-flex text-xl" />
+                    <i aria-hidden="true" className="fi fi-sr-yoga-moon inline-flex text-xl" />
                 </span>
             </div>
             {recordedAt ? (
@@ -262,10 +224,11 @@ function DifficultyRecordCard({ difficulty }: { difficulty: number | null }) {
         <section className="flex min-h-64 flex-col justify-between rounded-[28px] border border-red-700 bg-red-700 p-6 text-white shadow-sm sm:p-7">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-sm font-medium text-red-100">Personal record</p>
-                    <h3 className="mt-1 text-xl font-bold">DD record</h3>
+                    <h3 className="text-2xl font-extrabold tracking-tight sm:text-3xl">DD record</h3>
                 </div>
-                <span className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-lg">↗</span>
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-lg">
+                    <i aria-hidden="true" className="fi fi-rs-award inline-flex text-xl" />
+                </span>
             </div>
             <div className="mt-8">
                 <strong className="text-6xl tracking-tight">
@@ -295,27 +258,41 @@ function Bar({ value, peak, color }: { value: number; peak: number; color: strin
 }
 
 function PanelHeading({ title, subtitle }: { title: string; subtitle: string }) {
-    return <div><h3 className="text-xl font-bold text-zinc-950">{title}</h3><p className="mt-1 text-sm text-zinc-500">{subtitle}</p></div>;
+    return <div><h3 className="text-2xl font-extrabold tracking-tight text-zinc-950 sm:text-3xl">{title}</h3><p className="mt-2 text-sm text-zinc-500">{subtitle}</p></div>;
 }
 
-function ProgressTable({ progress }: { progress: RoutineProgress[] }) {
-    return (
-        <div className="overflow-x-auto border-t border-zinc-100">
-            <table className="w-full text-left text-sm">
-                <thead className="bg-zinc-50 text-zinc-500"><tr><th className="px-5 py-3 font-medium sm:px-7">Date</th><th className="px-5 py-3 font-medium">Routine</th><th className="px-5 py-3 font-medium">DD</th><th className="px-5 py-3 text-right font-medium sm:px-7">Completed</th></tr></thead>
-                <tbody className="divide-y divide-zinc-100">
-                    {progress.map((entry) => (
-                        <tr key={entry.id} className="hover:bg-zinc-50/80">
-                            <td className="whitespace-nowrap px-5 py-4 text-zinc-600 sm:px-7">{formatDate(entry.recorded_at)}</td>
-                            <td className="px-5 py-4"><span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold capitalize ${entry.routine_type === "optional" ? "bg-red-100 text-red-800" : "bg-zinc-100 text-zinc-700"}`}>{entry.routine_type}</span></td>
-                            <td className="px-5 py-4 text-zinc-600">{entry.difficulty ?? "—"}</td>
-                            <td className="px-5 py-4 text-right text-lg font-bold text-zinc-950 sm:px-7">{entry.completed_count}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
+function getMonthlyActivity(progress: RoutineProgress[], now = new Date()) {
+    const monthFormatter = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Vancouver",
+        year: "numeric",
+        month: "numeric",
+    });
+    const monthIndex = (date: Date) => {
+        const parts = monthFormatter.formatToParts(date);
+        const year = Number(parts.find((part) => part.type === "year")?.value);
+        const month = Number(parts.find((part) => part.type === "month")?.value);
+        return year * 12 + month - 1;
+    };
+    const currentMonth = monthIndex(now);
+    const current = { compulsory: 0, optional: 0 };
+    const previous = { compulsory: 0, optional: 0 };
+
+    for (const entry of progress) {
+        if (entry.routine_type !== "compulsory" && entry.routine_type !== "optional") continue;
+        const recordedAt = new Date(entry.recorded_at);
+        if (!Number.isFinite(recordedAt.getTime()) || recordedAt > now) continue;
+        const month = monthIndex(recordedAt);
+        if (month === currentMonth) current[entry.routine_type] += entry.completed_count;
+        if (month === currentMonth - 1) previous[entry.routine_type] += entry.completed_count;
+    }
+
+    const label = (index: number) => new Intl.DateTimeFormat("en-CA", {
+        timeZone: "UTC",
+        month: "long",
+        year: "numeric",
+    }).format(new Date(Date.UTC(Math.floor(index / 12), index % 12, 1)));
+
+    return { current, previous, currentLabel: label(currentMonth), previousLabel: label(currentMonth - 1) };
 }
 
 function getWeeklyActivity(progress: RoutineProgress[]) {
@@ -343,11 +320,4 @@ function sameDay(left: Date, right: Date) {
 
 function formatDate(value: string) {
     return new Intl.DateTimeFormat("en-CA", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
-}
-
-function formatShortDate(value: string) {
-    return new Intl.DateTimeFormat("en-CA", {
-        month: "short",
-        day: "numeric",
-    }).format(new Date(value));
 }
