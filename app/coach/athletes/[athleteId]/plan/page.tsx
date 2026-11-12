@@ -29,10 +29,11 @@ export default async function CoachEditPlanPage({ params }: PageProps) {
         .from("plan_items")
         .select("id, name, target")
         .eq("plan_id", plan.id)
-        .order("id");
+        .order("sort_order")
+            .order("id");
 
     return (
-        <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24">
+        <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24 text-zinc-950 sm:px-6">
             <div className="mx-auto max-w-2xl">
                 <p className="text-sm font-medium uppercase tracking-wide text-red-600">
                     Coach Edit

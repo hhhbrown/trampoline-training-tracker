@@ -34,7 +34,8 @@ export default async function PrintPlansPage({ params }: PageProps) {
                 .from("plan_items")
                 .select("id, name, target")
                 .eq("plan_id", plan.id)
-                .order("id")
+                .order("sort_order")
+            .order("id")
             : { data: [] };
 
           const { data: routines } = await supabase

@@ -34,6 +34,7 @@ export default async function AthletePlanPage({ params }: PageProps) {
             .from("plan_items")
             .select("id, name, target")
             .eq("plan_id", plan.id)
+            .order("sort_order")
             .order("id")
         : { data: [] };
 
