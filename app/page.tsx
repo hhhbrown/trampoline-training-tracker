@@ -40,7 +40,7 @@ export default function HomePage() {
                         </p>
 
                         <Link
-                            href="/athlete-login"
+                            href="/athletes"
                             className="inline-block mt-4 px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-700"
                         >
                             Enter
