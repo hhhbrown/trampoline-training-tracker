@@ -87,29 +87,25 @@ export default async function AthletePlanPage({ params }: PageProps) {
     const initialComments = logs?.[0]?.comments ?? "";
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-red-400 px-4 pb-10 pt-24">
-            <div className="mx-auto max-w-2xl">
+        <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24 text-zinc-950 sm:px-6">
+            <div className="mx-auto max-w-3xl">
                 <BackLink href={`/athletes/${coachId}/${athleteId}`}>
                     Back to Dashboard
                 </BackLink>
 
-                <div className="mb-8">
+                <header className="mb-8">
                     <p className="text-sm font-medium uppercase tracking-wide text-red-600">
                         Athlete Profile
                     </p>
-
                     <h1 className="mt-2 text-3xl font-bold text-black">
                         {athlete.name}
                     </h1>
-
                     <div className="mt-3 inline-block rounded-full bg-black px-3 py-1 text-sm font-medium text-white">
                         {athlete.level}
                     </div>
-                </div>
+                </header>
 
-                <section>
-                    <h2 className="text-xl font-semibold text-black">Daily Plan</h2>
-
+                <section aria-label="Daily training plan">
                     <DailyPlanForm
                         coachId={coachId}
                         athleteId={athleteId}

@@ -168,59 +168,66 @@ export default function DailyPlanForm({
         router.push(`/athletes/${coachId}/${athleteId}/progress`);
     }
 
+    const completedItems = planItems.filter((item) => checkedItems.includes(item.id)).length;
+
     return (
-        <>
-            <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-4">
+        <div className="space-y-6">
+            <section aria-labelledby="turns-heading" className="overflow-hidden rounded-2xl border border-red-100 bg-white shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-red-100 bg-red-50 px-5 py-5 sm:px-6">
+                    <h2 id="turns-heading" className="text-2xl font-extrabold tracking-tight text-zinc-950">Turns</h2>
+                    <span aria-live="polite" className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold tabular-nums text-red-800">
+                        {completedItems} of {planItems.length} completed
+                    </span>
+                </div>
                 {planItems.length > 0 ? (
-                    <div className="divide-y divide-zinc-100">
-                        {planItems.map((item) => (
-                            <div
-                                key={item.id}
-                                className="flex items-center justify-between py-3"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <input
-                                        type="checkbox"
-                                        checked={checkedItems.includes(item.id)}
-                                        onChange={() => toggleItem(item.id)}
-                                        className="h-4 w-4 accent-red-600"
-                                    />
-
-                                    <span className="text-black">
-                                        {item.name}
-                                    </span>
-                                </div>
-
-                                <span className="text-lg font-semibold text-black">
-                                    {item.target ?? "—"}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
+                    <ul className="divide-y divide-zinc-100">
+                        {planItems.map((item) => {
+                            const checked = checkedItems.includes(item.id);
+                            return (
+                                <li key={item.id}>
+                                    <label className={`flex min-h-20 cursor-pointer items-center gap-4 px-5 py-4 transition focus-within:ring-2 focus-within:ring-inset focus-within:ring-red-700 sm:px-6 ${checked ? "bg-red-50/60" : "hover:bg-zinc-50"}`}>
+                                        <input
+                                            type="checkbox"
+                                            checked={checked}
+                                            onChange={() => toggleItem(item.id)}
+                                            className="h-6 w-6 shrink-0 accent-red-700"
+                                        />
+                                        <span className="min-w-0 flex-1 break-words text-lg font-semibold leading-7 text-zinc-950">{item.name || "Untitled turn"}</span>
+                                        <span className="flex min-w-16 shrink-0 flex-col items-center rounded-xl bg-red-100 px-3 py-2 text-red-900">
+                                            <span className="text-2xl font-bold tabular-nums">{item.target ?? "—"}</span>
+                                        </span>
+                                    </label>
+                                </li>
+                            );
+                        })}
+                    </ul>
                 ) : (
-                    <p className="text-black">No plan available.</p>
+                    <p className="px-6 py-8 text-base text-zinc-600">No plan available.</p>
                 )}
-            </div>
+            </section>
 
-            <input
-                type="text"
-                placeholder="Enter comments"
-                value={comments}
-                onChange={(e) => setComments(e.target.value)}
-                className="mt-4 h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-black outline-none focus:ring-2 focus:ring-red-500"
-            />
+            <section aria-labelledby="notes-heading" className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
+                <h2 id="notes-heading" className="text-2xl font-extrabold tracking-tight text-zinc-950">
+                    <label htmlFor="training-comments">Training notes</label>
+                </h2>
+                <textarea
+                    id="training-comments"
+                    placeholder="Add a note about your session (optional)"
+                    value={comments}
+                    onChange={(e) => setComments(e.target.value)}
+                    rows={3}
+                    className="mt-4 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base leading-7 text-zinc-950 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-700"
+                />
+            </section>
 
-            <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-4">
-                <label
-                    htmlFor="ten-bounce-seconds"
-                    className="block text-sm font-semibold text-black"
-                >
-                    10-bounce time
-                </label>
-                <p className="mt-1 text-sm text-zinc-500">
-                    Optional. Enter the athlete&apos;s time in seconds.
-                </p>
-                <div className="mt-3 flex items-center gap-3">
+            <section aria-labelledby="bounce-heading" className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
+                <div className="flex flex-wrap items-center gap-3">
+                    <h2 id="bounce-heading" className="text-2xl font-extrabold tracking-tight text-zinc-950">
+                        <label htmlFor="ten-bounce-seconds">10-bounce time</label>
+                    </h2>
+                    <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-600">Optional</span>
+                </div>
+                <div className="mt-4 flex items-center gap-3">
                     <input
                         id="ten-bounce-seconds"
                         type="number"
@@ -230,19 +237,20 @@ export default function DailyPlanForm({
                         placeholder="e.g. 16.420"
                         value={tenBounceSeconds}
                         onChange={(event) => setTenBounceSeconds(event.target.value)}
-                        className="h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-black outline-none focus:ring-2 focus:ring-red-500"
+                        aria-describedby="bounce-units"
+                        className="h-14 w-full max-w-64 rounded-xl border border-zinc-300 bg-white px-4 py-3 text-lg tabular-nums text-zinc-950 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-700"
                     />
-                    <span className="text-sm font-medium text-zinc-500">seconds</span>
+                    <span id="bounce-units" className="text-base font-medium text-zinc-600">seconds</span>
                 </div>
-            </div>
+            </section>
 
             <button
                 type="button"
                 onClick={handleSubmit}
-                className="mt-4 rounded-lg bg-black px-4 py-2 text-sm text-white transition hover:bg-zinc-800"
+                className="inline-flex min-h-14 w-full items-center justify-center rounded-xl bg-red-700 px-6 py-3 text-lg font-bold text-white transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-4"
             >
-                Submit
+                Submit training
             </button>
-        </>
+        </div>
     );
 }
