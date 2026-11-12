@@ -50,6 +50,11 @@ export default function RoutineProgressDashboard({
 
     return (
         <div className="mt-7 space-y-5">
+            <link
+                rel="stylesheet"
+                href="https://cdn-uicons.flaticon.com/4.0.0/uicons-regular-straight/css/uicons-regular-straight.css"
+                precedence="default"
+            />
             <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
                 <LatestTrainingCard
                     recordedAt={latestRecordedAt}
@@ -216,7 +221,9 @@ function LatestTrainingCard({
                     title="Last submitted training"
                     subtitle={recordedAt ? formatDate(recordedAt) : "No training submitted yet"}
                 />
-                <span className="grid h-10 w-10 place-items-center rounded-full bg-red-700 text-lg text-white">↗</span>
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-red-700 text-lg text-white">
+                    <i aria-hidden="true" className="fi fi-rs-dumbbell-horizontal inline-flex text-xl" />
+                </span>
             </div>
             {recordedAt ? (
                 <div className="mt-6">
