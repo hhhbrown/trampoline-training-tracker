@@ -1,4 +1,5 @@
 import Link from "next/link";
+import BackLink from "@/components/BackLink";
 import { createClient } from "@/lib/supabase/server";
 
 type PageProps = {
@@ -45,7 +46,7 @@ export default async function AthleteDashboardPage({ params }: PageProps) {
     ];
 
     return (
-        <main className="min-h-screen bg-zinc-50 px-4 py-6 text-zinc-950 sm:px-6 sm:py-10">
+        <main className="min-h-screen bg-zinc-50 px-4 pb-6 pt-24 text-zinc-950 sm:px-6 sm:pb-10">
             <link
                 rel="stylesheet"
                 href="https://cdn-uicons.flaticon.com/4.0.0/uicons-thin-chubby/css/uicons-thin-chubby.css"
@@ -61,14 +62,17 @@ export default async function AthleteDashboardPage({ params }: PageProps) {
                 href="https://cdn-uicons.flaticon.com/4.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css"
                 precedence="default"
             />
+            <link
+                rel="stylesheet"
+                href="https://cdn-uicons.flaticon.com/4.0.0/uicons-regular-straight/css/uicons-regular-straight.css"
+                precedence="default"
+            />
             <div className="mx-auto max-w-4xl">
-                <Link
+                <BackLink
                     href={`/athletes/${coachId}`}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-zinc-600 transition hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-4"
                 >
-                    <span aria-hidden="true">←</span>
                     All athletes
-                </Link>
+                </BackLink>
 
                 <header className="mb-8 mt-6 border-b border-zinc-200 pb-8 sm:mt-8">
                     <p className="text-sm font-semibold uppercase tracking-widest text-red-700">
@@ -142,7 +146,7 @@ function DashboardIcon({ kind }: { kind: "routines" | "progress" | "conditioning
     }
 
     if (kind === "conditioning") {
-        return <i aria-hidden="true" className="fi fi-tc-dumbbell-weightlifting inline-flex text-xl" />;
+        return <i aria-hidden="true" className="fi fi-rs-dumbbell-horizontal inline-flex text-xl" />;
     }
 
     return <i aria-hidden="true" className="fi fi-br-progress-complete inline-flex text-xl" />;
