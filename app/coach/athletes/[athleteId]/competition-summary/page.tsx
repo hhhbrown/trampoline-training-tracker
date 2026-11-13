@@ -25,7 +25,7 @@ export default async function CompetitionSummaryPage({ params }: {
     const [{ data: ddRequirements, error: ddRequirementsError }, { data: routines, error: routinesError }] = await Promise.all([
         supabase.from("level_dd_requirements").select("level_id, gender, min_dd, max_dd")
             .in("level_id", (levels ?? []).map((level) => level.id)),
-        supabase.from("routines").select("optional_a, optional_a_difficulty, optional_b, optional_b_difficulty")
+        supabase.from("routines").select("compulsory, custom_compulsory, optional_a, optional_a_difficulty, optional_b, optional_b_difficulty")
             .eq("athlete_id", Number(athleteId)).maybeSingle(),
     ]);
     const season = competitionSeason();

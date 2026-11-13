@@ -1,3 +1,5 @@
+import CompulsoryRequirements from "./CompulsoryRequirements";
+import { requiresAdvancedCompulsory } from "@/lib/competition-compulsory";
 import { matchDDRequirement, assessDD, type LevelDDRequirement } from "@/lib/competition-dd";
 import { competitionAge, matchCompetitionLevel, meetsAgeRequirements, type CompetitionLevel } from "@/lib/competition-age";
 
@@ -10,6 +12,8 @@ export default function CompetitionRequirements({ dateOfBirth, profileLevel, gen
     lookupError?: string;
     ddRequirements: LevelDDRequirement[];
     routines: {
+        compulsory: string | null;
+        custom_compulsory: string | null;
         optional_a: string | null;
         optional_a_difficulty: number | null;
         optional_b: string | null;
@@ -21,7 +25,7 @@ export default function CompetitionRequirements({ dateOfBirth, profileLevel, gen
     const age = competitionAge(dateOfBirth, year);
     const level = matchCompetitionLevel(levels, profileLevel, "TRI");
     const genderCategory = gender?.trim().toLowerCase() === "male" ? "Men"
-        : gender?.trim().toLowerCase() === "female" ? "Woman"
+        : gender?.trim().toLowerCase() === "female" ? "Women"
         : gender?.trim() || "Gender not set";
     const levelName = level?.name ?? profileLevel?.trim() ?? "";
     const issue = !dateOfBirth ? "Date of birth required"
@@ -31,12 +35,6 @@ export default function CompetitionRequirements({ dateOfBirth, profileLevel, gen
         : !level ? "No matching age requirements for this TRI level"
         : null;
     const eligible = !issue && age != null && level != null ? meetsAgeRequirements(age, level) : null;
-    const requirement = level
-        ? level.min_age != null && level.max_age != null ? `Required: ${level.min_age}–${level.max_age} years`
-            : level.min_age != null ? `Required: ${level.min_age}+ years`
-            : level.max_age != null ? `Required: ${level.max_age} years or younger`
-            : "No age limits"
-        : null;
     const statusStyle = eligible === true ? "border-emerald-200 bg-emerald-50 text-emerald-900"
         : eligible === false ? "border-red-200 bg-red-50 text-red-900"
         : "border-amber-200 bg-amber-50 text-amber-900";
@@ -68,10 +66,9 @@ export default function CompetitionRequirements({ dateOfBirth, profileLevel, gen
                     <li className={`flex items-start gap-3 rounded-xl border p-4 ${statusStyle}`}>
                         <span aria-hidden="true" className="mt-0.5 text-xl font-bold">{eligible === true ? "✓" : eligible === false ? "✕" : "!"}</span>
                         <div>
-                            <p className="text-lg font-bold">Age: {age ?? "Not available"}</p>
-                            <p className="mt-1 text-sm font-semibold">{issue ?? (eligible ? "Meets age requirement" : "Does not meet age requirement")}</p>
-                            {requirement && <p className="mt-1 text-sm">{requirement}</p>}
-                            <p className="mt-1 text-xs">As of December 31, {year}</p>
+                            <span className="sr-only">{eligible ? "Meets age requirement" : eligible === false ? "Does not meet age requirement" : "Age could not be checked"}. </span>
+                            <p><span className="text-lg font-bold">Age: {age ?? "Not available"}</span>{" "}<span className="text-sm font-medium">(as of December 31, {year})</span></p>
+                            {issue && <p className="mt-1 text-sm font-semibold">{issue}</p>}
                         </div>
                     </li>
                     {optionalRoutines.length ? optionalRoutines.map((routine) => {
@@ -91,6 +88,9 @@ export default function CompetitionRequirements({ dateOfBirth, profileLevel, gen
                         />;
                     }) : <DDRequirementRow title="Routine DD" eligible={null} message={ddIssue ?? "Add an optional routine in Edit Routines to check DD requirements"} range={ddRange} />}
                 </ul>
+                {requiresAdvancedCompulsory(levelName) && (
+                    <CompulsoryRequirements compulsory={routines?.compulsory} routine={routines?.custom_compulsory} error={routinesError} />
+                )}
             </div>
         </section>
     );
@@ -110,9 +110,8 @@ function DDRequirementRow({ title, eligible, message, range, bonus }: {
         <li className={`flex items-start gap-3 rounded-xl border p-4 ${style}`}>
             <span aria-hidden="true" className="mt-0.5 text-xl font-bold">{eligible === true ? "✓" : eligible === false ? "✕" : "!"}</span>
             <div>
-                <p className="text-lg font-bold">{title}</p>
+                <p><span className="text-lg font-bold">{title}</span>{range && <> <span className="text-sm font-medium">({range})</span></>}</p>
                 <p className="mt-1 text-sm font-semibold">{message}</p>
-                {range && <p className="mt-1 text-sm">{range}</p>}
                 {bonus != null && <p className="mt-2 text-sm font-bold">Bonus: +{bonus.toFixed(2)} points</p>}
             </div>
         </li>
