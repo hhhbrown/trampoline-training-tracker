@@ -1,4 +1,4 @@
-import CompetitionAgeCheck from "@/components/CompetitionAgeCheck";
+import CompetitionRequirements from "@/components/CompetitionRequirements";
 import { competitionSeason } from "@/lib/competition-age";
 import BackLink from "@/components/BackLink";
 import { createClient } from "@/lib/supabase/server";
@@ -38,7 +38,7 @@ export default async function CompetitionSummaryPage({ params }: {
                     <p className="text-sm font-semibold text-red-700">Competition Summary</p>
                     <h1 className="mt-2 break-words text-3xl font-bold tracking-tight">{athlete.name}</h1>
                 </header>
-                <CompetitionAgeCheck
+                <CompetitionRequirements
                     dateOfBirth={athlete.date_of_birth}
                     profileLevel={athlete.level}
                     levels={levels ?? []}

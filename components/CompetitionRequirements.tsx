@@ -1,7 +1,7 @@
 import { matchDDRequirement, assessDD, type LevelDDRequirement } from "@/lib/competition-dd";
 import { competitionAge, matchCompetitionLevel, meetsAgeRequirements, type CompetitionLevel } from "@/lib/competition-age";
 
-export default function CompetitionAgeCheck({ dateOfBirth, profileLevel, gender, levels, year, lookupError, ddRequirements, routines, ddLookupError, routinesError }: {
+export default function CompetitionRequirements({ dateOfBirth, profileLevel, gender, levels, year, lookupError, ddRequirements, routines, ddLookupError, routinesError }: {
     dateOfBirth: string | null;
     profileLevel: string | null;
     gender: string | null;
@@ -85,6 +85,9 @@ export default function CompetitionAgeCheck({ dateOfBirth, profileLevel, gender,
                             eligible={ddStatus}
                             message={ddIssue ?? (missingDD ? "Save a DD for this routine in Edit Routines" : assessment?.message ?? "DD could not be checked")}
                             range={ddRange}
+                            bonus={!missingDD && !ddIssue && ddRequirement && level?.discipline === "TRI" && /^level\s+[1-4]$/i.test(level.name.trim())
+                                ? Math.min(dd, ddRequirement.max_dd == null ? dd : Number(ddRequirement.max_dd))
+                                : undefined}
                         />;
                     }) : <DDRequirementRow title="Routine DD" eligible={null} message={ddIssue ?? "Add an optional routine in Edit Routines to check DD requirements"} range={ddRange} />}
                 </ul>
@@ -93,11 +96,12 @@ export default function CompetitionAgeCheck({ dateOfBirth, profileLevel, gender,
     );
 }
 
-function DDRequirementRow({ title, eligible, message, range }: {
+function DDRequirementRow({ title, eligible, message, range, bonus }: {
     title: string;
     eligible: boolean | null;
     message: string;
     range?: string;
+    bonus?: number;
 }) {
     const style = eligible === true ? "border-emerald-200 bg-emerald-50 text-emerald-900"
         : eligible === false ? "border-red-200 bg-red-50 text-red-900"
@@ -109,6 +113,7 @@ function DDRequirementRow({ title, eligible, message, range }: {
                 <p className="text-lg font-bold">{title}</p>
                 <p className="mt-1 text-sm font-semibold">{message}</p>
                 {range && <p className="mt-1 text-sm">{range}</p>}
+                {bonus != null && <p className="mt-2 text-sm font-bold">Bonus: +{bonus.toFixed(2)} points</p>}
             </div>
         </li>
     );
