@@ -97,6 +97,12 @@ export default async function CoachAthletesPage({ params }: PageProps) {
                                 >
                                     View Progress
                                 </Link>
+                                <Link
+                                    href={`/coach/athletes/${athlete.id}/competition-summary`}
+                                    className="block w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-center text-sm font-semibold text-red-800 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
+                                >
+                                    Competition Summary
+                                </Link>
                             </div>
                         </div>
                     ))}
