@@ -23,6 +23,10 @@ export default async function RoutinesPage({ params }: PageProps) {
         .eq("athlete_id", Number(athleteId))
         .single();
 
+    const { data: ddLookup, error: ddLookupError } = await supabase
+        .from("dd_lookup")
+        .select("fig_code, difficulty");
+
     return (
         <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24 text-zinc-950 sm:px-6">
             <div className="mx-auto max-w-4xl">
@@ -35,6 +39,12 @@ export default async function RoutinesPage({ params }: PageProps) {
                     athleteId={athleteId}
                     athleteName={athlete?.name ?? ""}
                     routines={routines}
+                    ddLookup={ddLookup ?? []}
+                    ddLookupError={ddLookupError
+                        ? "Unable to load the DD lookup table. Enter DD manually or reload to try again."
+                        : !ddLookup?.length
+                          ? "No DD lookup entries are visible to the app. Check that the table is populated and its read policy allows access. You can still enter DD manually."
+                          : undefined}
                 />
             </div>
         </main>

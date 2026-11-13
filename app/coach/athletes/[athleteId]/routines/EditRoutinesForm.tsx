@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { calculateDD, type DDLookupEntry } from "@/lib/dd";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import BackLink from "@/components/BackLink";
@@ -9,6 +10,8 @@ type EditRoutinesFormProps = {
     coachId: string;
     athleteId: string;
     athleteName: string;
+    ddLookup: DDLookupEntry[];
+    ddLookupError?: string;
     routines: {
         id: number;
         athlete_id: number;
@@ -32,6 +35,8 @@ export default function EditRoutinesForm({
     athleteId,
     athleteName,
     routines,
+    ddLookup,
+    ddLookupError,
 }: EditRoutinesFormProps) {
     const router = useRouter();
     const compulsoryOptions = [
@@ -46,13 +51,21 @@ export default function EditRoutinesForm({
         routines?.custom_compulsory ?? ""
     );
     const [optionalA, setOptionalA] = useState(routines?.optional_a ?? "");
-    const [optionalADifficulty, setOptionalADifficulty] = useState(
-        routines?.optional_a_difficulty?.toString() ?? ""
-    );
+    const [optionalADifficulty, setOptionalADifficulty] = useState<string | null>(() => {
+        const saved = routines?.optional_a_difficulty;
+        const calculated = calculateDD(routines?.optional_a ?? "", ddLookup).total;
+        return saved != null && (ddLookupError || saved !== calculated) ? String(saved) : null;
+    });
     const [optionalB, setOptionalB] = useState(routines?.optional_b ?? "");
-    const [optionalBDifficulty, setOptionalBDifficulty] = useState(
-        routines?.optional_b_difficulty?.toString() ?? ""
-    );
+    const [optionalBDifficulty, setOptionalBDifficulty] = useState<string | null>(() => {
+        const saved = routines?.optional_b_difficulty;
+        const calculated = calculateDD(routines?.optional_b ?? "", ddLookup).total;
+        return saved != null && (ddLookupError || saved !== calculated) ? String(saved) : null;
+    });
+    const calculationA = calculateDD(optionalA, ddLookup);
+    const calculationB = calculateDD(optionalB, ddLookup);
+    const effectiveA = optionalADifficulty ?? (ddLookupError ? "" : calculationA.total?.toFixed(2) ?? "");
+    const effectiveB = optionalBDifficulty ?? (ddLookupError ? "" : calculationB.total?.toFixed(2) ?? "");
     const [doubleMiniSetA, setDoubleMiniSetA] = useState(
         routines?.double_mini_set_a ?? ""
     );
@@ -69,6 +82,14 @@ export default function EditRoutinesForm({
     const [notes, setNotes] = useState(routines?.notes ?? "");
 
     async function handleSave() {
+        if ([effectiveA, effectiveB, doubleMiniSetADifficulty, doubleMiniSetBDifficulty].some((value) => value !== "" && (!Number.isFinite(Number(value)) || Number(value) < 0))) {
+            alert("Enter a valid DD of 0 or more.");
+            return;
+        }
+        if (ddLookupError && ((optionalA.trim() && effectiveA === "") || (optionalB.trim() && effectiveB === ""))) {
+            alert("Automatic DD calculation is unavailable. Enter DD manually before saving.");
+            return;
+        }
         const supabase = createClient();
 
         const payload = {
@@ -78,10 +99,10 @@ export default function EditRoutinesForm({
                 compulsory === "Level 5+" ? customCompulsory.trim() || null : null,
             optional_a: optionalA,
             optional_a_difficulty:
-                optionalADifficulty === "" ? null : Number(optionalADifficulty),
+                effectiveA === "" ? null : Number(effectiveA),
             optional_b: optionalB,
             optional_b_difficulty:
-                optionalBDifficulty === "" ? null : Number(optionalBDifficulty),
+                effectiveB === "" ? null : Number(effectiveB),
             double_mini_set_a: doubleMiniSetA,
             double_mini_set_a_difficulty:
                 doubleMiniSetADifficulty === ""
@@ -141,8 +162,8 @@ export default function EditRoutinesForm({
                         </div>
                     </div>
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                        <RoutineEditor id="optional-a" title="Optional A" value={optionalA} onChange={setOptionalA} difficulty={optionalADifficulty} onDifficultyChange={setOptionalADifficulty} rows={Math.max(10, optionalA.split("\n").length)} />
-                        <RoutineEditor id="optional-b" title="Optional B" value={optionalB} onChange={setOptionalB} difficulty={optionalBDifficulty} onDifficultyChange={setOptionalBDifficulty} rows={Math.max(10, optionalB.split("\n").length)} />
+                        <RoutineEditor id="optional-a" title="Optional A" value={optionalA} onChange={setOptionalA} difficulty={effectiveA} onDifficultyChange={(value) => setOptionalADifficulty(value === "" ? null : value)} calculation={calculationA} manual={optionalADifficulty !== null} onUseCalculated={() => setOptionalADifficulty(null)} calculationError={ddLookupError} rows={Math.max(10, optionalA.split("\n").length)} />
+                        <RoutineEditor id="optional-b" title="Optional B" value={optionalB} onChange={setOptionalB} difficulty={effectiveB} onDifficultyChange={(value) => setOptionalBDifficulty(value === "" ? null : value)} calculation={calculationB} manual={optionalBDifficulty !== null} onUseCalculated={() => setOptionalBDifficulty(null)} calculationError={ddLookupError} rows={Math.max(10, optionalB.split("\n").length)} />
                     </div>
                 </section>
 
@@ -170,13 +191,17 @@ export default function EditRoutinesForm({
     );
 }
 
-function RoutineEditor({ id, title, value, onChange, difficulty, onDifficultyChange, rows = 6, placeholder = "One skill per line" }: {
+function RoutineEditor({ id, title, value, onChange, difficulty, onDifficultyChange, calculation, manual, onUseCalculated, calculationError, rows = 6, placeholder = "One skill per line" }: {
     id: string;
     title: string;
     value: string;
     onChange: (value: string) => void;
     difficulty?: string;
     onDifficultyChange?: (value: string) => void;
+    calculation?: ReturnType<typeof calculateDD>;
+    manual?: boolean;
+    onUseCalculated?: () => void;
+    calculationError?: string;
     rows?: number;
     placeholder?: string;
 }) {
@@ -186,12 +211,26 @@ function RoutineEditor({ id, title, value, onChange, difficulty, onDifficultyCha
                 <label htmlFor={`routine-${id}`} className="text-base font-bold text-red-900">{title}</label>
             </div>
             <div className="p-4">
-                <textarea id={`routine-${id}`} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={rows} className="w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base leading-7 text-zinc-950 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-700" />
+                <textarea id={`routine-${id}`} value={value} onChange={(event) => onChange(event.target.value)} placeholder={calculation ? "One skill per line, or separate with commas" : placeholder} rows={rows} className="w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base leading-7 text-zinc-950 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-700" />
+                {calculation && (
+                    <div aria-live="polite" className="mt-3 space-y-2 text-sm leading-6">
+                        {calculationError ? <p role="alert" className="text-amber-900">{calculationError}</p> : (
+                            <>
+                                <p className="font-semibold text-zinc-700">Calculated DD: {calculation.total?.toFixed(2) ?? "—"}{calculation.unmatched.length > 0 ? " (matched skills only)" : ""}</p>
+                                {calculation.unmatched.map((skill) => <p key={skill} className="rounded-lg bg-amber-50 px-3 py-2 text-amber-900">Calculation done, please note no match was found in our database for skill {skill}.</p>)}
+                            </>
+                        )}
+                        {calculation.repeated.map((skill) => <p key={skill} className="rounded-lg bg-amber-50 px-3 py-2 text-amber-900">Repeated skill: {skill}. DD includes every occurrence.</p>)}
+                    </div>
+                )}
                 {onDifficultyChange && (
                     <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg bg-red-50 p-3">
-                        <label htmlFor={`routine-${id}-dd`} className="flex-1 text-sm font-semibold text-red-900">Degree of Difficulty</label>
+                        <label htmlFor={`routine-${id}-dd`} className="flex-1 text-sm font-semibold text-red-900">{calculation ? (manual ? "DD · Manual override" : "DD · Calculated") : "Degree of Difficulty"}</label>
                         <input id={`routine-${id}-dd`} type="number" min="0" step="0.01" value={difficulty ?? ""} onChange={(event) => onDifficultyChange(event.target.value)} placeholder="0.00" className="w-24 rounded-lg border border-red-200 bg-white px-2 py-2 text-center text-base font-bold tabular-nums text-red-900 focus:outline-none focus:ring-2 focus:ring-red-700" />
                     </div>
+                )}
+                {calculation && manual && !calculationError && (
+                    <button type="button" onClick={onUseCalculated} className="mt-2 rounded text-sm font-semibold text-red-700 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700">Use calculated DD</button>
                 )}
             </div>
         </div>
