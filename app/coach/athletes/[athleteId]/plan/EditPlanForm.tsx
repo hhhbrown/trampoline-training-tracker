@@ -10,6 +10,8 @@ type EditPlanFormProps = {
     athleteId: string;
     planItems: PlanItem[];
     planId: number;
+    copyAthletes: { id: number; name: string }[];
+    copyAthletesError?: string;
 };
 
 type PlanItem = {
@@ -26,11 +28,52 @@ export default function EditPlanForm({
     coachId,
     planItems,
     planId,
+    copyAthletes,
+    copyAthletesError,
 }: EditPlanFormProps) {
     const [items, setItems] = useState<EditablePlanItem[]>(planItems);
     const [deletedIds, setDeletedIds] = useState<number[]>([]);
     const [draggedId, setDraggedId] = useState<number | null>(null);
+    const [copyAthleteId, setCopyAthleteId] = useState("");
+    const [copying, setCopying] = useState(false);
+    const [copyMessage, setCopyMessage] = useState("");
     const router = useRouter();
+
+    async function copyPlan() {
+        const source = copyAthletes.find((athlete) => String(athlete.id) === copyAthleteId);
+        if (!source || copying) return;
+        setCopying(true);
+        setCopyMessage("");
+        try {
+            const supabase = createClient();
+            const { data: sourcePlan, error: planError } = await supabase
+                .from("plans").select("id").eq("athlete_id", source.id).maybeSingle();
+            if (planError) throw new Error(planError.message);
+            if (!sourcePlan) throw new Error(`${source.name} has no daily plan to copy.`);
+
+            const { data: sourceItems, error: itemsError } = await supabase
+                .from("plan_items").select("name, target").eq("plan_id", sourcePlan.id)
+                .order("sort_order").order("id");
+            if (itemsError) throw new Error(itemsError.message);
+            if (!sourceItems?.length) throw new Error(`${source.name}’s daily plan has no turns to copy.`);
+            if (!window.confirm(`Replace all rows in this editor with ${sourceItems.length} rows from ${source.name}’s daily plan? Changes are only saved when you click Save Plan.`)) return;
+
+            setDeletedIds((current) => [...new Set([...current, ...items.filter((item) => !item.isNew).map((item) => item.id)])]);
+            const baseId = Date.now();
+            setItems(sourceItems.map((item, index) => ({
+                id: -baseId - index,
+                name: item.name,
+                target: item.target,
+                isNew: true,
+            })));
+            setDraggedId(null);
+            setCopyMessage(`Copied ${sourceItems.length} rows from ${source.name}. Click Save Plan to keep these changes.`);
+        } catch (error) {
+            setCopyMessage(error instanceof Error ? error.message : "Unable to copy the plan. Try again.");
+        } finally {
+            setCopying(false);
+        }
+    }
 
     function moveRow(id: number, targetId: number) {
         setItems((current) => {
@@ -121,6 +164,23 @@ export default function EditPlanForm({
     return (
         <section className="mt-8" aria-labelledby="edit-plan-heading">
             <BackLink href={`/coach/${coachId}/athletes`}>Back</BackLink>
+            <fieldset disabled={copying} className="min-w-0 disabled:opacity-70">
+            <div className="mb-5 rounded-xl border border-red-100 bg-red-50 p-3">
+                <label htmlFor="copy-plan-athlete" className="block text-sm font-semibold text-zinc-800">Copy daily plan from another athlete</label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                    <select id="copy-plan-athlete" value={copyAthleteId} onChange={(event) => setCopyAthleteId(event.target.value)} className="min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 focus:outline-none focus:ring-2 focus:ring-red-700">
+                        <option value="">Select athlete</option>
+                        {copyAthletes.map((athlete) => <option key={athlete.id} value={athlete.id}>{athlete.name}</option>)}
+                    </select>
+                    <button type="button" onClick={copyPlan} disabled={!copyAthleteId || copying} className="rounded-lg bg-red-700 px-3 py-2 text-sm font-semibold text-white hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                        {copying ? "Copying…" : "Copy Plan"}
+                    </button>
+                </div>
+                <p className="mt-2 text-xs leading-5 text-zinc-600">Replaces all turns and counts. Save Plan to apply.</p>
+                {copyAthletesError && <p role="alert" className="mt-2 text-sm text-red-800">{copyAthletesError}</p>}
+                {!copyAthletesError && copyAthletes.length === 0 && <p className="mt-2 text-sm text-zinc-600">No other athletes available for this coach.</p>}
+                <p role="status" className="mt-2 text-sm font-medium text-red-900">{copyMessage}</p>
+            </div>
             <div className="flex items-center justify-between gap-3">
                 <h2 id="edit-plan-heading" className="text-xl font-semibold text-zinc-950">Daily Plan</h2>
                 <button type="button" onClick={addRow} className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-800 hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700">
@@ -199,6 +259,7 @@ export default function EditPlanForm({
             <button type="button" onClick={handleSave} className="mt-5 rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2">
                 Save Plan
             </button>
+            </fieldset>
         </section>
     );
 }

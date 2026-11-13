@@ -32,6 +32,13 @@ export default async function CoachEditPlanPage({ params }: PageProps) {
         .order("sort_order")
             .order("id");
 
+    const { data: copyAthletes, error: copyAthletesError } = await supabase
+        .from("athletes")
+        .select("id, name")
+        .eq("coach_id", athlete?.coach_id)
+        .neq("id", Number(athleteId))
+        .order("name");
+
     return (
         <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24 text-zinc-950 sm:px-6">
             <div className="mx-auto max-w-2xl">
@@ -52,6 +59,8 @@ export default async function CoachEditPlanPage({ params }: PageProps) {
                     athleteId={athleteId}
                     planId={plan.id}
                     planItems={planItems ?? []}
+                    copyAthletes={copyAthletes ?? []}
+                    copyAthletesError={copyAthletesError ? "Unable to load athletes for copying. Reload to try again." : undefined}
                 />
             </div>
         </main>
