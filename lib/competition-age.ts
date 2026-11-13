@@ -1,4 +1,5 @@
 export type CompetitionLevel = {
+    id?: number | string;
     name: string;
     discipline: string;
     min_age: number | null;

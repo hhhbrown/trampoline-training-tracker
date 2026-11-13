@@ -20,8 +20,14 @@ export default async function CompetitionSummaryPage({ params }: {
 
     const { data: levels, error: levelsError } = await supabase
         .from("competition_levels")
-        .select("name, discipline, min_age, max_age")
+        .select("id, name, discipline, min_age, max_age")
         .eq("discipline", "TRI");
+    const [{ data: ddRequirements, error: ddRequirementsError }, { data: routines, error: routinesError }] = await Promise.all([
+        supabase.from("level_dd_requirements").select("level_id, gender, min_dd, max_dd")
+            .in("level_id", (levels ?? []).map((level) => level.id)),
+        supabase.from("routines").select("optional_a, optional_a_difficulty, optional_b, optional_b_difficulty")
+            .eq("athlete_id", Number(athleteId)).maybeSingle(),
+    ]);
     const season = competitionSeason();
 
     return (
@@ -38,6 +44,10 @@ export default async function CompetitionSummaryPage({ params }: {
                     levels={levels ?? []}
                     gender={athlete.gender}
                     year={season.endYear}
+                    ddRequirements={ddRequirements ?? []}
+                    routines={routines}
+                    ddLookupError={ddRequirementsError ? "DD requirements could not be loaded. Check read access to level_dd_requirements." : undefined}
+                    routinesError={routinesError ? "Saved routine DD could not be loaded." : undefined}
                     lookupError={levelsError || !levels?.length ? "Competition age requirements could not be loaded. Check that competition_levels is populated and readable by the app." : undefined}
                 />
             </div>
