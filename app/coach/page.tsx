@@ -42,6 +42,12 @@ export default async function CoachPage() {
                             </Link>
                         ))}
                     </div>
+                    <Link
+                        href="/coach/resources"
+                        className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-red-700 px-5 py-2 text-sm font-semibold text-white transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
+                    >
+                        Resources
+                    </Link>
                 </div>
 
             </div>
