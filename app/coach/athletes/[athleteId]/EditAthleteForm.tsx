@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import AthleteDetailsFields from "@/components/AthleteDetailsFields";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -9,6 +10,8 @@ type Athlete = {
     name: string;
     level: string | null;
     coach_id: number | null;
+    date_of_birth: string | null;
+    gender: string | null;
 };
 
 type Coach = {
@@ -25,6 +28,8 @@ export default function EditAthleteForm({
 }) {
     const [name, setName] = useState(athlete.name);
     const [level, setLevel] = useState(athlete.level ?? "");
+    const [dateOfBirth, setDateOfBirth] = useState(athlete.date_of_birth ?? "");
+    const [gender, setGender] = useState(athlete.gender ?? "");
     const [coachId, setCoachId] = useState(athlete.coach_id ?? "");
 
     const router = useRouter();
@@ -63,6 +68,8 @@ export default function EditAthleteForm({
                 name,
                 level,
                 coach_id: Number(coachId),
+                date_of_birth: dateOfBirth || null,
+                gender: gender.trim() || null,
             })
             .eq("id", athlete.id);
 
@@ -117,6 +124,13 @@ export default function EditAthleteForm({
                         ))}
                     </select>
                 </div>
+
+                <AthleteDetailsFields
+                    dateOfBirth={dateOfBirth}
+                    onDateOfBirthChange={setDateOfBirth}
+                    gender={gender}
+                    onGenderChange={setGender}
+                />
 
                 <button
                     type="button"

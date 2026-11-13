@@ -11,7 +11,7 @@ export default async function CoachEditAthletePage({ params }: PageProps) {
 
     const { data: athlete, error } = await supabase
         .from("athletes")
-        .select("id, name, level, coach_id")
+        .select("id, name, level, coach_id, date_of_birth, gender")
         .eq("id", Number(athleteId))
         .single();
 

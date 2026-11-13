@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import AthleteDetailsFields from "@/components/AthleteDetailsFields";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -13,6 +14,8 @@ export default function AddAthleteForm({
 }: AddAthleteFormProps) {
     const [name, setName] = useState("");
     const [level, setLevel] = useState("");
+    const [dateOfBirth, setDateOfBirth] = useState("");
+    const [gender, setGender] = useState("");
 
     const router = useRouter();
 
@@ -25,6 +28,8 @@ export default function AddAthleteForm({
                 name,
                 level,
                 coach_id: Number(coachId),
+                date_of_birth: dateOfBirth || null,
+                gender: gender.trim() || null,
             })
             .select("id")
             .single();
@@ -101,6 +106,13 @@ export default function AddAthleteForm({
                         className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-black outline-none focus:ring-2 focus:ring-red-500"
                     />
                 </div>
+
+                <AthleteDetailsFields
+                    dateOfBirth={dateOfBirth}
+                    onDateOfBirthChange={setDateOfBirth}
+                    gender={gender}
+                    onGenderChange={setGender}
+                />
 
                 <button
                     type="button"
