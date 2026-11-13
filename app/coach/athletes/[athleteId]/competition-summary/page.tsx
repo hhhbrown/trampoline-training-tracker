@@ -1,3 +1,5 @@
+import CompetitionAgeCheck from "@/components/CompetitionAgeCheck";
+import { competitionSeason } from "@/lib/competition-age";
 import BackLink from "@/components/BackLink";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
@@ -9,12 +11,18 @@ export default async function CompetitionSummaryPage({ params }: {
     const supabase = await createClient();
     const { data: athlete, error } = await supabase
         .from("athletes")
-        .select("id, name, level, coach_id")
+        .select("id, name, level, coach_id, date_of_birth, gender")
         .eq("id", Number(athleteId))
         .maybeSingle();
 
     if (error) return <p className="p-8 text-red-700">Unable to load this athlete’s competition summary. Please try again.</p>;
     if (!athlete) notFound();
+
+    const { data: levels, error: levelsError } = await supabase
+        .from("competition_levels")
+        .select("name, discipline, min_age, max_age")
+        .eq("discipline", "TRI");
+    const season = competitionSeason();
 
     return (
         <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24 text-zinc-950 sm:px-6">
@@ -23,12 +31,15 @@ export default async function CompetitionSummaryPage({ params }: {
                 <header className="mb-8 border-b border-zinc-200 pb-6">
                     <p className="text-sm font-semibold text-red-700">Competition Summary</p>
                     <h1 className="mt-2 break-words text-3xl font-bold tracking-tight">{athlete.name}</h1>
-                    {athlete.level && <span className="mt-3 inline-block rounded-full bg-zinc-950 px-3 py-1 text-sm font-medium text-white">{athlete.level}</span>}
                 </header>
-                <section className="rounded-2xl border border-red-100 bg-white p-5 shadow-sm">
-                    <h2 className="text-xl font-bold text-zinc-950">Competition details</h2>
-                    <p className="mt-3 text-base leading-7 text-zinc-600">No competition details added yet.</p>
-                </section>
+                <CompetitionAgeCheck
+                    dateOfBirth={athlete.date_of_birth}
+                    profileLevel={athlete.level}
+                    levels={levels ?? []}
+                    gender={athlete.gender}
+                    year={season.endYear}
+                    lookupError={levelsError || !levels?.length ? "Competition age requirements could not be loaded. Check that competition_levels is populated and readable by the app." : undefined}
+                />
             </div>
         </main>
     );

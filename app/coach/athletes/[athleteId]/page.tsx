@@ -24,6 +24,17 @@ export default async function CoachEditAthletePage({ params }: PageProps) {
         return <p className="p-8 text-red-600">Error: {error.message}</p>;
     }
 
+    const { data: triLevels, error: triLevelsError } = await supabase
+        .from("competition_levels")
+        .select("name")
+        .eq("discipline", "TRI")
+        .order("min_age")
+        .order("name");
+    const levelOptions = (triLevels ?? []).map((level) => level.name);
+    const levelError = triLevelsError || !levelOptions.length
+        ? "TRI levels could not be loaded. Existing values will be preserved; reload to try again."
+        : undefined;
+
     return (
         <main className="min-h-screen bg-zinc-50 px-4 py-10">
             <div className="mx-auto max-w-2xl">
@@ -39,7 +50,7 @@ export default async function CoachEditAthletePage({ params }: PageProps) {
                     {athlete?.name}
                 </h2>
 
-                <EditAthleteForm athlete={athlete} coaches={coaches ?? []} />
+                <EditAthleteForm athlete={athlete} coaches={coaches ?? []} triLevels={levelOptions} triLevelsError={levelError} />
             </div>
         </main>
     );
