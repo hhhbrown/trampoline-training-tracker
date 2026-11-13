@@ -33,6 +33,7 @@ export default function DailyPlanForm({
     const [checkedItems, setCheckedItems] = useState<number[]>(initialCheckedItems);
     const [comments, setComments] = useState(initialComments);
     const [tenBounceSeconds, setTenBounceSeconds] = useState("");
+    const [actualAttempts, setActualAttempts] = useState<Record<number, string>>({});
     const router = useRouter();
 
     async function toggleItem(id: number) {
@@ -73,6 +74,15 @@ export default function DailyPlanForm({
             checkedItems.includes(item.id)
         );
 
+        const attemptsFor = (item: PlanItem) => {
+            const actual = actualAttempts[item.id]?.trim() ?? "";
+            return actual === "" ? (item.target ?? 1) : Number(actual);
+        };
+        if (checkedPlanItems.some((item) => !Number.isSafeInteger(attemptsFor(item)) || attemptsFor(item) < 0)) {
+            alert("Enter a whole-number actual attempt count of 0 or more, or leave it blank to use the suggested count.");
+            return;
+        }
+
         const completedCount = (planItemName: string) =>
             checkedPlanItems.filter((item) => {
                 const name = item.name ?? "";
@@ -88,9 +98,18 @@ export default function DailyPlanForm({
                     ? `optional ${optional[1].toLowerCase()}`
                     : "optional";
                 return routineName === planItemName;
-            }).length;
+            }).reduce((total, item) => total + attemptsFor(item), 0);
 
         const genericOptionalCount = completedCount("optional");
+        const submittedOptionals = [...optionalRoutines];
+        for (const planItemName of ["optional a", "optional b"] as const) {
+            if (!submittedOptionals.some((routine) => routine.planItemName === planItemName) && completedCount(planItemName) > 0) {
+                submittedOptionals.push({ planItemName, difficulty: null });
+            }
+        }
+        if (submittedOptionals.length === 0 && genericOptionalCount > 0) {
+            submittedOptionals.push({ planItemName: "optional a", difficulty: null });
+        }
         const tenBounceValue =
             tenBounceSeconds.trim() === "" ? null : Number(tenBounceSeconds);
 
@@ -111,7 +130,7 @@ export default function DailyPlanForm({
                 difficulty: null,
                 completed_count: completedCount("compulsory"),
             },
-            ...optionalRoutines.map((routine, index) => ({
+            ...submittedOptionals.map((routine, index) => ({
                 athlete_id: Number(athleteId),
                 recorded_at: recordedAt,
                 routine_type: "optional",
@@ -160,6 +179,7 @@ export default function DailyPlanForm({
             return;
         }
 
+        setActualAttempts({});
         setCheckedItems([]);
         setComments("");
         setTenBounceSeconds("");
@@ -185,18 +205,39 @@ export default function DailyPlanForm({
                             const checked = checkedItems.includes(item.id);
                             return (
                                 <li key={item.id}>
-                                    <label className={`flex min-h-20 cursor-pointer items-center gap-4 px-5 py-4 transition focus-within:ring-2 focus-within:ring-inset focus-within:ring-red-700 sm:px-6 ${checked ? "bg-red-50/60" : "hover:bg-zinc-50"}`}>
-                                        <input
-                                            type="checkbox"
-                                            checked={checked}
-                                            onChange={() => toggleItem(item.id)}
-                                            className="h-6 w-6 shrink-0 accent-red-700"
-                                        />
-                                        <span className="min-w-0 flex-1 break-words text-lg font-semibold leading-7 text-zinc-950">{item.name || "Untitled turn"}</span>
-                                        <span className="flex min-w-16 shrink-0 flex-col items-center rounded-xl bg-red-100 px-3 py-2 text-red-900">
-                                            <span className="text-2xl font-bold tabular-nums">{item.target ?? "—"}</span>
-                                        </span>
-                                    </label>
+                                    <div className={`flex flex-wrap items-center gap-3 px-5 py-4 transition sm:flex-nowrap sm:gap-4 sm:px-6 ${checked ? "bg-red-50/60" : "hover:bg-zinc-50"}`}>
+                                        <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={checked}
+                                                onChange={() => toggleItem(item.id)}
+                                                className="h-6 w-6 shrink-0 accent-red-700 focus-visible:ring-2 focus-visible:ring-red-700"
+                                            />
+                                            <span className="min-w-0 break-words text-lg font-semibold leading-7 text-zinc-950">{item.name || "Untitled turn"}</span>
+                                        </label>
+                                        <div className="ml-auto flex shrink-0 items-end gap-3">
+                                            <div className="text-center">
+                                                <span className="mb-1 block text-xs font-semibold text-zinc-600">Suggested</span>
+                                                <span className="flex h-11 min-w-16 items-center justify-center rounded-xl bg-red-100 px-3 text-xl font-bold tabular-nums text-red-900">{item.target ?? "—"}</span>
+                                            </div>
+                                            <div>
+                                                <label htmlFor={`actual-${item.id}`} className="mb-1 block text-center text-xs font-semibold text-zinc-600">Actual</label>
+                                                <input
+                                                    id={`actual-${item.id}`}
+                                                    aria-label={`Actual attempts for ${item.name || "Untitled turn"}`}
+                                                    type="number"
+                                                    min="0"
+                                                    step="1"
+                                                    inputMode="numeric"
+                                                    disabled={!checked}
+                                                    placeholder={String(item.target ?? 1)}
+                                                    value={actualAttempts[item.id] ?? ""}
+                                                    onChange={(event) => setActualAttempts((current) => ({ ...current, [item.id]: event.target.value }))}
+                                                    className="h-11 w-20 rounded-xl border border-zinc-300 bg-white px-2 text-center text-lg font-semibold tabular-nums text-zinc-950 placeholder:font-normal placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-700 disabled:bg-zinc-100 disabled:opacity-50"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </li>
                             );
                         })}
