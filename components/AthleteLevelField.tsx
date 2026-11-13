@@ -1,12 +1,14 @@
 "use client";
 
+import { isCombinedNoviceLevel } from "@/lib/competition-age";
+
 export default function AthleteLevelField({ value, onChange, levels, error }: {
     value: string;
     onChange: (value: string) => void;
     levels: string[];
     error?: string;
 }) {
-    const options = [...new Set(levels)];
+    const options = [...new Set(levels)].filter((name) => !isCombinedNoviceLevel(name));
     const legacyValue = value !== "" && !options.includes(value);
 
     return (
@@ -22,6 +24,7 @@ export default function AthleteLevelField({ value, onChange, levels, error }: {
                 {legacyValue && <option value={value}>{value} (current value)</option>}
                 {options.map((name) => <option key={name} value={name}>{name}</option>)}
             </select>
+            {isCombinedNoviceLevel(value) && <p className="mt-2 text-sm text-amber-900">Choose Novice (ages 11–14) or Level 5 (age 15+). The existing value is preserved until you change it.</p>}
             {error && <p role="alert" className="mt-2 text-sm text-amber-900">{error}</p>}
         </div>
     );

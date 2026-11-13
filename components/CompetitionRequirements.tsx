@@ -1,7 +1,7 @@
 import CompulsoryRequirements from "./CompulsoryRequirements";
 import { requiresAdvancedCompulsory } from "@/lib/competition-compulsory";
 import { matchDDRequirement, assessDD, type LevelDDRequirement } from "@/lib/competition-dd";
-import { competitionAge, matchCompetitionLevel, meetsAgeRequirements, type CompetitionLevel } from "@/lib/competition-age";
+import { competitionAge, isCombinedNoviceLevel, matchCompetitionLevel, meetsAgeRequirements, type CompetitionLevel } from "@/lib/competition-age";
 
 export default function CompetitionRequirements({ dateOfBirth, profileLevel, gender, levels, year, lookupError, ddRequirements, routines, ddLookupError, routinesError }: {
     dateOfBirth: string | null;
@@ -28,12 +28,13 @@ export default function CompetitionRequirements({ dateOfBirth, profileLevel, gen
         : gender?.trim().toLowerCase() === "female" ? "Women"
         : gender?.trim() || "Gender not set";
     const levelName = level?.name ?? profileLevel?.trim() ?? "";
-    const issue = !dateOfBirth ? "Date of birth required"
+    const levelIssue = isCombinedNoviceLevel(profileLevel) ? "Choose Novice or Level 5 in Edit Athlete to check the correct requirements" : null;
+    const issue = levelIssue ?? (!dateOfBirth ? "Date of birth required"
         : age == null ? "Check date of birth"
         : lookupError ? "Age requirements unavailable"
         : !levelName ? "TRI level required"
         : !level ? "No matching age requirements for this TRI level"
-        : null;
+        : null);
     const eligible = !issue && age != null && level != null ? meetsAgeRequirements(age, level) : null;
     const statusStyle = eligible === true ? "border-emerald-200 bg-emerald-50 text-emerald-900"
         : eligible === false ? "border-red-200 bg-red-50 text-red-900"
@@ -44,9 +45,9 @@ export default function CompetitionRequirements({ dateOfBirth, profileLevel, gen
         { name: "Optional A", value: routines?.optional_a, difficulty: routines?.optional_a_difficulty },
         { name: "Optional B", value: routines?.optional_b, difficulty: routines?.optional_b_difficulty },
     ].filter((routine) => routine.value?.trim());
-    const ddIssue = lookupError ? "Competition level requirements unavailable"
+    const ddIssue = levelIssue ?? (lookupError ? "Competition level requirements unavailable"
         : !level ? "No matching TRI level"
-        : ddLookupError ?? routinesError ?? (!ddRequirement ? "No DD requirements found for this level and gender category" : null);
+        : ddLookupError ?? routinesError ?? (!ddRequirement ? "No DD requirements found for this level and gender category" : null));
     const ddRange = ddRequirement
         ? ddRequirement.min_dd != null && ddRequirement.max_dd != null ? `Level DD range: ${Number(ddRequirement.min_dd).toFixed(2)}–${Number(ddRequirement.max_dd).toFixed(2)}`
             : ddRequirement.min_dd != null ? `Required DD: ${Number(ddRequirement.min_dd).toFixed(2)}+`

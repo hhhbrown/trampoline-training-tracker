@@ -27,13 +27,16 @@ export function competitionAge(dateOfBirth: string | null, year: number): number
     return year - y;
 }
 
+export function isCombinedNoviceLevel(name: string | null) {
+    return /^novice\s*\/\s*level\s+5$/i.test(name?.trim() ?? "");
+}
+
 export function matchCompetitionLevel(levels: CompetitionLevel[], profileLevel: string | null, discipline: string) {
     const normalize = (value: string) => value.trim().toLowerCase().replace(/\s+/g, " ");
     const name = normalize(profileLevel ?? "");
-    if (!name) return undefined;
+    if (!name || isCombinedNoviceLevel(profileLevel)) return undefined;
     const candidates = levels.filter((level) => level.discipline === discipline);
-    return candidates.find((level) => normalize(level.name) === name)
-        ?? candidates.find((level) => level.name.split("/").some((alias) => normalize(alias) === name));
+    return candidates.find((level) => normalize(level.name) === name);
 }
 
 export function meetsAgeRequirements(age: number, level: CompetitionLevel) {
