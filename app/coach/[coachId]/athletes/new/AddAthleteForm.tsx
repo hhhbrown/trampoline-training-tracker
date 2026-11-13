@@ -1,16 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import AthleteLevelField from "@/components/AthleteLevelField";
 import AthleteDetailsFields from "@/components/AthleteDetailsFields";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
 type AddAthleteFormProps = {
     coachId: string;
+    triLevels: string[];
+    triLevelsError?: string;
 };
 
 export default function AddAthleteForm({
     coachId,
+    triLevels,
+    triLevelsError,
 }: AddAthleteFormProps) {
     const [name, setName] = useState("");
     const [level, setLevel] = useState("");
@@ -95,17 +100,7 @@ export default function AddAthleteForm({
                     />
                 </div>
 
-                <div>
-                    <label className="mb-1 block text-black font-medium text-zinc-700">
-                        Level
-                    </label>
-
-                    <input
-                        value={level}
-                        onChange={(e) => setLevel(e.target.value)}
-                        className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-black outline-none focus:ring-2 focus:ring-red-500"
-                    />
-                </div>
+                <AthleteLevelField value={level} onChange={setLevel} levels={triLevels} error={triLevelsError} />
 
                 <AthleteDetailsFields
                     dateOfBirth={dateOfBirth}
