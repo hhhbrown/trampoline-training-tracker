@@ -1,3 +1,4 @@
+import DmtNationalsRequirements from "@/components/DmtNationalsRequirements";
 import DmtCompetitionRequirements from "@/components/DmtCompetitionRequirements";
 import SynchroRequirements from "@/components/SynchroRequirements";
 import AthleteEventSummary from "@/components/AthleteEventSummary";
@@ -108,6 +109,7 @@ export default async function CompetitionSummaryPage({ params }: {
                     error={levelsError ? "Competition levels could not be loaded." : nationalsError ? "Canadian Championships standards could not be loaded. Check read access to qualification_requirements." : undefined}
                     routinesError={routinesError ? "Saved routine DD could not be loaded." : undefined}
                 />
+                <DmtNationalsRequirements athlete={athlete} year={season.endYear} />
                 <WagcRequirements
                     requirements={wagcRequirements ?? []}
                     dateOfBirth={athlete.date_of_birth}
