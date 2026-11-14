@@ -1,6 +1,6 @@
 import { loadDmtDDLookup } from "@/lib/dmt-dd";
 import { competesInEvent } from "@/lib/athlete-events";
-import { emptyDmtSet, loadDmtSet } from "@/lib/dmt-sets";
+import { emptyDmtSet, loadDmtSets } from "@/lib/dmt-sets";
 import { sharedSynchroAthleteIds } from "@/lib/synchro-routines";
 import { canShowSynchroRoutine } from "@/lib/athlete-events";
 import { resolveSynchroPartner } from "@/lib/synchro-partner";
@@ -39,8 +39,8 @@ export default async function RoutinesPage({ params }: PageProps) {
         .select("id, athlete_id, routine_name, skills, difficulty, notes").in("athlete_id", synAthleteIds).order("id").limit(1);
 
     const [dmt, dmtDD] = competesInEvent(athlete?.dmt_level)
-        ? await Promise.all([loadDmtSet(supabase, Number(athleteId), athlete?.dmt_level), loadDmtDDLookup(supabase)])
-        : [{ draft: emptyDmtSet(), error: null }, { entries: [], error: null }];
+        ? await Promise.all([loadDmtSets(supabase, Number(athleteId), athlete?.dmt_level), loadDmtDDLookup(supabase)])
+        : [{ drafts: [emptyDmtSet()], error: null }, { entries: [], error: null }];
 
     return (
         <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24 text-zinc-950 sm:px-6">
@@ -55,7 +55,7 @@ export default async function RoutinesPage({ params }: PageProps) {
                     athleteName={athlete?.name ?? ""}
                     routines={routines}
                     dmtLevel={athlete?.dmt_level ?? null}
-                    dmtSet={dmt.draft}
+                    dmtSets={dmt.drafts}
                     dmtError={dmt.error}
                     dmtDDLookup={dmtDD.entries}
                     dmtDDLookupError={dmtDD.error}

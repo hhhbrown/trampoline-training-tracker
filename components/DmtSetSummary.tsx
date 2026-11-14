@@ -5,8 +5,8 @@ import type { DmtSetDraft } from "@/lib/dmt-sets";
 
 export default function DmtSetSummary({ set, error, ddLookup, ddLookupError, level }: { set: DmtSetDraft; error?: string | null; ddLookup: DDLookupEntry[]; ddLookupError?: string | null; level: string | null }) {
     return (
-        <section aria-labelledby="double-mini-heading">
-            <h2 id="double-mini-heading" className="mb-4 text-xl font-bold text-red-900">DMT · Set 1</h2>
+        <section aria-labelledby={`dmt-summary-${set.id ?? set.name}-heading`}>
+            <h2 id={`dmt-summary-${set.id ?? set.name}-heading`} className="mb-4 text-xl font-bold text-red-900">DMT · {set.name || "Set 1"}</h2>
             {error ? <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">{error}</p> : (
                 <>
                 <div className="grid gap-5 md:grid-cols-2">

@@ -8,26 +8,27 @@ export type DmtPassDraft = {
     firstCode: string;
     dismountCode: string;
 };
-export type DmtSetDraft = { id: number | null; passes: DmtPassDraft[] };
+export type DmtSetDraft = { id: number | null; name?: string; passes: DmtPassDraft[] };
 type SkillRecord = { position: number; placement: string; fig_code: string };
-export type DmtSetRecord = { id: number; dmt_passes: { id: number; pass_number: number | null; dmt_pass_skills: SkillRecord[] }[] };
+export type DmtSetRecord = { id: number; name?: string; dmt_passes: { id: number; pass_number: number | null; dmt_pass_skills: SkillRecord[] }[] };
 
 export function dmtPassCount(level?: string | null) {
     return dmtRepetitionRule(level) === "zone" ? 4 : 2;
 }
 
-export function emptyDmtSet(level?: string | null): DmtSetDraft {
-    return { id: null, passes: Array.from({ length: dmtPassCount(level) }, (_, index) => index + 1).map((passNumber) => ({ id: null, passNumber, firstPlacement: "mount", firstCode: "", dismountCode: "" })) };
+export function emptyDmtSet(level?: string | null, name = "Set 1"): DmtSetDraft {
+    return { id: null, name, passes: Array.from({ length: dmtPassCount(level) }, (_, index) => index + 1).map((passNumber) => ({ id: null, passNumber, firstPlacement: "mount", firstCode: "", dismountCode: "" })) };
 }
 
 export function dmtSetDraft(record: DmtSetRecord | null, level?: string | null): DmtSetDraft {
     if (!record) return emptyDmtSet(level);
-    if (record.dmt_passes.some((pass) => pass.pass_number == null || !Number.isInteger(pass.pass_number) || pass.pass_number < 1 || pass.pass_number > 4)) throw new Error("Set 1 has passes without a supported pass number. Assign pass numbers 1–4 before editing.");
+    if (record.dmt_passes.some((pass) => pass.pass_number == null || !Number.isInteger(pass.pass_number) || pass.pass_number < 1 || pass.pass_number > 4)) throw new Error("DMT set has passes without a supported pass number. Assign pass numbers 1–4 before editing.");
     return {
         id: record.id,
+        name: record.name || "Set 1",
         passes: Array.from({ length: dmtPassCount(level) }, (_, index) => index + 1).map((passNumber) => {
             const candidates = record.dmt_passes.filter((pass) => pass.pass_number === passNumber);
-            if (candidates.length > 1) throw new Error(`Set 1 has more than one Pass ${passNumber}. Review the database entries.`);
+            if (candidates.length > 1) throw new Error(`DMT set has more than one Pass ${passNumber}. Review the database entries.`);
             const pass = candidates[0];
             const first = pass?.dmt_pass_skills.find((skill) => skill.position === 1);
             const dismount = pass?.dmt_pass_skills.find((skill) => skill.position === 2);
@@ -36,13 +37,20 @@ export function dmtSetDraft(record: DmtSetRecord | null, level?: string | null):
     };
 }
 
-export async function loadDmtSet(client: SupabaseClient, athleteId: number, level?: string | null) {
+export async function loadDmtSets(client: SupabaseClient, athleteId: number, level?: string | null) {
     const { data, error } = await client.from("dmt_sets")
-        .select("id, dmt_passes(id, pass_number, dmt_pass_skills(position, placement, fig_code))")
-        .eq("athlete_id", athleteId).order("id").limit(1);
-    if (error) return { draft: emptyDmtSet(level), error: "DMT Set 1 could not be loaded. Check access to dmt_sets, dmt_passes, and dmt_pass_skills." };
-    try { return { draft: dmtSetDraft(data?.[0] as DmtSetRecord ?? null, level), error: null }; }
-    catch (error) { return { draft: emptyDmtSet(level), error: error instanceof Error ? error.message : "DMT Set 1 could not be loaded." }; }
+        .select("id, name, dmt_passes(id, pass_number, dmt_pass_skills(position, placement, fig_code))")
+        .eq("athlete_id", athleteId).order("id");
+    if (error) return { drafts: [emptyDmtSet(level)], error: "DMT sets could not be loaded. Check access to dmt_sets, dmt_passes, and dmt_pass_skills." };
+    try {
+        const records = (data ?? []) as DmtSetRecord[];
+        return { drafts: records.length ? records.map((record, index) => dmtSetDraft({ ...record, name: record.name || `Set ${index + 1}` }, level)) : [emptyDmtSet(level)], error: null };
+    } catch (error) { return { drafts: [emptyDmtSet(level)], error: error instanceof Error ? error.message : "DMT sets could not be loaded." }; }
+}
+
+export async function loadDmtSet(client: SupabaseClient, athleteId: number, level?: string | null) {
+    const result = await loadDmtSets(client, athleteId, level);
+    return { draft: result.drafts[0], error: result.error };
 }
 
 export function dmtValidation(set: DmtSetDraft) {
@@ -60,13 +68,13 @@ export function dmtSkillRows(pass: DmtPassDraft & { id: number }) {
     ];
 }
 
-export async function saveDmtSet(client: SupabaseClient, athleteId: number, draft: DmtSetDraft, onProgress: (draft: DmtSetDraft) => void) {
+export async function saveDmtSet(client: SupabaseClient, athleteId: number, draft: DmtSetDraft, onProgress: (draft: DmtSetDraft) => void, persistEmpty = false) {
     const validation = dmtValidation(draft);
     if (validation) throw new Error(validation);
     let current = { ...draft, passes: draft.passes.map((pass) => ({ ...pass })) };
-    if (current.id == null && current.passes.every((pass) => !pass.firstCode.trim())) return;
+    if (!persistEmpty && current.id == null && current.passes.every((pass) => !pass.firstCode.trim())) return;
     if (current.id == null) {
-        const { data, error } = await client.from("dmt_sets").insert({ athlete_id: athleteId, name: "Set 1" }).select("id").single();
+        const { data, error } = await client.from("dmt_sets").insert({ athlete_id: athleteId, name: draft.name || "Set 1" }).select("id").single();
         if (error) throw new Error(error.message);
         current = { ...current, id: data.id };
         onProgress(current);

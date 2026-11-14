@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { dmtPassCount, dmtSetDraft, dmtSkillRows, dmtValidation, emptyDmtSet, saveDmtSet } from "./dmt-sets";
+import { dmtPassCount, dmtSetDraft, dmtSkillRows, dmtValidation, emptyDmtSet, loadDmtSets, saveDmtSet } from "./dmt-sets";
 
 test("Set 1 defaults to two passes, each starting with a mount", () => {
     const set = emptyDmtSet();
@@ -73,4 +73,24 @@ test("loads all four passes for zone levels and keeps existing skills", () => {
     assert.equal(dmtSetDraft(record, "Level 5").passes[3].dismountCode, "8-1o");
     assert.equal(dmtSetDraft(record, "Senior").passes.length, 2);
     assert.equal(record.dmt_passes.length, 4);
+});
+
+test("loads every set with its own name, IDs and passes", async () => {
+    const records = [1, 2].map((id) => ({ id, name: `Set ${id}`, dmt_passes: [{ id: id * 10, pass_number: 1, dmt_pass_skills: [{ position: 1, placement: "mount", fig_code: id === 1 ? "43" : "44" }, { position: 2, placement: "dismount", fig_code: "8-1o" }] }] }));
+    const client = { from: () => ({ select: () => ({ eq: () => ({ order: async () => ({ data: records, error: null }) }) }) }) } as unknown as SupabaseClient;
+    const loaded = await loadDmtSets(client, 7, "Level 5");
+    assert.equal(loaded.error, null);
+    assert.deepEqual(loaded.drafts.map((set) => set.name), ["Set 1", "Set 2"]);
+    assert.deepEqual(loaded.drafts.map((set) => set.passes[0].firstCode), ["43", "44"]);
+    assert(loaded.drafts.every((set) => set.passes.length === 4));
+});
+
+test("explicitly added empty sets can be saved and retain their name", async () => {
+    let inserted: unknown;
+    const client = { from: () => ({ insert: (value: unknown) => { inserted = value; return { select: () => ({ single: async () => ({ data: { id: 22 }, error: null }) }) }; } }) } as unknown as SupabaseClient;
+    let draft = emptyDmtSet("Senior", "Set 2");
+    await saveDmtSet(client, 7, draft, (value) => { draft = value; }, true);
+    assert.deepEqual(inserted, { athlete_id: 7, name: "Set 2" });
+    assert.equal(draft.id, 22);
+    assert.equal(draft.passes.length, 2);
 });

@@ -32,7 +32,7 @@ export default function PrintablePlanSheet({
     athlete,
     planItems,
     routines,
-    dmtSet,
+    dmtSets,
     dmtError,
     dmtDDLookup,
     dmtDDLookupError,
@@ -40,7 +40,7 @@ export default function PrintablePlanSheet({
     athlete: Athlete;
     planItems: PlanItem[];
     routines: Routines;
-    dmtSet: DmtSetDraft;
+    dmtSets: DmtSetDraft[];
     dmtError?: string | null;
     dmtDDLookup: DDLookupEntry[];
     dmtDDLookupError?: string | null;
@@ -54,14 +54,14 @@ export default function PrintablePlanSheet({
             : compulsorySkills[routines?.compulsory ?? ""] ?? [];
     const optionalA = splitRoutine(routines?.optional_a);
     const optionalB = splitRoutine(routines?.optional_b);
-    const dmtLines = dmtSet.passes.flatMap((pass) => {
+    const dmtLines = dmtSets.flatMap((set) => set.passes.flatMap((pass) => {
         const result = calculateDmtDD(pass, dmtDDLookup);
         const label = dmtDDLookupError ? "unavailable" : result.unmatched.length ? "unmatched skill" : !result.complete ? "incomplete" : result.total?.toFixed(2) ?? "—";
         return [
-            `Pass ${pass.passNumber} (DD: ${label}) · ${pass.firstPlacement}: ${pass.firstCode || "—"}`,
-            `Pass ${pass.passNumber} · dismount: ${pass.dismountCode || "—"}`,
+            `${set.name || "Set 1"} · Pass ${pass.passNumber} (DD: ${label}) · ${pass.firstPlacement}: ${pass.firstCode || "—"}`,
+            `${set.name || "Set 1"} · Pass ${pass.passNumber} · dismount: ${pass.dismountCode || "—"}`,
         ];
-    });
+    }));
 
     return (
         <section className="mx-auto mb-4 w-[7.75in] min-h-[10in] bg-white p-2 text-black print:mb-0 print:break-after-page">
@@ -120,7 +120,7 @@ export default function PrintablePlanSheet({
                             colSpan={3}
                             className="border border-black bg-yellow-300 p-1 text-center font-semibold"
                         >
-                            DMT · Set 1
+                            DMT Sets
                         </td>
                         <td
                             colSpan={2}

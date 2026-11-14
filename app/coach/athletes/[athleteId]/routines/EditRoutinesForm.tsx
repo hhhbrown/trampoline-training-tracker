@@ -1,7 +1,7 @@
 "use client";
 
 import DmtSetFields from "@/components/DmtSetFields";
-import { dmtValidation, saveDmtSet, type DmtSetDraft } from "@/lib/dmt-sets";
+import { emptyDmtSet, dmtValidation, saveDmtSet, type DmtSetDraft } from "@/lib/dmt-sets";
 import { competesInEvent } from "@/lib/athlete-events";
 import { useState } from "react";
 import { synchroDraft, synchroDifficulty, synchroPayload, type SynchroRoutine, type SynchroDraft } from "@/lib/synchro-routines";
@@ -15,7 +15,7 @@ type EditRoutinesFormProps = {
     athleteId: string;
     athleteName: string;
     dmtLevel: string | null;
-    dmtSet: DmtSetDraft;
+    dmtSets: DmtSetDraft[];
     dmtError?: string | null;
     dmtDDLookup: DDLookupEntry[];
     dmtDDLookupError?: string | null;
@@ -45,7 +45,7 @@ export default function EditRoutinesForm({
     athleteId,
     athleteName,
     dmtLevel,
-    dmtSet,
+    dmtSets,
     dmtError,
     dmtDDLookup,
     dmtDDLookupError,
@@ -92,7 +92,7 @@ export default function EditRoutinesForm({
     function updateSyn(index: number, changes: Partial<SynchroDraft>) {
         setSynDrafts((current) => current.map((draft, i) => i === index ? { ...draft, ...changes } : draft));
     }
-    const [dmtDraft, setDmtDraft] = useState(dmtSet);
+    const [dmtDrafts, setDmtDrafts] = useState(dmtSets);
     const [skills, setSkills] = useState(routines?.skills ?? "");
     const [notes, setNotes] = useState(routines?.notes ?? "");
 
@@ -108,8 +108,10 @@ export default function EditRoutinesForm({
             return;
         }
         if (competesInEvent(dmtLevel) && !dmtError) {
-            const validation = dmtValidation(dmtDraft);
-            if (validation) { alert(validation); return; }
+            for (const draft of dmtDrafts) {
+                const validation = dmtValidation(draft);
+                if (validation) { alert(`${draft.name || "DMT set"}: ${validation}`); return; }
+            }
         }
         setSaving(true);
         try {
@@ -159,7 +161,9 @@ export default function EditRoutinesForm({
             }
         }
         if (competesInEvent(dmtLevel) && !dmtError) {
-            await saveDmtSet(supabase, Number(athleteId), dmtDraft, setDmtDraft);
+            for (const [index, draft] of dmtDrafts.entries()) {
+                await saveDmtSet(supabase, Number(athleteId), draft, (saved) => setDmtDrafts((current) => current.map((set, i) => i === index ? saved : set)), true);
+            }
         }
         console.log("Saved routine:", data);
         alert("Routines saved!");
@@ -222,7 +226,15 @@ export default function EditRoutinesForm({
                     </section>
                 )}
 
-                {competesInEvent(dmtLevel) && <DmtSetFields level={dmtLevel} value={dmtDraft} onChange={setDmtDraft} error={dmtError} ddLookup={dmtDDLookup} ddLookupError={dmtDDLookupError} />}
+                {competesInEvent(dmtLevel) && <div className="space-y-6">
+                    {dmtDrafts.map((draft, index) => <DmtSetFields key={index} idPrefix={`dmt-set-${index}`} level={dmtLevel} value={draft}
+                        onChange={(value) => setDmtDrafts((current) => current.map((set, i) => i === index ? value : set))}
+                        error={dmtError} ddLookup={dmtDDLookup} ddLookupError={dmtDDLookupError} />)}
+                    {!dmtError && <button type="button" onClick={() => setDmtDrafts((current) => {
+                        const highest = Math.max(current.length, ...current.map((set) => Number(/^Set (\d+)$/.exec(set.name ?? "")?.[1] ?? 0)));
+                        return [...current, emptyDmtSet(dmtLevel, `Set ${highest + 1}`)];
+                    })} className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700">+ Add DMT set</button>}
+                </div>}
 
                 <section aria-labelledby="skills-edit-heading">
                     <h3 id="skills-edit-heading" className="mb-3 text-xl font-bold text-red-900">Skills & Notes</h3>
