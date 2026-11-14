@@ -14,12 +14,12 @@ export const coachResources: CoachResource[] = [
         description: "2025–2028 Trampoline Gymnastics Code of Points",
     },
     {
-        title: "Canadian Pathways",
+        title: "2027 Canadian Pathways",
         url: "https://activitymessenger-assets-ca.s3.ca-central-1.amazonaws.com/documents/661ccc8569271d9502e074bf3febbfcd/EN_TG_V5_Canadian.Pathways_2027.pdf",
         category: "Competition Rules & Pathways",
     },
     {
-        title: "Canadian Competition Rules",
+        title: "2026 Canadian Competition Rules",
         url: "https://activitymessenger-assets-ca.s3.ca-central-1.amazonaws.com/documents/a400d480d57b9dd557b70a1436f015df/TG_Canadian-Competition-Rules.pdf",
         category: "Competition Rules & Pathways",
     },
@@ -41,6 +41,11 @@ export const coachResources: CoachResource[] = [
     {
         title: "2026 DMT WAGC Selection",
         url: "https://activitymessenger-assets-ca.s3.ca-central-1.amazonaws.com/documents/7f41fdcb7e0e88d9f77db3d9f22052d5/2026-TUM-%26-DMT---WAGC-Selection-Process---EN.pdf",
+        category: "Selection Criteria",
+    },
+    {
+        title: "2026 DMT qualifying standards",
+        url: "https://activitymessenger-assets-ca.s3.ca-central-1.amazonaws.com/documents/a578fab65ec4163987db7312fdd3bee1/2026-Qualifying-Standards---Updated-March-12.pdf",
         category: "Selection Criteria",
     },
     {
