@@ -1,3 +1,4 @@
+import { competesInEvent } from "@/lib/athlete-events";
 import DmtNationalTeamRequirements from "@/components/DmtNationalTeamRequirements";
 import NationalTeamRequirements from "@/components/NationalTeamRequirements";
 import DmtWagcRequirements from "@/components/DmtWagcRequirements";
@@ -34,6 +35,10 @@ export default async function CompetitionSummaryPage({ params }: {
         .select("id, name, discipline, min_age, max_age")
         .eq("discipline", "TRI");
     const season = competitionSeason();
+    const showTraQualifications = !/^level\s+[1-3]$/i.test(athlete.level?.trim() ?? "");
+    const showDmtQualifications = competesInEvent(athlete.dmt_level)
+        && !/^level\s+[1-3]$/i.test(athlete.dmt_level?.trim() ?? "");
+    const showQualifications = showTraQualifications || showDmtQualifications;
     const sourceLevel = matchCompetitionLevel(levels ?? [], athlete.level, "TRI");
     const [{ data: ddRequirements, error: ddRequirementsError }, { data: routines, error: routinesError }, { data: mobilityRequirements, error: mobilityError }, { data: wagcRequirements, error: wagcError }, { data: nationalsRequirements, error: nationalsError }] = await Promise.all([
         supabase.from("level_dd_requirements").select("level_id, gender, min_dd, max_dd")
@@ -63,15 +68,24 @@ export default async function CompetitionSummaryPage({ params }: {
     ]);
 
     return (
-        <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24 text-zinc-950 sm:px-6">
+        <main className="min-h-screen bg-[#fffaf0] px-4 pb-10 pt-24 text-black sm:px-6" style={{ colorScheme: "light" }}>
             <BackLink href={`/coach/${athlete.coach_id}/athletes`}>Back</BackLink>
             <div className="mx-auto max-w-4xl">
-                <header className="mb-8 border-b border-zinc-200 pb-6">
-                    <p className="text-sm font-semibold text-red-700">Competition Summary</p>
+                <header className="mb-8 border-b-2 border-red-700 pb-6">
+                    <p className="text-sm font-semibold text-black">Competition Summary</p>
                     <h1 className="mt-2 break-words text-3xl font-bold tracking-tight">{athlete.name}</h1>
                     <AthleteEventSummary athlete={athlete} />
                 </header>
-                <CompetitionRequirements
+                <nav aria-label="Summary sections" className="mb-8 flex flex-wrap gap-3 text-sm font-semibold">
+                    <a href="#general-requirements" className="rounded-lg bg-black px-4 py-2 text-white hover:bg-red-800">General requirements</a>
+                    {showQualifications && <a href="#qualification-standards" className="rounded-lg border border-red-200 bg-white px-4 py-2 text-black hover:bg-red-100">Qualification standards</a>}
+                </nav>
+                <section id="general-requirements" aria-labelledby="general-heading" className="scroll-mt-6">
+                    <h2 id="general-heading" className="mb-5 border-b-2 border-black pb-3 text-2xl font-bold text-black">General requirements</h2>
+                    <div className="space-y-7">
+                        <section aria-labelledby="general-tra-heading">
+                            <h3 id="general-tra-heading" className="mb-3 text-xl font-bold text-black">TRA</h3>
+                            <CompetitionRequirements
                     dateOfBirth={athlete.date_of_birth}
                     profileLevel={athlete.level}
                     levels={levels ?? []}
@@ -83,9 +97,19 @@ export default async function CompetitionSummaryPage({ params }: {
                     routinesError={routinesError ? "Saved routine DD could not be loaded." : undefined}
                     lookupError={levelsError || !levels?.length ? "Competition age requirements could not be loaded. Check that competition_levels is populated and readable by the app." : undefined}
                 />
-                <DmtCompetitionRequirements athlete={athlete} />
-                <SynchroRequirements athlete={athlete} />
-                <MobilityRequirements
+                            <SynchroRequirements athlete={athlete} />
+                        </section>
+                        {competesInEvent(athlete.dmt_level) && <section aria-labelledby="general-dmt-heading">
+                            <h3 id="general-dmt-heading" className="mb-3 text-xl font-bold text-black">DMT</h3>
+                            <DmtCompetitionRequirements athlete={athlete} />
+                        </section>}
+                    </div>
+                </section>
+                {showQualifications && <section id="qualification-standards" aria-labelledby="qualification-heading" className="mt-12 scroll-mt-6">
+                    <h2 id="qualification-heading" className="mb-5 border-b-2 border-black pb-3 text-2xl font-bold text-black">Qualification standards</h2>
+                    {showTraQualifications && <section aria-labelledby="qualification-tra-heading">
+                        <h3 id="qualification-tra-heading" className="text-xl font-bold text-black">TRA</h3>
+                        <MobilityRequirements
                     profileLevel={athlete.level}
                     dateOfBirth={athlete.date_of_birth}
                     gender={athlete.gender}
@@ -99,7 +123,7 @@ export default async function CompetitionSummaryPage({ params }: {
                     error={levelsError ? "Competition levels could not be loaded." : mobilityError ? "Mobility requirements could not be loaded. Check read access to qualification_requirements." : undefined}
                     routinesError={routinesError ? "Saved routines could not be loaded." : undefined}
                 />
-                <NationalsRequirements
+                        <NationalsRequirements
                     profileLevel={athlete.level}
                     gender={athlete.gender}
                     levels={levels ?? []}
@@ -112,16 +136,7 @@ export default async function CompetitionSummaryPage({ params }: {
                     error={levelsError ? "Competition levels could not be loaded." : nationalsError ? "Canadian Championships standards could not be loaded. Check read access to qualification_requirements." : undefined}
                     routinesError={routinesError ? "Saved routine DD could not be loaded." : undefined}
                 />
-                <DmtNationalsRequirements athlete={athlete} year={season.endYear} />
-                <DmtWagcRequirements athlete={athlete} />
-                <DmtNationalTeamRequirements athlete={athlete} year={season.endYear} />
-                <NationalTeamRequirements athlete={athlete} year={season.endYear}
-                    routines={[
-                        { name: "Optional A", value: routines?.optional_a ?? null, difficulty: routines?.optional_a_difficulty ?? null },
-                        { name: "Optional B", value: routines?.optional_b ?? null, difficulty: routines?.optional_b_difficulty ?? null },
-                    ]}
-                    routinesError={routinesError ? "Saved routines could not be loaded." : undefined} />
-                <WagcRequirements
+                        <WagcRequirements
                     requirements={wagcRequirements ?? []}
                     dateOfBirth={athlete.date_of_birth}
                     gender={athlete.gender}
@@ -133,6 +148,20 @@ export default async function CompetitionSummaryPage({ params }: {
                     error={wagcError ? "WAGC requirements could not be loaded. Check read access to qualification_requirements." : undefined}
                     routinesError={routinesError ? "Saved routine DD could not be loaded." : undefined}
                 />
+                        <NationalTeamRequirements athlete={athlete} year={season.endYear}
+                    routines={[
+                        { name: "Optional A", value: routines?.optional_a ?? null, difficulty: routines?.optional_a_difficulty ?? null },
+                        { name: "Optional B", value: routines?.optional_b ?? null, difficulty: routines?.optional_b_difficulty ?? null },
+                    ]}
+                    routinesError={routinesError ? "Saved routines could not be loaded." : undefined} />
+                    </section>}
+                    {showDmtQualifications && <section aria-labelledby="qualification-dmt-heading" className="mt-8">
+                        <h3 id="qualification-dmt-heading" className="text-xl font-bold text-black">DMT</h3>
+                        <DmtNationalsRequirements athlete={athlete} year={season.endYear} />
+                        <DmtWagcRequirements athlete={athlete} />
+                        <DmtNationalTeamRequirements athlete={athlete} year={season.endYear} />
+                    </section>}
+                </section>}
             </div>
         </main>
     );
