@@ -1,4 +1,4 @@
-import { calculateDmtDD } from "@/lib/dmt-dd";
+import { dmtPrintLines } from "@/lib/dmt-print";
 import type { DDLookupEntry } from "@/lib/dd";
 import type { DmtSetDraft } from "@/lib/dmt-sets";
 import { competesInEvent } from "@/lib/athlete-events";
@@ -54,14 +54,7 @@ export default function PrintablePlanSheet({
             : compulsorySkills[routines?.compulsory ?? ""] ?? [];
     const optionalA = splitRoutine(routines?.optional_a);
     const optionalB = splitRoutine(routines?.optional_b);
-    const dmtLines = dmtSets.flatMap((set) => set.passes.flatMap((pass) => {
-        const result = calculateDmtDD(pass, dmtDDLookup);
-        const label = dmtDDLookupError ? "unavailable" : result.unmatched.length ? "unmatched skill" : !result.complete ? "incomplete" : result.total?.toFixed(2) ?? "—";
-        return [
-            `${set.name || "Set 1"} · Pass ${pass.passNumber} (DD: ${label}) · ${pass.firstPlacement}: ${pass.firstCode || "—"}`,
-            `${set.name || "Set 1"} · Pass ${pass.passNumber} · dismount: ${pass.dismountCode || "—"}`,
-        ];
-    }));
+    const dmtLines = dmtPrintLines(dmtSets, dmtDDLookup, dmtDDLookupError);
 
     return (
         <section className="mx-auto mb-4 w-[7.75in] min-h-[10in] bg-white p-2 text-black print:mb-0 print:break-after-page">
@@ -120,11 +113,11 @@ export default function PrintablePlanSheet({
                             colSpan={3}
                             className="border border-black bg-yellow-300 p-1 text-center font-semibold"
                         >
-                            DMT Sets
+                            DMT · {dmtSets[0]?.name || "Competitive set"}
                         </td>
                         <td
                             colSpan={2}
-                            rowSpan={dmtLines.length + 1}
+                            rowSpan={5}
                             className="border border-black p-1 align-top"
                         >
                             <p className="font-semibold">Skills to work on:</p>
@@ -141,7 +134,7 @@ export default function PrintablePlanSheet({
                             <td className="border border-black bg-zinc-100 p-1 text-center">
                                 {index + 1}
                             </td>
-                            <td colSpan={2} className="border border-black p-1">
+                            <td colSpan={2} className="h-5 whitespace-nowrap border border-black p-1 text-[10px] leading-tight">
                                 {dmtError ? index === 0 ? "DMT set unavailable" : "" : dmtLines[index] ?? ""}
                             </td>
                         </tr>

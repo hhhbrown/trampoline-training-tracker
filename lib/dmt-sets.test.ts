@@ -94,3 +94,11 @@ test("explicitly added empty sets can be saved and retain their name", async () 
     assert.equal(draft.id, 22);
     assert.equal(draft.passes.length, 2);
 });
+
+test("exposes at most the first two sets in database order without deleting extras", async () => {
+    const records = [1, 2, 3].map((id) => ({ id, name: `Set ${id}`, dmt_passes: [] }));
+    const client = { from: () => ({ select: () => ({ eq: () => ({ order: async () => ({ data: records, error: null }) }) }) }) } as unknown as SupabaseClient;
+    const result = await loadDmtSets(client, 7, "Level 4");
+    assert.deepEqual(result.drafts.map((set) => set.id), [1, 2]);
+    assert.equal(records.length, 3);
+});
