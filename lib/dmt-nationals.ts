@@ -14,3 +14,9 @@ export function dmtNationalsRounds(sets: DmtSetDraft[], lookup: DDLookupEntry[])
             difficulty: complete ? results.reduce((total, result) => total + Math.round((result?.total ?? 0) * 100), 0) / 100 : null }];
     }));
 }
+
+export function dmtWagcRounds(sets: DmtSetDraft[], lookup: DDLookupEntry[]) {
+    return dmtNationalsRounds(sets.map((set) => ({ ...set,
+        passes: set.passes.filter((pass) => pass.passNumber === 1 || pass.passNumber === 2),
+    })), lookup);
+}

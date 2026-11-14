@@ -13,17 +13,18 @@ export function supportsWagc(profileLevel: string | null) {
     return numbered != null && Number(numbered[1]) >= 5;
 }
 
-export function wagcRules(requirements: QualificationRequirement[], gender: string | null) {
+export function wagcRules(requirements: QualificationRequirement[], gender: string | null, discipline: "TRI" | "DMT" = "TRI") {
     return requirements.filter((rule) => rule.qualification_type === "international"
         && rule.ruleset_year === WAGC_RULESET_YEAR
-        && /\bWAGC\b/i.test(rule.pathway_name ?? "") && /\bTRI\b/i.test(rule.pathway_name ?? "")
+        && /\bWAGC\b/i.test(rule.pathway_name ?? "")
+        && (rule.discipline != null ? rule.discipline === discipline : discipline === "TRI" && /\bTRI\b/i.test(rule.pathway_name ?? ""))
         && (rule.gender == null || mobilityGender(rule.gender) === mobilityGender(gender)));
 }
 
-export function wagcAgeGroup(requirements: QualificationRequirement[], birthDate: string | null, gender: string | null) {
+export function wagcAgeGroup(requirements: QualificationRequirement[], birthDate: string | null, gender: string | null, discipline: "TRI" | "DMT" = "TRI") {
     const age = competitionAge(birthDate, WAGC_AGE_CUTOFF_YEAR);
     if (age == null) return undefined;
-    return wagcRules(requirements, gender).find((rule) => (rule.min_age == null || age >= rule.min_age)
+    return wagcRules(requirements, gender, discipline).find((rule) => (rule.min_age == null || age >= rule.min_age)
         && (rule.max_age == null || age <= rule.max_age));
 }
 

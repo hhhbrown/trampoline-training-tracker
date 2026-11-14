@@ -54,3 +54,11 @@ test("checks eligible regular competition categories", () => {
         assert(!wagcCategoryEligible(level, age));
     }
 });
+
+test("DMT WAGC uses explicit discipline and the 2027 age cutoff with 2026 rules", () => {
+    const dmt = { ...base, discipline: "DMT", pathway_name: "WAGC", min_age: 13, max_age: 14, ruleset_year: 2026 };
+    assert.equal(wagcAgeGroup([dmt], "2013-12-31", dmt.gender, "DMT"), dmt);
+    assert.equal(wagcAgeGroup([dmt], "2013-12-31", dmt.gender), undefined);
+    assert.equal(wagcAgeGroup([{ ...dmt, ruleset_year: 2027 }], "2013-12-31", dmt.gender, "DMT"), undefined);
+    assert.equal(wagcAgeGroup([dmt], "2012-01-01", dmt.gender, "DMT"), undefined);
+});

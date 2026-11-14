@@ -1,3 +1,5 @@
+import NationalTeamRequirements from "@/components/NationalTeamRequirements";
+import DmtWagcRequirements from "@/components/DmtWagcRequirements";
 import DmtNationalsRequirements from "@/components/DmtNationalsRequirements";
 import DmtCompetitionRequirements from "@/components/DmtCompetitionRequirements";
 import SynchroRequirements from "@/components/SynchroRequirements";
@@ -110,6 +112,13 @@ export default async function CompetitionSummaryPage({ params }: {
                     routinesError={routinesError ? "Saved routine DD could not be loaded." : undefined}
                 />
                 <DmtNationalsRequirements athlete={athlete} year={season.endYear} />
+                <DmtWagcRequirements athlete={athlete} />
+                <NationalTeamRequirements athlete={athlete} year={season.endYear}
+                    routines={[
+                        { name: "Optional A", value: routines?.optional_a ?? null, difficulty: routines?.optional_a_difficulty ?? null },
+                        { name: "Optional B", value: routines?.optional_b ?? null, difficulty: routines?.optional_b_difficulty ?? null },
+                    ]}
+                    routinesError={routinesError ? "Saved routines could not be loaded." : undefined} />
                 <WagcRequirements
                     requirements={wagcRequirements ?? []}
                     dateOfBirth={athlete.date_of_birth}

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { dmtNationalsRounds } from "./dmt-nationals";
+import { dmtNationalsRounds, dmtWagcRounds } from "./dmt-nationals";
 import { emptyDmtSet } from "./dmt-sets";
 import { nationalsRequirement } from "./nationals";
 import type { QualificationRequirement } from "./mobility";
@@ -23,4 +23,13 @@ test("DMT qualification matches database level, gender and year independently of
     assert.equal(nationalsRequirement([rule], level, "Male", 2027), undefined);
     assert.equal(nationalsRequirement([rule], level, "Female", 2026), undefined);
     assert.equal(nationalsRequirement([{ ...rule, discipline: "TRI" }], level, "Female", 2027), undefined);
+});
+
+test("DMT WAGC excludes finals and mount bonuses", () => {
+    const set = emptyDmtSet("Level 5");
+    set.passes = set.passes.map((pass) => ({ ...pass, firstCode: "41o", dismountCode: pass.passNumber <= 2 ? "4-o" : "8--o" }));
+    const rounds = dmtWagcRounds([set], [{ fig_code: "41o", difficulty: 0.5 }, { fig_code: "4-o", difficulty: 0.5 }, { fig_code: "8--o", difficulty: 3 }]);
+    assert.equal(rounds.length, 1);
+    assert.equal(rounds[0].difficulty, 2);
+    assert.match(rounds[0].name, /Preliminary/);
 });
