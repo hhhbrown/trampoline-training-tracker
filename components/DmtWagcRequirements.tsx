@@ -57,7 +57,6 @@ export default async function DmtWagcRequirements({ athlete }: {
                 <div className="space-y-2 border-t border-zinc-200 pt-4 text-sm leading-6 text-zinc-600">
                     <p>Bonuses do not count toward WAGC qualification. Both score and minimum DD must be achieved in the same Qualification Round. Scores are shown for reference; saved passes indicate DD readiness only.</p>
                     <p>Priority goes to eligible top-eight Senior National Team athletes not attending Worlds in DMT, top-four Development athletes, and top-four Junior athletes, using rankings at the conclusion of the 2026 Canadian Championships. National Team members have priority; ranking among them follows the normal selection procedure. Ages 17–21 prioritize Senior, then Development athletes.</p>
-                    <p>To complete the delegation, the World Games Sub-Committee may consider athletes who meet the score requirement but not the DD requirement. This is discretionary and does not mark the DD requirement as met.</p>
                     <p>Bonuses may count toward National Team qualification. This check does not confirm team selection or a qualifying competition result.</p>
                 </div>
             </div>

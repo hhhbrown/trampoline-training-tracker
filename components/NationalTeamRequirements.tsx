@@ -40,7 +40,7 @@ export function TeamSection({ discipline, profileLevel, athlete, year, requireme
     const age = competitionAge(athlete.date_of_birth, year);
     const rules = nationalTeamRules(requirements, discipline, athlete.gender, athlete.date_of_birth, year);
     return <section aria-labelledby={`national-team-${discipline}`} className="mt-7 rounded-2xl border border-red-100 bg-white p-5 shadow-sm sm:p-6">
-        <h2 id={`national-team-${discipline}`} className="text-2xl font-extrabold tracking-tight text-zinc-950">National Team · {discipline === "TRS" ? "SYN" : "TRI"}</h2>
+        <h2 id={`national-team-${discipline}`} className="text-2xl font-extrabold tracking-tight text-zinc-950">National Team · {discipline === "TRS" ? "SYN" : discipline}</h2>
         <p className="mt-2 text-sm text-zinc-600">{NATIONAL_TEAM_RULESET_YEAR} rules · Age: {age ?? "Not available"} (December 31, {year})</p>
         {error && <p role="status" className="mt-4 text-sm text-amber-900">{error}</p>}
         {!rules.length && !error && <p className="mt-4 text-sm text-amber-900">No matching National Team standard for this age and gender category is visible in the database.</p>}
@@ -53,7 +53,7 @@ export function TeamSection({ discipline, profileLevel, athlete, year, requireme
             return <details key={rule.id} className="mt-5 overflow-hidden rounded-xl border border-zinc-200">
                 <summary className={`cursor-pointer px-4 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-700 ${style}`}>
                     <span className="text-lg font-bold">{rule.pathway_name}</span>
-                    <span className="mt-2 block text-sm font-semibold">{age == null ? "Date of birth required" : !categoryEligible ? "Competition category not eligible for this ranking list" : met ? "Profile DD target met · ranking entry requires verification" : failed ? "DD target not met" : "Checks incomplete"}</span>
+                    <span className="mt-2 block text-sm font-semibold">{age == null ? "Date of birth required" : !categoryEligible ? "Competition category not eligible for this ranking list" : met ? "Profile DD target met" : failed ? "DD target not met" : "Checks incomplete"}</span>
                 </summary>
                 <div className="space-y-4 p-4">
                     <p className="text-sm font-semibold">Age requirement: {rule.max_age == null ? `${rule.min_age}+` : `${rule.min_age}–${rule.max_age}`}</p>
@@ -63,7 +63,7 @@ export function TeamSection({ discipline, profileLevel, athlete, year, requireme
                         <p className="font-bold">{check.status === "met" ? "✓" : check.status === "unmet" ? "✕" : "!"} {check.title}</p><p className="mt-1 text-sm">{check.detail}</p>
                     </li>)}</ul></div>)}
                     <p className="text-sm leading-6 text-zinc-600">{discipline === "DMT" ? "Only athletes on the National Team Ranking List are eligible for Junior, Development, or Senior National Team selection and participation as Canadian Team members in FIG World Cups, World Championships, or other FIG-sanctioned events. Competing in Junior, Level 6, or Senior is required; ranking-list membership must be verified by the coach." : nationalTeamEntryNote(rule.pathway_name, profileLevel)}</p>
-                    <p className="text-sm leading-6 text-zinc-600">{discipline === "DMT" ? "Ranking score: best Q1 two-pass total + highest single-pass score + next-highest single-pass score. Both single-pass scores must come from rounds other than the round used for Q1. Bonuses count toward National Team qualification. The DD check uses the two-pass Q1 total; it does not calculate a ranking score." : "Coach verification required for trial participation, prior mobility, notifications, and eligible carried-forward scores."} Saved routines indicate DD readiness; scores and ranking-list entry are not verified by this app.</p>
+                    <p className="text-sm leading-6 text-zinc-600">{discipline === "DMT" ? "Ranking score: best Q1 two-pass total + highest single-pass score + next-highest single-pass score. Both single-pass scores must come from rounds other than the round used for Q1. Bonuses count toward National Team qualification." : "Coach verification required for trial participation, prior mobility, notifications, and eligible carried-forward scores."}</p>
                     {discipline === "TRS" && <p className="text-sm text-zinc-600">This checks this athlete and the shared routine. Confirm the partner’s eligibility separately. Mixed SYN is not supported.</p>}
                 </div>
             </details>;

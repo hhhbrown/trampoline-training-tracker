@@ -38,26 +38,28 @@ export default function MobilityRequirements({ profileLevel, dateOfBirth, gender
                         const futureSeason = source && (/^level\s+4$/i.test(source.name.trim()) || ["novice", "junior"].includes(source.name.trim().toLowerCase()))
                             ? futureMobilitySeason(path, target, dateOfBirth, year, discipline) : null;
                         const ageCheck = mobilityAgeCheck(path, target, dateOfBirth, year, discipline);
-                        if (futureSeason) {
-                            ageCheck.status = "unknown";
-                            ageCheck.detail = `Age-eligible for ${target?.name} from the ${futureSeason.label} season (December 31, ${futureSeason.endYear}).`;
-                        }
                         const needsRoutine = path.minimum_dd != null || Boolean(path.required_skill);
                         const routineResults = discipline === "DMT" ? dmtMobilityResults(path, dmtSets, dmtDDLookup) : availableRoutines.map((routine) => ({ routine, checks: mobilityRoutineChecks(path, routine) }));
+                        const ddMet = path.minimum_dd == null || (!routinesError && routineResults.some(({ routine }) =>
+                            routine.difficulty != null && Number.isFinite(routine.difficulty) && routine.difficulty >= Number(path.minimum_dd)));
+                        if (futureSeason) {
+                            ageCheck.status = "unknown";
+                            if (ddMet) ageCheck.detail = `Age-eligible for ${target?.name} from the ${futureSeason.label} season (December 31, ${futureSeason.endYear}).`;
+                        }
                         const routineMet = !needsRoutine || (!routinesError && routineResults.some((result) => result.checks.every((check) => check.status === "met")));
                         const routineFailed = needsRoutine && !routinesError && routineResults.length > 0 && routineResults.every((result) => result.checks.some((check) => check.status === "unmet"));
                         const status = ageCheck.status === "unmet" || routineFailed ? "unmet"
                             : ageCheck.status === "unknown" || !routineMet ? "unknown" : "met";
                         const summary = status === "unmet" ? "Requirements not met"
                             : status === "met" ? "Profile requirements met"
-                            : futureSeason && routineMet ? "Routine requirements met · awaiting age eligibility" : "Checks incomplete";
+                            : futureSeason && routineMet ? null : "Checks incomplete";
                         return (
                             <details key={path.id} className="overflow-hidden rounded-xl border border-zinc-200">
                                 <summary className={`cursor-pointer px-4 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-700 ${status === "met" ? "bg-emerald-50" : futureSeason && status !== "unmet" ? "bg-amber-50" : "bg-red-50"}`}>
                                     <span className="text-lg font-bold text-black">{title || `${source?.name} to ${target?.name ?? "target level"}`}</span>
                                     {destinationNote && <span className="mt-2 block text-sm font-medium text-zinc-700">{destinationNote}</span>}
-                                    {futureSeason && <span className="mt-2 block text-sm font-medium text-amber-900">Age-eligible for {target?.name} from {futureSeason.label}; the score target can still be pursued now.</span>}
-                                    <span className={`mt-2 block text-sm font-semibold ${status === "met" ? "text-emerald-800" : status === "unmet" ? "text-red-800" : "text-amber-900"}`}>{summary}</span>
+                                    {futureSeason && ddMet && <span className="mt-2 block text-sm font-medium text-amber-900">Age-eligible for {target?.name} from {futureSeason.label}; the score target can still be pursued now.</span>}
+                                    {summary && <span className={`mt-2 block text-sm font-semibold ${status === "met" ? "text-emerald-800" : status === "unmet" ? "text-red-800" : "text-amber-900"}`}>{summary}</span>}
                                 </summary>
                                 <div className="space-y-4 p-4">
                                     {discipline === "DMT" && <p className="text-sm text-black">Saved passes indicate DD and skill readiness. The score is a reference target, not a verified competition result.</p>}

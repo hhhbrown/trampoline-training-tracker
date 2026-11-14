@@ -44,7 +44,7 @@ export default async function SynchroRequirements({ athlete }: {
                         <p className="mt-1 text-sm font-semibold">{error ?? check.message}</p>
                     </div>
                 </div>
-                {synParticipationNote(synLevel) && <p className="text-sm leading-6 text-black">Participation in gendered SYN at Level 5 or above means this pair cannot participate in Mixed SYN. This application supports gendered SYN only.</p>}
+                {synParticipationNote(synLevel) && <p className="text-sm leading-6 text-black">Participation in gendered TRS at Level 5 or above means this pair cannot participate in Mixed TRS.</p>}
             </div>
         </section>
     );
