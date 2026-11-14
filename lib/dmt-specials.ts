@@ -46,13 +46,13 @@ export function checkDmtSpecials(pass: DmtPassDraft, level: string, lookup: DDLo
         const dismount = pass.dismountCode.trim().replace(/^\.+/, "");
         const complete = Boolean(first && dismount);
         const valid = (first.startsWith("4") && dismount.startsWith("4"))
-            || (first.startsWith("-") && dismount.startsWith("8"));
+            || ((first.startsWith("-") || first.startsWith("4")) && dismount.startsWith("8"));
         return [
             { title: "2 elements", status: complete ? "met" : "unknown", message: complete ? "Both elements entered" : "Enter both elements for this pass" },
             { title: "Two saltos or a double dismount", status: !complete ? "unknown" : valid ? "met" : "unmet",
                 message: !complete ? "Complete both elements to check this requirement"
                     : valid ? `${pass.firstCode.trim()} → ${pass.dismountCode.trim()}`
-                    : "Both skills must start with 4, or the mount/spotter must start with - and the dismount with 8" },
+                    : "Both skills must start with 4, or the mount/spotter must start with - or 4 and the dismount with 8" },
         ];
     }
     const number = /^level\s+([12])$/i.exec(level.trim())?.[1];

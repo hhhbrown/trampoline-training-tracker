@@ -58,13 +58,13 @@ test("mount bonus counts distinct 41 shapes once per set and excludes other zone
     assert.equal(dmtMountBonus(set, "Level 1").total, 0);
 });
 
-test("Level 3 accepts two 4-prefix skills or a -prefix first skill with an 8-prefix dismount", () => {
-    for (const firstPlacement of ["mount", "spotter"] as const) {
-        for (const [firstCode, dismountCode] of [["41o", "43"], [".4-o", ".44"], ["--o", "8--o"], ["-2", ".8-1o"]]) {
-            assert.equal(checkDmtSpecials({ ...pass, firstPlacement, firstCode, dismountCode }, "Level 3", [])[1].status, "met");
+test("Levels 3 and 4 accept 4-to-4, dash-to-8 and 4-to-8 passes", () => {
+    for (const level of ["Level 3", "Level 4"]) for (const firstPlacement of ["mount", "spotter"] as const) {
+        for (const [firstCode, dismountCode] of [["41o", "43"], [".4-o", ".44"], ["--o", "8--o"], ["-2", ".8-1o"], ["4-o", "8--o"], [".4-o", ".8-1<"]]) {
+            assert.equal(checkDmtSpecials({ ...pass, firstPlacement, firstCode, dismountCode }, level, [])[1].status, "met");
         }
-        for (const [firstCode, dismountCode] of [["--o", "43"], ["4-o", "8--o"], ["8--o", "4-o"], ["3-o", "8--o"]]) {
-            assert.equal(checkDmtSpecials({ ...pass, firstPlacement, firstCode, dismountCode }, "Level 3", [])[1].status, "unmet");
+        for (const [firstCode, dismountCode] of [["--o", "43"], ["8--o", "4-o"], ["3-o", "8--o"]]) {
+            assert.equal(checkDmtSpecials({ ...pass, firstPlacement, firstCode, dismountCode }, level, [])[1].status, "unmet");
         }
     }
     assert.equal(checkDmtSpecials({ ...pass, firstCode: "" }, "Level 3", [])[1].status, "unknown");
