@@ -124,63 +124,69 @@ export default function EditAthleteForm({
     }
 
     return (
-        <section className="mt-8 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-            <div className="space-y-5">
-                <div>
-                    <label className="mb-1 block text-black font-medium text-zinc-700">
-                        Name
-                    </label>
-                    <input
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-black outline-none focus:ring-2 focus:ring-red-500"
+        <div className="mt-6 space-y-5">
+            <section aria-labelledby="athlete-details-heading" className="overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm">
+                <h2 id="athlete-details-heading" className="border-b border-red-200 bg-red-50 px-5 py-3 text-lg font-bold text-black">Athlete details</h2>
+                <div className="space-y-5 p-5">
+                    <div>
+                        <label htmlFor="athlete-name" className="mb-1 block text-sm font-semibold text-black">Name</label>
+                        <input
+                            id="athlete-name"
+                            autoComplete="name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-base text-black outline-none focus:border-red-700 focus:ring-2 focus:ring-red-700"
+                        />
+                    </div>
+                    <AthleteDetailsFields
+                        dateOfBirth={dateOfBirth}
+                        onDateOfBirthChange={setDateOfBirth}
+                        gender={gender}
+                        onGenderChange={setGender}
                     />
+                    <div className="grid gap-5 sm:grid-cols-2">
+                        <AthleteLevelField value={level} onChange={setLevel} levels={triLevels} error={triLevelsError} />
+                        <div>
+                            <label htmlFor="athlete-coach" className="mb-1 block text-sm font-semibold text-black">Coach</label>
+                            <select
+                                id="athlete-coach"
+                                value={coachId}
+                                onChange={(e) => setCoachId(e.target.value)}
+                                className="w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-base text-black outline-none focus:border-red-700 focus:ring-2 focus:ring-red-700"
+                            >
+                                <option value="">Select coach</option>
+                                {coaches.map((coach) => <option key={coach.id} value={coach.id}>{coach.name}</option>)}
+                            </select>
+                        </div>
+                    </div>
                 </div>
+            </section>
 
-                <AthleteLevelField value={level} onChange={setLevel} levels={triLevels} error={triLevelsError} />
-
-                <div>
-                    <label className="mb-1 block text-black font-medium text-zinc-700">
-                        Coach
-                    </label>
-                    <select
-                        value={coachId}
-                        onChange={(e) => setCoachId(e.target.value)}
-                        className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-black outline-none focus:ring-2 focus:ring-red-500"
-                    >
-                        <option value="">Select coach</option>
-                        {coaches.map((coach) => (
-                            <option key={coach.id} value={coach.id}>
-                                {coach.name}
-                            </option>
-                        ))}
-                    </select>
+            <section aria-labelledby="athlete-events-heading" className="overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm">
+                <h2 id="athlete-events-heading" className="border-b border-red-200 bg-red-50 px-5 py-3 text-lg font-bold text-black">DMT & Synchro</h2>
+                <div className="p-5">
+                    <AthleteEventsFields value={events} onChange={setEvents} athletes={partnerAthletes} athleteId={athlete.id} partnersError={partnersError} externalPartnerAvailable={externalPartnerAvailable} externalAthletes={externalAthletes} externalPartnersError={externalPartnersError} />
                 </div>
+            </section>
 
-                <AthleteEventsFields value={events} onChange={setEvents} athletes={partnerAthletes} athleteId={athlete.id} partnersError={partnersError} externalPartnerAvailable={externalPartnerAvailable} externalAthletes={externalAthletes} externalPartnersError={externalPartnersError} />
-
-                <AthleteDetailsFields
-                    dateOfBirth={dateOfBirth}
-                    onDateOfBirthChange={setDateOfBirth}
-                    gender={gender}
-                    onGenderChange={setGender}
-                />
-
+            <div className="flex justify-end">
                 <button
                     type="button"
                     onClick={handleSave}
-                    className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+                    className="min-h-11 w-full rounded-lg bg-red-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2 sm:w-auto"
                 >
                     Save Athlete
                 </button>
+            </div>
+            <div className="flex justify-end border-t border-red-200 pt-5">
                 <button
                     type="button"
                     onClick={() => handleDelete(athlete.id)}
-                    className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+                    className="min-h-11 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-800 transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
                 >
                     Delete Athlete
                 </button>
             </div>
-        </section>
+        </div>
     );
 }

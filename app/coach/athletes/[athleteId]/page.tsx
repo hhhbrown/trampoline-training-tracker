@@ -1,3 +1,4 @@
+import BackLink from "@/components/BackLink";
 import { resolveSynchroPartner } from "@/lib/synchro-partner";
 import { createClient } from "@/lib/supabase/server";
 import EditAthleteForm from "./EditAthleteForm";
@@ -48,19 +49,16 @@ export default async function CoachEditAthletePage({ params }: PageProps) {
     ]);
 
     return (
-        <main className="min-h-screen bg-zinc-50 px-4 py-10">
+        <main className="min-h-screen bg-[#fffaf0] px-4 py-10 text-black" style={{ colorScheme: "light" }}>
             <div className="mx-auto max-w-2xl">
-                <p className="text-sm font-medium uppercase tracking-wide text-red-600">
-                    Coach View
-                </p>
-
-                <h1 className="mt-2 text-3xl font-bold text-black">
-                    Edit Athlete
-                </h1>
-
-                <h2 className="mt-2 text-1xl font-bold text-black">
-                    {athlete?.name}
-                </h2>
+                <BackLink href={`/coach/${athlete.coach_id}/athletes`}>Back to athletes</BackLink>
+                <header className="mt-6 border-b-2 border-red-700 pb-5">
+                    <p className="text-sm font-semibold text-red-800">Edit Athlete</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-3">
+                        <h1 className="min-w-0 break-words text-3xl font-bold text-black">{athlete.name}</h1>
+                        {athlete.level && <span className="rounded-md bg-black px-2 py-1 text-sm font-semibold text-white">{athlete.level}</span>}
+                    </div>
+                </header>
 
                 <EditAthleteForm athlete={displayedAthlete} coaches={coaches ?? []} triLevels={levelOptions} triLevelsError={levelError}
                     partnerAthletes={partnerAthletes ?? []}
