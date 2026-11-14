@@ -1,3 +1,4 @@
+import { resolveSynchroPartner } from "@/lib/synchro-partner";
 import { createClient } from "@/lib/supabase/server";
 import EditAthleteForm from "./EditAthleteForm";
 
@@ -11,7 +12,7 @@ export default async function CoachEditAthletePage({ params }: PageProps) {
 
     const { data: athlete, error } = await supabase
         .from("athletes")
-        .select("id, name, level, coach_id, date_of_birth, gender")
+        .select("*")
         .eq("id", Number(athleteId))
         .single();
 
@@ -35,6 +36,17 @@ export default async function CoachEditAthletePage({ params }: PageProps) {
         ? "TRI levels could not be loaded. Existing values will be preserved; reload to try again."
         : undefined;
 
+    const pairing = await resolveSynchroPartner(athlete);
+    const displayedAthlete = pairing.inferred && pairing.partner
+        ? { ...athlete, syn_level: athlete.syn_level || pairing.partner.syn_level, synchro_partner_id: pairing.partner.id }
+        : athlete;
+
+    const [{ data: partnerAthletes, error: partnersError }, { error: externalColumnError }, { data: externalAthletes, error: externalPartnersError }] = await Promise.all([
+        supabase.from("athletes").select("id, name").order("name"),
+        supabase.from("athletes").select("external_synchro_partner_id").limit(0),
+        supabase.from("external_athletes").select("id, name, club").order("name"),
+    ]);
+
     return (
         <main className="min-h-screen bg-zinc-50 px-4 py-10">
             <div className="mx-auto max-w-2xl">
@@ -50,7 +62,12 @@ export default async function CoachEditAthletePage({ params }: PageProps) {
                     {athlete?.name}
                 </h2>
 
-                <EditAthleteForm athlete={athlete} coaches={coaches ?? []} triLevels={levelOptions} triLevelsError={levelError} />
+                <EditAthleteForm athlete={displayedAthlete} coaches={coaches ?? []} triLevels={levelOptions} triLevelsError={levelError}
+                    partnerAthletes={partnerAthletes ?? []}
+                    partnersError={partnersError ? "Club athletes could not be loaded. Reload to try again." : undefined}
+                    externalPartnerAvailable={!externalColumnError}
+                    externalAthletes={externalAthletes ?? []}
+                    externalPartnersError={externalPartnersError ? "External athletes could not be loaded. Check read access to external_athletes." : undefined} />
             </div>
         </main>
     );

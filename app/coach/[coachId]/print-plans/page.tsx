@@ -11,7 +11,7 @@ export default async function PrintPlansPage({ params }: PageProps) {
 
   const { data: athletes, error } = await supabase
     .from("athletes")
-    .select("id, name, level")
+    .select("id, name, level, dmt_level")
     .eq("coach_id", Number(coachId))
     .order("name");
 

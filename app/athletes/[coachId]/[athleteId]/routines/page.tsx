@@ -1,3 +1,5 @@
+import { competesInEvent } from "@/lib/athlete-events";
+import AthleteEventSummary from "@/components/AthleteEventSummary";
 import { createClient } from "@/lib/supabase/server";
 import { compulsorySkills } from "@/lib/compulsories";
 import BackLink from "@/components/BackLink";
@@ -15,7 +17,7 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
 
     const { data: athlete, error: athleteError } = await supabase
         .from("athletes")
-        .select("id, name, level")
+        .select("*")
         .eq("id", Number(athleteId))
         .single();
 
@@ -60,6 +62,7 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
                             </span>
                         )}
                     </div>
+                    <AthleteEventSummary athlete={athlete} />
                 </header>
 
                 <div className="space-y-10">
@@ -76,6 +79,7 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
                         </div>
                     </section>
 
+                    {competesInEvent(athlete.dmt_level) && (
                     <section aria-labelledby="double-mini-heading">
                         <h2 id="double-mini-heading" className="mb-4 text-xl font-bold text-red-900">Double Mini</h2>
                         <div className="grid items-start gap-5 md:grid-cols-2">
@@ -83,6 +87,7 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
                             <RoutineCard title="Set B" value={routines?.double_mini_set_b} difficulty={routines?.double_mini_set_b_difficulty} />
                         </div>
                     </section>
+                    )}
 
                     <section aria-labelledby="practice-heading">
                         <h2 id="practice-heading" className="mb-4 text-xl font-bold text-red-900">Skills & Notes</h2>

@@ -1,3 +1,4 @@
+import AthleteEventSummary from "@/components/AthleteEventSummary";
 import NationalsRequirements from "@/components/NationalsRequirements";
 import WagcRequirements from "@/components/WagcRequirements";
 import { WAGC_RULESET_YEAR } from "@/lib/wagc";
@@ -15,7 +16,7 @@ export default async function CompetitionSummaryPage({ params }: {
     const supabase = await createClient();
     const { data: athlete, error } = await supabase
         .from("athletes")
-        .select("id, name, level, coach_id, date_of_birth, gender")
+        .select("*")
         .eq("id", Number(athleteId))
         .maybeSingle();
 
@@ -62,6 +63,7 @@ export default async function CompetitionSummaryPage({ params }: {
                 <header className="mb-8 border-b border-zinc-200 pb-6">
                     <p className="text-sm font-semibold text-red-700">Competition Summary</p>
                     <h1 className="mt-2 break-words text-3xl font-bold tracking-tight">{athlete.name}</h1>
+                    <AthleteEventSummary athlete={athlete} />
                 </header>
                 <CompetitionRequirements
                     dateOfBirth={athlete.date_of_birth}

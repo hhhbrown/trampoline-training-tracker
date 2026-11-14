@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import AthleteEventsFields, { type ExternalPartnerOption, type PartnerOption } from "@/components/AthleteEventsFields";
+import { prepareEventPayload, eventValidation, type AthleteEvents } from "@/lib/athlete-events";
 import AthleteLevelField from "@/components/AthleteLevelField";
 import AthleteDetailsFields from "@/components/AthleteDetailsFields";
 import { createClient } from "@/lib/supabase/client";
@@ -13,6 +15,10 @@ type Athlete = {
     coach_id: number | null;
     date_of_birth: string | null;
     gender: string | null;
+    dmt_level: string | null;
+    syn_level: string | null;
+    synchro_partner_id: number | null;
+    external_synchro_partner_id: number | null;
 };
 
 type Coach = {
@@ -25,11 +31,21 @@ export default function EditAthleteForm({
     coaches,
     triLevels,
     triLevelsError,
+    partnerAthletes,
+    partnersError,
+    externalPartnerAvailable,
+    externalAthletes,
+    externalPartnersError,
 }: {
     athlete: Athlete;
     coaches: Coach[];
     triLevels: string[];
     triLevelsError?: string;
+    partnerAthletes: PartnerOption[];
+    partnersError?: string;
+    externalPartnerAvailable: boolean;
+    externalAthletes: ExternalPartnerOption[];
+    externalPartnersError?: string;
 }) {
     const [name, setName] = useState(athlete.name);
     const [level, setLevel] = useState(athlete.level ?? "");
@@ -37,6 +53,15 @@ export default function EditAthleteForm({
     const [gender, setGender] = useState(athlete.gender ?? "");
     const [coachId, setCoachId] = useState(athlete.coach_id ?? "");
 
+    const [events, setEvents] = useState<AthleteEvents>({
+        dmtLevel: athlete.dmt_level ?? "",
+        synLevel: athlete.syn_level ?? "",
+        partnerType: athlete.synchro_partner_id ? "club" : athlete.external_synchro_partner_id ? "external" : "none",
+        partnerId: athlete.synchro_partner_id?.toString() ?? "",
+        externalPartnerId: athlete.external_synchro_partner_id?.toString() ?? "",
+        externalName: "",
+        externalClub: "",
+    });
     const router = useRouter();
 
     async function handleDelete(athleteId: number) {
@@ -65,7 +90,17 @@ export default function EditAthleteForm({
     }
 
     async function handleSave() {
+        const eventError = eventValidation(events, athlete.id);
+        if (eventError) { alert(eventError); return; }
         const supabase = createClient();
+        let eventData;
+        try {
+            eventData = await prepareEventPayload(events, supabase, externalPartnerAvailable);
+            setEvents(eventData.events);
+        } catch (error) {
+            alert(error instanceof Error ? error.message : "Unable to save external partner.");
+            return;
+        }
 
         const { error } = await supabase
             .from("athletes")
@@ -75,6 +110,7 @@ export default function EditAthleteForm({
                 coach_id: Number(coachId),
                 date_of_birth: dateOfBirth || null,
                 gender: gender.trim() || null,
+                ...eventData.payload,
             })
             .eq("id", athlete.id);
 
@@ -120,6 +156,8 @@ export default function EditAthleteForm({
                         ))}
                     </select>
                 </div>
+
+                <AthleteEventsFields value={events} onChange={setEvents} athletes={partnerAthletes} athleteId={athlete.id} partnersError={partnersError} externalPartnerAvailable={externalPartnerAvailable} externalAthletes={externalAthletes} externalPartnersError={externalPartnersError} />
 
                 <AthleteDetailsFields
                     dateOfBirth={dateOfBirth}

@@ -1,3 +1,4 @@
+import AthleteEventSummary from "@/components/AthleteEventSummary";
 import Link from "next/link";
 import BackLink from "@/components/BackLink";
 import { createClient } from "@/lib/supabase/server";
@@ -15,7 +16,7 @@ export default async function AthleteDashboardPage({ params }: PageProps) {
 
     const { data: athlete, error } = await supabase
         .from("athletes")
-        .select("id, name, level")
+        .select("*")
         .eq("id", Number(athleteId))
         .single();
 
@@ -88,6 +89,7 @@ export default async function AthleteDashboardPage({ params }: PageProps) {
                             </span>
                         )}
                     </div>
+                    <AthleteEventSummary athlete={athlete} />
                 </header>
 
                 <section aria-labelledby="training-heading" className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">

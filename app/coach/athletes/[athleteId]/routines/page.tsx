@@ -11,7 +11,7 @@ export default async function RoutinesPage({ params }: PageProps) {
 
     const { data: athlete } = await supabase
         .from("athletes")
-        .select("coach_id, name")
+        .select("coach_id, name, dmt_level")
         .eq("id", Number(athleteId))
         .single();
 
@@ -39,6 +39,7 @@ export default async function RoutinesPage({ params }: PageProps) {
                     athleteId={athleteId}
                     athleteName={athlete?.name ?? ""}
                     routines={routines}
+                    dmtLevel={athlete?.dmt_level ?? null}
                     ddLookup={ddLookup ?? []}
                     ddLookupError={ddLookupError
                         ? "Unable to load the DD lookup table. Enter DD manually or reload to try again."

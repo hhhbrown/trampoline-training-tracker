@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import AthleteEventsFields, { type ExternalPartnerOption, type PartnerOption } from "@/components/AthleteEventsFields";
+import { prepareEventPayload, eventValidation, type AthleteEvents } from "@/lib/athlete-events";
 import AthleteLevelField from "@/components/AthleteLevelField";
 import AthleteDetailsFields from "@/components/AthleteDetailsFields";
 import { createClient } from "@/lib/supabase/client";
@@ -10,22 +12,43 @@ type AddAthleteFormProps = {
     coachId: string;
     triLevels: string[];
     triLevelsError?: string;
+    partnerAthletes: PartnerOption[];
+    partnersError?: string;
+    externalPartnerAvailable: boolean;
+    externalAthletes: ExternalPartnerOption[];
+    externalPartnersError?: string;
 };
 
 export default function AddAthleteForm({
     coachId,
     triLevels,
     triLevelsError,
+    partnerAthletes,
+    partnersError,
+    externalPartnerAvailable,
+    externalAthletes,
+    externalPartnersError,
 }: AddAthleteFormProps) {
     const [name, setName] = useState("");
     const [level, setLevel] = useState("");
     const [dateOfBirth, setDateOfBirth] = useState("");
     const [gender, setGender] = useState("");
 
+    const [events, setEvents] = useState<AthleteEvents>({ dmtLevel: "", synLevel: "", partnerType: "none", partnerId: "", externalPartnerId: "", externalName: "", externalClub: "" });
     const router = useRouter();
 
     async function handleSave() {
+        const eventError = eventValidation(events);
+        if (eventError) { alert(eventError); return; }
         const supabase = createClient();
+        let eventData;
+        try {
+            eventData = await prepareEventPayload(events, supabase, externalPartnerAvailable);
+            setEvents(eventData.events);
+        } catch (error) {
+            alert(error instanceof Error ? error.message : "Unable to save external partner.");
+            return;
+        }
 
         const { data: newAthlete, error: athleteError } = await supabase
             .from("athletes")
@@ -35,6 +58,7 @@ export default function AddAthleteForm({
                 coach_id: Number(coachId),
                 date_of_birth: dateOfBirth || null,
                 gender: gender.trim() || null,
+                ...eventData.payload,
             })
             .select("id")
             .single();
@@ -101,6 +125,8 @@ export default function AddAthleteForm({
                 </div>
 
                 <AthleteLevelField value={level} onChange={setLevel} levels={triLevels} error={triLevelsError} />
+
+                <AthleteEventsFields value={events} onChange={setEvents} athletes={partnerAthletes} partnersError={partnersError} externalPartnerAvailable={externalPartnerAvailable} externalAthletes={externalAthletes} externalPartnersError={externalPartnersError} />
 
                 <AthleteDetailsFields
                     dateOfBirth={dateOfBirth}

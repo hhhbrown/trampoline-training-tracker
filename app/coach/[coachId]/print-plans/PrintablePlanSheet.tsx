@@ -1,9 +1,11 @@
+import { competesInEvent } from "@/lib/athlete-events";
 import { compulsorySkills } from "@/lib/compulsories";
 
 type Athlete = {
     id: number;
     name: string;
     level: string | null;
+    dmt_level: string | null;
 };
 
 type PlanItem = {
@@ -95,6 +97,7 @@ export default function PrintablePlanSheet({
                         </tr>
                     ))}
 
+                    {competesInEvent(athlete.dmt_level) ? <>
                     <tr>
                         <td
                             colSpan={3}
@@ -126,6 +129,10 @@ export default function PrintablePlanSheet({
                             </td>
                         </tr>
                     ))}
+
+                    </> : (
+                        <tr><td colSpan={5} className="border border-black p-2"><p className="font-semibold">Skills to work on:</p><p className="mt-1 whitespace-pre-line">{routines?.skills}</p></td></tr>
+                    )}
 
                     <tr>
                         <td colSpan={5} className="h-6 border border-black bg-red-700"></td>

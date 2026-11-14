@@ -1,5 +1,6 @@
 "use client";
 
+import { competesInEvent } from "@/lib/athlete-events";
 import { useState } from "react";
 import { calculateDD, type DDLookupEntry } from "@/lib/dd";
 import { createClient } from "@/lib/supabase/client";
@@ -10,6 +11,7 @@ type EditRoutinesFormProps = {
     coachId: string;
     athleteId: string;
     athleteName: string;
+    dmtLevel: string | null;
     ddLookup: DDLookupEntry[];
     ddLookupError?: string;
     routines: {
@@ -34,6 +36,7 @@ export default function EditRoutinesForm({
     coachId,
     athleteId,
     athleteName,
+    dmtLevel,
     routines,
     ddLookup,
     ddLookupError,
@@ -167,6 +170,7 @@ export default function EditRoutinesForm({
                     </div>
                 </section>
 
+                {competesInEvent(dmtLevel) && (
                 <section aria-labelledby="double-mini-edit-heading">
                     <h3 id="double-mini-edit-heading" className="mb-3 text-xl font-bold text-red-900">Double Mini</h3>
                     <div className="grid gap-4 sm:grid-cols-2">
@@ -174,6 +178,7 @@ export default function EditRoutinesForm({
                         <RoutineEditor id="double-mini-b" title="Set B" value={doubleMiniSetB} onChange={setDoubleMiniSetB} difficulty={doubleMiniSetBDifficulty} onDifficultyChange={setDoubleMiniSetBDifficulty} rows={4} />
                     </div>
                 </section>
+                )}
 
                 <section aria-labelledby="skills-edit-heading">
                     <h3 id="skills-edit-heading" className="mb-3 text-xl font-bold text-red-900">Skills & Notes</h3>
