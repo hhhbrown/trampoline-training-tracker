@@ -1,3 +1,4 @@
+import DmtCompetitionRequirements from "@/components/DmtCompetitionRequirements";
 import SynchroRequirements from "@/components/SynchroRequirements";
 import AthleteEventSummary from "@/components/AthleteEventSummary";
 import NationalsRequirements from "@/components/NationalsRequirements";
@@ -78,6 +79,7 @@ export default async function CompetitionSummaryPage({ params }: {
                     routinesError={routinesError ? "Saved routine DD could not be loaded." : undefined}
                     lookupError={levelsError || !levels?.length ? "Competition age requirements could not be loaded. Check that competition_levels is populated and readable by the app." : undefined}
                 />
+                <DmtCompetitionRequirements athlete={athlete} />
                 <SynchroRequirements athlete={athlete} />
                 <MobilityRequirements
                     profileLevel={athlete.level}
