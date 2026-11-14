@@ -17,6 +17,8 @@ type EditRoutinesFormProps = {
     dmtLevel: string | null;
     dmtSet: DmtSetDraft;
     dmtError?: string | null;
+    dmtDDLookup: DDLookupEntry[];
+    dmtDDLookupError?: string | null;
     synEligible: boolean;
     synStorageAvailable: boolean;
     synRoutines: SynchroRoutine[];
@@ -45,6 +47,8 @@ export default function EditRoutinesForm({
     dmtLevel,
     dmtSet,
     dmtError,
+    dmtDDLookup,
+    dmtDDLookupError,
     synEligible,
     synStorageAvailable,
     synRoutines,
@@ -218,7 +222,7 @@ export default function EditRoutinesForm({
                     </section>
                 )}
 
-                {competesInEvent(dmtLevel) && <DmtSetFields value={dmtDraft} onChange={setDmtDraft} error={dmtError} />}
+                {competesInEvent(dmtLevel) && <DmtSetFields level={dmtLevel} value={dmtDraft} onChange={setDmtDraft} error={dmtError} ddLookup={dmtDDLookup} ddLookupError={dmtDDLookupError} />}
 
                 <section aria-labelledby="skills-edit-heading">
                     <h3 id="skills-edit-heading" className="mb-3 text-xl font-bold text-red-900">Skills & Notes</h3>

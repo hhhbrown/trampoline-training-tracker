@@ -1,3 +1,5 @@
+import { calculateDmtDD } from "@/lib/dmt-dd";
+import type { DDLookupEntry } from "@/lib/dd";
 import type { DmtSetDraft } from "@/lib/dmt-sets";
 import { competesInEvent } from "@/lib/athlete-events";
 import { compulsorySkills } from "@/lib/compulsories";
@@ -32,12 +34,16 @@ export default function PrintablePlanSheet({
     routines,
     dmtSet,
     dmtError,
+    dmtDDLookup,
+    dmtDDLookupError,
 }: {
     athlete: Athlete;
     planItems: PlanItem[];
     routines: Routines;
     dmtSet: DmtSetDraft;
     dmtError?: string | null;
+    dmtDDLookup: DDLookupEntry[];
+    dmtDDLookupError?: string | null;
 }) {
     const today = new Date().toLocaleDateString("en-CA");
     const rows = Array.from({ length: 15 }, (_, index) => planItems[index]);
@@ -48,10 +54,14 @@ export default function PrintablePlanSheet({
             : compulsorySkills[routines?.compulsory ?? ""] ?? [];
     const optionalA = splitRoutine(routines?.optional_a);
     const optionalB = splitRoutine(routines?.optional_b);
-    const dmtLines = dmtSet.passes.flatMap((pass) => [
-        `Pass ${pass.passNumber} · ${pass.firstPlacement}: ${pass.firstCode || "—"}`,
-        `Pass ${pass.passNumber} · dismount: ${pass.dismountCode || "—"}`,
-    ]);
+    const dmtLines = dmtSet.passes.flatMap((pass) => {
+        const result = calculateDmtDD(pass, dmtDDLookup);
+        const label = dmtDDLookupError ? "unavailable" : result.unmatched.length ? "unmatched skill" : !result.complete ? "incomplete" : result.total?.toFixed(2) ?? "—";
+        return [
+            `Pass ${pass.passNumber} (DD: ${label}) · ${pass.firstPlacement}: ${pass.firstCode || "—"}`,
+            `Pass ${pass.passNumber} · dismount: ${pass.dismountCode || "—"}`,
+        ];
+    });
 
     return (
         <section className="mx-auto mb-4 w-[7.75in] min-h-[10in] bg-white p-2 text-black print:mb-0 print:break-after-page">
@@ -114,7 +124,7 @@ export default function PrintablePlanSheet({
                         </td>
                         <td
                             colSpan={2}
-                            rowSpan={5}
+                            rowSpan={dmtLines.length + 1}
                             className="border border-black p-1 align-top"
                         >
                             <p className="font-semibold">Skills to work on:</p>
@@ -126,7 +136,7 @@ export default function PrintablePlanSheet({
                         </td>
                     </tr>
 
-                    {Array.from({ length: 4 }).map((_, index) => (
+                    {Array.from({ length: dmtLines.length }).map((_, index) => (
                         <tr key={`dmt-${index}`}>
                             <td className="border border-black bg-zinc-100 p-1 text-center">
                                 {index + 1}

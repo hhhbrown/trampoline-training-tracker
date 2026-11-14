@@ -1,3 +1,4 @@
+import { loadDmtDDLookup } from "@/lib/dmt-dd";
 import { competesInEvent } from "@/lib/athlete-events";
 import { emptyDmtSet, loadDmtSet } from "@/lib/dmt-sets";
 import { createClient } from "@/lib/supabase/server";
@@ -21,6 +22,8 @@ export default async function PrintPlansPage({ params }: PageProps) {
     return <p className="p-8 text-red-600">Error: {error.message}</p>;
   }
 
+  const dmtDD = athletes?.some((athlete) => competesInEvent(athlete.dmt_level))
+    ? await loadDmtDDLookup(supabase) : { entries: [], error: null };
   return (
     <main className="bg-white">
       {await Promise.all(
@@ -47,7 +50,7 @@ export default async function PrintPlansPage({ params }: PageProps) {
             .maybeSingle();
 
           const dmt = competesInEvent(athlete.dmt_level)
-            ? await loadDmtSet(supabase, athlete.id) : { draft: emptyDmtSet(), error: null };
+            ? await loadDmtSet(supabase, athlete.id, athlete.dmt_level) : { draft: emptyDmtSet(), error: null };
           return (
             <PrintablePlanSheet
               key={athlete.id}
@@ -56,6 +59,8 @@ export default async function PrintPlansPage({ params }: PageProps) {
               routines={routines}
               dmtSet={dmt.draft}
               dmtError={dmt.error}
+              dmtDDLookup={dmtDD.entries}
+              dmtDDLookupError={dmtDD.error}
             />
           );
         })

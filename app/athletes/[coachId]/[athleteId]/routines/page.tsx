@@ -1,3 +1,4 @@
+import { loadDmtDDLookup } from "@/lib/dmt-dd";
 import DmtSetSummary from "@/components/DmtSetSummary";
 import { emptyDmtSet, loadDmtSet } from "@/lib/dmt-sets";
 import { sharedSynchroAthleteIds } from "@/lib/synchro-routines";
@@ -46,8 +47,9 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
         ? await supabase.from("synchro_routines").select("id, athlete_id, routine_name, skills, difficulty, notes").in("athlete_id", synAthleteIds).order("id").limit(1)
         : { data: [], error: null };
 
-    const dmt = competesInEvent(athlete.dmt_level)
-        ? await loadDmtSet(supabase, Number(athleteId)) : { draft: emptyDmtSet(), error: null };
+    const [dmt, dmtDD] = competesInEvent(athlete?.dmt_level)
+        ? await Promise.all([loadDmtSet(supabase, Number(athleteId), athlete?.dmt_level), loadDmtDDLookup(supabase)])
+        : [{ draft: emptyDmtSet(), error: null }, { entries: [], error: null }];
 
     const skills: string[] =
         routines?.compulsory === "Level 5+"
@@ -106,7 +108,7 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
                         </section>
                     )}
 
-                    {competesInEvent(athlete.dmt_level) && <DmtSetSummary set={dmt.draft} error={dmt.error} />}
+                    {competesInEvent(athlete.dmt_level) && <DmtSetSummary level={athlete.dmt_level} set={dmt.draft} error={dmt.error} ddLookup={dmtDD.entries} ddLookupError={dmtDD.error} />}
 
                     <section aria-labelledby="practice-heading">
                         <h2 id="practice-heading" className="mb-4 text-xl font-bold text-red-900">Skills & Notes</h2>

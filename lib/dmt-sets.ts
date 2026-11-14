@@ -1,3 +1,4 @@
+import { dmtRepetitionRule } from "./dmt-repetitions";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type DmtPassDraft = {
@@ -11,16 +12,20 @@ export type DmtSetDraft = { id: number | null; passes: DmtPassDraft[] };
 type SkillRecord = { position: number; placement: string; fig_code: string };
 export type DmtSetRecord = { id: number; dmt_passes: { id: number; pass_number: number | null; dmt_pass_skills: SkillRecord[] }[] };
 
-export function emptyDmtSet(): DmtSetDraft {
-    return { id: null, passes: [1, 2].map((passNumber) => ({ id: null, passNumber, firstPlacement: "mount", firstCode: "", dismountCode: "" })) };
+export function dmtPassCount(level?: string | null) {
+    return dmtRepetitionRule(level) === "zone" ? 4 : 2;
 }
 
-export function dmtSetDraft(record: DmtSetRecord | null): DmtSetDraft {
-    if (!record) return emptyDmtSet();
-    if (record.dmt_passes.some((pass) => pass.pass_number !== 1 && pass.pass_number !== 2)) throw new Error("Set 1 has passes without a supported pass number. Assign pass numbers 1 and 2 before editing.");
+export function emptyDmtSet(level?: string | null): DmtSetDraft {
+    return { id: null, passes: Array.from({ length: dmtPassCount(level) }, (_, index) => index + 1).map((passNumber) => ({ id: null, passNumber, firstPlacement: "mount", firstCode: "", dismountCode: "" })) };
+}
+
+export function dmtSetDraft(record: DmtSetRecord | null, level?: string | null): DmtSetDraft {
+    if (!record) return emptyDmtSet(level);
+    if (record.dmt_passes.some((pass) => pass.pass_number == null || !Number.isInteger(pass.pass_number) || pass.pass_number < 1 || pass.pass_number > 4)) throw new Error("Set 1 has passes without a supported pass number. Assign pass numbers 1–4 before editing.");
     return {
         id: record.id,
-        passes: [1, 2].map((passNumber) => {
+        passes: Array.from({ length: dmtPassCount(level) }, (_, index) => index + 1).map((passNumber) => {
             const candidates = record.dmt_passes.filter((pass) => pass.pass_number === passNumber);
             if (candidates.length > 1) throw new Error(`Set 1 has more than one Pass ${passNumber}. Review the database entries.`);
             const pass = candidates[0];
@@ -31,13 +36,13 @@ export function dmtSetDraft(record: DmtSetRecord | null): DmtSetDraft {
     };
 }
 
-export async function loadDmtSet(client: SupabaseClient, athleteId: number) {
+export async function loadDmtSet(client: SupabaseClient, athleteId: number, level?: string | null) {
     const { data, error } = await client.from("dmt_sets")
         .select("id, dmt_passes(id, pass_number, dmt_pass_skills(position, placement, fig_code))")
         .eq("athlete_id", athleteId).order("id").limit(1);
-    if (error) return { draft: emptyDmtSet(), error: "DMT Set 1 could not be loaded. Check access to dmt_sets, dmt_passes, and dmt_pass_skills." };
-    try { return { draft: dmtSetDraft(data?.[0] as DmtSetRecord ?? null), error: null }; }
-    catch (error) { return { draft: emptyDmtSet(), error: error instanceof Error ? error.message : "DMT Set 1 could not be loaded." }; }
+    if (error) return { draft: emptyDmtSet(level), error: "DMT Set 1 could not be loaded. Check access to dmt_sets, dmt_passes, and dmt_pass_skills." };
+    try { return { draft: dmtSetDraft(data?.[0] as DmtSetRecord ?? null, level), error: null }; }
+    catch (error) { return { draft: emptyDmtSet(level), error: error instanceof Error ? error.message : "DMT Set 1 could not be loaded." }; }
 }
 
 export function dmtValidation(set: DmtSetDraft) {

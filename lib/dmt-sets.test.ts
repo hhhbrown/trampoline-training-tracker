@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { dmtSetDraft, dmtSkillRows, dmtValidation, emptyDmtSet, saveDmtSet } from "./dmt-sets";
+import { dmtPassCount, dmtSetDraft, dmtSkillRows, dmtValidation, emptyDmtSet, saveDmtSet } from "./dmt-sets";
 
 test("Set 1 defaults to two passes, each starting with a mount", () => {
     const set = emptyDmtSet();
@@ -57,4 +57,20 @@ test("creates set/pass IDs once and reuses them on subsequent saves", async () =
 
 test("an entirely empty new set makes no database writes", async () => {
     await saveDmtSet({ from: () => { throw new Error("Unexpected database write"); } } as unknown as SupabaseClient, 7, emptyDmtSet(), () => {});
+});
+
+test("Levels 1–Novice/5 get four passes, advanced levels get two", () => {
+    for (const level of ["Level 1", "Level 2", "Level 3", "Level 4", "Novice", "Level 5", "Novice / Level 5"]) {
+        assert.equal(dmtPassCount(level), 4);
+        assert.deepEqual(emptyDmtSet(level).passes.map((pass) => pass.passNumber), [1, 2, 3, 4]);
+    }
+    for (const level of ["Level 6", "Junior", "Senior"]) assert.equal(emptyDmtSet(level).passes.length, 2);
+});
+
+test("loads all four passes for zone levels and keeps existing skills", () => {
+    const record = { id: 1, dmt_passes: [1, 2, 3, 4].map((pass_number) => ({ id: pass_number + 10, pass_number, dmt_pass_skills: [{ position: 1, placement: "mount", fig_code: "43" }, { position: 2, placement: "dismount", fig_code: "8-1o" }] })) };
+    assert.equal(dmtSetDraft(record, "Level 5").passes[3].id, 14);
+    assert.equal(dmtSetDraft(record, "Level 5").passes[3].dismountCode, "8-1o");
+    assert.equal(dmtSetDraft(record, "Senior").passes.length, 2);
+    assert.equal(record.dmt_passes.length, 4);
 });
