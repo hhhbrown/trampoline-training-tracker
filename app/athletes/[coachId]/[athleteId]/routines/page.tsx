@@ -1,4 +1,6 @@
-import { competesInEvent } from "@/lib/athlete-events";
+import { sharedSynchroAthleteIds } from "@/lib/synchro-routines";
+import { resolveSynchroPartner } from "@/lib/synchro-partner";
+import { canShowSynchroRoutine, competesInEvent } from "@/lib/athlete-events";
 import AthleteEventSummary from "@/components/AthleteEventSummary";
 import { createClient } from "@/lib/supabase/server";
 import { compulsorySkills } from "@/lib/compulsories";
@@ -27,13 +29,20 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
 
     const { data: routines, error: routinesError } = await supabase
         .from("routines")
-        .select("id, athlete_id, compulsory, custom_compulsory, optional_a, optional_a_difficulty, optional_b, optional_b_difficulty, double_mini_set_a, double_mini_set_a_difficulty, double_mini_set_b, double_mini_set_b_difficulty, skills, notes")
+        .select("*")
         .eq("athlete_id", Number(athleteId))
         .maybeSingle();
 
     if (routinesError) {
         return <p className="p-8 text-red-600">Error: {routinesError.message}</p>;
     }
+
+    const pairing = await resolveSynchroPartner(athlete);
+    const showSyn = canShowSynchroRoutine(athlete, pairing);
+    const synAthleteIds = sharedSynchroAthleteIds(athlete, pairing);
+    const { data: synRoutines, error: synError } = showSyn
+        ? await supabase.from("synchro_routines").select("id, athlete_id, routine_name, skills, difficulty, notes").in("athlete_id", synAthleteIds).order("id").limit(1)
+        : { data: [], error: null };
 
     const skills: string[] =
         routines?.compulsory === "Level 5+"
@@ -78,6 +87,19 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
                             <RoutineCard title="Optional B" value={routines?.optional_b} difficulty={routines?.optional_b_difficulty} />
                         </div>
                     </section>
+
+                    {showSyn && (
+                        <section aria-labelledby="synchro-heading">
+                            <h2 id="synchro-heading" className="mb-4 text-xl font-bold text-red-900">Synchro</h2>
+                            {synError ? <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Synchro routines could not be loaded. Please try again.</p>
+                                : synRoutines?.length ? <div className="grid items-start gap-5 md:grid-cols-2">{synRoutines.map((routine) => (
+                                    <div key={routine.id} className="space-y-3">
+                                        <RoutineCard title={routine.routine_name} value={routine.skills.join("\n")} difficulty={routine.difficulty} />
+                                    </div>
+                                ))}</div> : <RoutineCard title="Synchro Routine" value={null} />}
+
+                        </section>
+                    )}
 
                     {competesInEvent(athlete.dmt_level) && (
                     <section aria-labelledby="double-mini-heading">

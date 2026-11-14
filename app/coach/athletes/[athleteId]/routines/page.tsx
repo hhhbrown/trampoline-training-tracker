@@ -1,3 +1,6 @@
+import { sharedSynchroAthleteIds } from "@/lib/synchro-routines";
+import { canShowSynchroRoutine } from "@/lib/athlete-events";
+import { resolveSynchroPartner } from "@/lib/synchro-partner";
 import { createClient } from "@/lib/supabase/server";
 import EditRoutinesForm from "./EditRoutinesForm";
 
@@ -11,7 +14,7 @@ export default async function RoutinesPage({ params }: PageProps) {
 
     const { data: athlete } = await supabase
         .from("athletes")
-        .select("coach_id, name, dmt_level")
+        .select("*")
         .eq("id", Number(athleteId))
         .single();
 
@@ -19,13 +22,18 @@ export default async function RoutinesPage({ params }: PageProps) {
 
     const { data: routines } = await supabase
         .from("routines")
-        .select("id, athlete_id, compulsory, custom_compulsory, optional_a, optional_a_difficulty, optional_b, optional_b_difficulty, double_mini_set_a, double_mini_set_a_difficulty, double_mini_set_b, double_mini_set_b_difficulty, skills, notes")
+        .select("*")
         .eq("athlete_id", Number(athleteId))
         .single();
 
     const { data: ddLookup, error: ddLookupError } = await supabase
         .from("dd_lookup")
         .select("fig_code, difficulty");
+
+    const pairing = athlete ? await resolveSynchroPartner(athlete) : undefined;
+    const synAthleteIds = athlete ? sharedSynchroAthleteIds(athlete, pairing) : [Number(athleteId)];
+    const { data: synRoutines, error: synSchemaError } = await supabase.from("synchro_routines")
+        .select("id, athlete_id, routine_name, skills, difficulty, notes").in("athlete_id", synAthleteIds).order("id").limit(1);
 
     return (
         <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24 text-zinc-950 sm:px-6">
@@ -40,6 +48,11 @@ export default async function RoutinesPage({ params }: PageProps) {
                     athleteName={athlete?.name ?? ""}
                     routines={routines}
                     dmtLevel={athlete?.dmt_level ?? null}
+                    synEligible={athlete ? canShowSynchroRoutine(athlete, pairing) : false}
+                    synStorageAvailable={!synSchemaError}
+                    synRoutines={synRoutines ?? []}
+                    synAthleteIds={synAthleteIds}
+                    synPartnerName={synAthleteIds.length > 1 ? pairing?.partner?.name : undefined}
                     ddLookup={ddLookup ?? []}
                     ddLookupError={ddLookupError
                         ? "Unable to load the DD lookup table. Enter DD manually or reload to try again."

@@ -21,7 +21,10 @@ export async function resolveSynchroPartner(athlete: SynchroProfile): Promise<{
         return { partner: null, externalPartner: data, inferred: false, conflict: false };
     }
     if (athlete.synchro_partner_id && athlete.synchro_partner_id !== athlete.id) {
-        const { data } = await supabase.from("athletes").select("id, name, syn_level").eq("id", athlete.synchro_partner_id).maybeSingle();
+        const { data } = await supabase.from("athletes").select("id, name, syn_level, synchro_partner_id, external_synchro_partner_id").eq("id", athlete.synchro_partner_id).maybeSingle();
+        if (data && (data.external_synchro_partner_id || (data.synchro_partner_id && data.synchro_partner_id !== athlete.id))) {
+            return { partner: null, inferred: false, conflict: true };
+        }
         return { partner: data as { id: number; name: string; syn_level: string | null } | null, inferred: false, conflict: false };
     }
     const { data, error } = await supabase.from("athletes").select("id, name, syn_level")

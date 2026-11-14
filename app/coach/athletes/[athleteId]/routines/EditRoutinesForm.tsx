@@ -2,6 +2,7 @@
 
 import { competesInEvent } from "@/lib/athlete-events";
 import { useState } from "react";
+import { synchroDraft, synchroDifficulty, synchroPayload, type SynchroRoutine, type SynchroDraft } from "@/lib/synchro-routines";
 import { calculateDD, type DDLookupEntry } from "@/lib/dd";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -12,6 +13,11 @@ type EditRoutinesFormProps = {
     athleteId: string;
     athleteName: string;
     dmtLevel: string | null;
+    synEligible: boolean;
+    synStorageAvailable: boolean;
+    synRoutines: SynchroRoutine[];
+    synAthleteIds: number[];
+    synPartnerName?: string;
     ddLookup: DDLookupEntry[];
     ddLookupError?: string;
     routines: {
@@ -37,6 +43,11 @@ export default function EditRoutinesForm({
     athleteId,
     athleteName,
     dmtLevel,
+    synEligible,
+    synStorageAvailable,
+    synRoutines,
+    synAthleteIds,
+    synPartnerName,
     routines,
     ddLookup,
     ddLookupError,
@@ -69,6 +80,12 @@ export default function EditRoutinesForm({
     const calculationB = calculateDD(optionalB, ddLookup);
     const effectiveA = optionalADifficulty ?? (ddLookupError ? "" : calculationA.total?.toFixed(2) ?? "");
     const effectiveB = optionalBDifficulty ?? (ddLookupError ? "" : calculationB.total?.toFixed(2) ?? "");
+    const [synDrafts, setSynDrafts] = useState<SynchroDraft[]>(() => (synRoutines.length ? synRoutines : [null]).map((record) => synchroDraft(record, ddLookup, ddLookupError)));
+    const [saving, setSaving] = useState(false);
+    const showSyn = synEligible && synStorageAvailable;
+    function updateSyn(index: number, changes: Partial<SynchroDraft>) {
+        setSynDrafts((current) => current.map((draft, i) => i === index ? { ...draft, ...changes } : draft));
+    }
     const [doubleMiniSetA, setDoubleMiniSetA] = useState(
         routines?.double_mini_set_a ?? ""
     );
@@ -85,14 +102,18 @@ export default function EditRoutinesForm({
     const [notes, setNotes] = useState(routines?.notes ?? "");
 
     async function handleSave() {
-        if ([effectiveA, effectiveB, doubleMiniSetADifficulty, doubleMiniSetBDifficulty].some((value) => value !== "" && (!Number.isFinite(Number(value)) || Number(value) < 0))) {
+        if (saving) return;
+        const synDDs = showSyn ? synDrafts.map((draft) => synchroDifficulty(draft, ddLookup, ddLookupError)) : [];
+        if ([effectiveA, effectiveB, doubleMiniSetADifficulty, doubleMiniSetBDifficulty, ...synDDs].some((value) => value !== "" && (!Number.isFinite(Number(value)) || Number(value) < 0))) {
             alert("Enter a valid DD of 0 or more.");
             return;
         }
-        if (ddLookupError && ((optionalA.trim() && effectiveA === "") || (optionalB.trim() && effectiveB === ""))) {
+        if (ddLookupError && ((optionalA.trim() && effectiveA === "") || (optionalB.trim() && effectiveB === "") || (showSyn && synDrafts.some((draft, index) => draft.skills.trim() && synDDs[index] === "")))) {
             alert("Automatic DD calculation is unavailable. Enter DD manually before saving.");
             return;
         }
+        setSaving(true);
+        try {
         const supabase = createClient();
 
         const payload = {
@@ -132,9 +153,30 @@ export default function EditRoutinesForm({
             return;
         }
 
+        if (showSyn) {
+            for (const [index, draft] of synDrafts.entries()) {
+                if (draft.id == null && !draft.skills.trim() && !draft.notes.trim()) continue;
+                const ownerId = draft.athleteId ?? Math.min(...synAthleteIds);
+                if (!synAthleteIds.includes(ownerId)) throw new Error("This routine no longer belongs to the athlete or their current partner. Reload before saving.");
+                const synData = synchroPayload(draft, ownerId, ddLookup, ddLookupError);
+                if (draft.id != null) {
+                    const { error: synError } = await supabase.from("synchro_routines").update(synData).eq("id", draft.id).eq("athlete_id", ownerId).select("id").single();
+                    if (synError) throw new Error(synError.message);
+                } else {
+                    const { data: created, error: synError } = await supabase.from("synchro_routines").insert(synData).select("id").single();
+                    if (synError) throw new Error(synError.message);
+                    updateSyn(index, { id: created.id, athleteId: ownerId });
+                }
+            }
+        }
         console.log("Saved routine:", data);
         alert("Routines saved!");
         router.push(`/coach/${coachId}/athletes`);
+        } catch (error) {
+            alert(`Some routine changes may have saved. Synchro routine save failed: ${error instanceof Error ? error.message : "Try again."}`);
+        } finally {
+            setSaving(false);
+        }
     }
 
     const fieldStyle = "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base leading-6 text-zinc-950 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-700";
@@ -142,6 +184,7 @@ export default function EditRoutinesForm({
     return (
         <section className="mt-6">
             <BackLink href={`/coach/${coachId}/athletes`}>Back</BackLink>
+            <fieldset disabled={saving} className="min-w-0 disabled:opacity-70">
             <h2 className="break-words text-2xl font-bold text-zinc-950">{athleteName}</h2>
 
             <div className="mt-6 space-y-7">
@@ -170,6 +213,23 @@ export default function EditRoutinesForm({
                     </div>
                 </section>
 
+                {synEligible && (
+                    <section aria-labelledby="syn-routine-heading">
+                        <h3 id="syn-routine-heading" className="mb-3 text-xl font-bold text-red-900">Synchro</h3>
+                        {synPartnerName && <p className="mb-3 text-sm font-medium text-zinc-600">Shared with {synPartnerName}. Changes apply to both profiles.</p>}
+                        {synStorageAvailable ? <div className="space-y-4">
+                            {synDrafts.map((draft, index) => (
+                                <div key={index} className="space-y-3">
+                                    <RoutineEditor id={`syn-${index}`} title={draft.name || "Synchro Routine"} value={draft.skills} onChange={(value) => updateSyn(index, { skills: value })}
+                                        difficulty={synchroDifficulty(draft, ddLookup, ddLookupError)} onDifficultyChange={(value) => updateSyn(index, { manualDifficulty: value === "" ? null : value })}
+                                        calculation={calculateDD(draft.skills, ddLookup)} manual={draft.manualDifficulty !== null} onUseCalculated={() => updateSyn(index, { manualDifficulty: null })}
+                                        calculationError={ddLookupError} rows={Math.max(10, draft.skills.split("\n").length)} />
+                                </div>
+                            ))}
+                        </div> : <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Synchro routines could not be loaded. Check access to synchro_routines and reload.</p>}
+                    </section>
+                )}
+
                 {competesInEvent(dmtLevel) && (
                 <section aria-labelledby="double-mini-edit-heading">
                     <h3 id="double-mini-edit-heading" className="mb-3 text-xl font-bold text-red-900">Double Mini</h3>
@@ -190,8 +250,9 @@ export default function EditRoutinesForm({
             </div>
 
             <button type="button" onClick={handleSave} className="mt-6 rounded-lg bg-red-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2">
-                Save Routines
+                {saving ? "Saving…" : "Save Routines"}
             </button>
+            </fieldset>
         </section>
     );
 }

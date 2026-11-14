@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { competesInEvent, DMT_LEVELS, SYN_LEVELS, eventPayload, eventValidation, type AthleteEvents } from "./athlete-events";
+import { canShowSynchroRoutine, competesInEvent, DMT_LEVELS, SYN_LEVELS, eventPayload, eventValidation, type AthleteEvents } from "./athlete-events";
 
 const base: AthleteEvents = { dmtLevel: "Level 2", synLevel: "Level 3", partnerType: "club", partnerId: "8", externalPartnerId: "", externalName: "", externalClub: "" };
 
@@ -37,4 +37,12 @@ test("rejects self-partners, missing club partners, and blank external names", (
     assert(eventValidation({ ...base, partnerType: "external", externalPartnerId: "new", externalName: " " }, 7));
     assert.equal(eventValidation(base, 7), null);
     assert.equal(eventValidation({ ...base, partnerType: "none", partnerId: "" }, 7), null);
+});
+
+test("synchro routines require both event participation and a partner", () => {
+    assert(canShowSynchroRoutine({ syn_level: "Level 3", synchro_partner_id: 8 }));
+    assert(canShowSynchroRoutine({ syn_level: "Level 3", external_synchro_partner_id: 9 }));
+    assert(!canShowSynchroRoutine({ syn_level: "Level 3" }));
+    assert(!canShowSynchroRoutine({ syn_level: null, synchro_partner_id: 8 }));
+    assert(canShowSynchroRoutine({ syn_level: null }, { partner: { id: 8, syn_level: "Level 3" }, inferred: true }));
 });

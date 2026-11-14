@@ -49,3 +49,13 @@ export async function prepareEventPayload(events: AthleteEvents, client: Supabas
     }
     return { events: resolved, payload: eventPayload(resolved, externalPartnerAvailable) };
 }
+
+export function canShowSynchroRoutine(profile: {
+    syn_level: string | null;
+    synchro_partner_id?: number | null;
+    external_synchro_partner_id?: number | null;
+}, pairing?: { partner: { id: number; syn_level: string | null } | null; inferred: boolean }) {
+    const level = profile.syn_level || (pairing?.inferred ? pairing.partner?.syn_level : null);
+    const hasPartner = Boolean(profile.synchro_partner_id || profile.external_synchro_partner_id || pairing?.partner);
+    return competesInEvent(level) && hasPartner;
+}
