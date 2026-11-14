@@ -49,7 +49,7 @@ export default async function CoachAthletesPage({ params }: PageProps) {
                     </Link>
                     <Link
                         href={`/coach/${coachId}/print-plans`}
-                        className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+                        className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-red-800"
                     >
                         Print Plans
                     </Link>
@@ -64,42 +64,45 @@ export default async function CoachAthletesPage({ params }: PageProps) {
                     {athletes?.map((athlete) => (
                         <div
                             key={athlete.id}
-                            className="relative rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
+                            className="rounded-xl border border-red-200 bg-[#fffaf0] p-5 shadow-sm"
                         >
-                            <Link
-                                href={`/coach/athletes/${athlete.id}`}
-                                className="absolute top-4 right-4 rounded-lg bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700"
-                            >
-                                Edit Athlete
-                            </Link>
-
-                            <h2 className="font-semibold text-black">{athlete.name}</h2>
-                            <p className="mt-1 text-sm text-zinc-600">{athlete.level}</p>
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                    <h2 className="break-words text-xl font-bold leading-tight text-black">{athlete.name}</h2>
+                                    {athlete.level && <p className="mt-2 inline-block rounded-md bg-black px-2 py-1 text-sm font-semibold text-white">{athlete.level}</p>}
+                                </div>
+                                <Link
+                                    href={`/coach/athletes/${athlete.id}`}
+                                    className="shrink-0 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-800 transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
+                                >
+                                    Edit Athlete
+                                </Link>
+                            </div>
 
                             <div className="mt-6 space-y-2">
                                 <Link
                                     href={`/coach/athletes/${athlete.id}/plan`}
-                                    className="block w-full rounded-lg bg-black px-4 py-2 text-sm font-medium text-white text-center hover:bg-zinc-800"
+                                    className="block w-full rounded-lg bg-red-700 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
                                 >
                                     Edit Plan
                                 </Link>
 
                                 <Link
                                     href={`/coach/athletes/${athlete.id}/routines`}
-                                    className="block w-full rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-black text-center hover:bg-zinc-100"
+                                    className="block w-full rounded-lg border border-red-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-black transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
                                 >
                                     Edit Routines
                                 </Link>
 
                                 <Link
                                     href={`/coach/athletes/${athlete.id}/progress`}
-                                    className="block w-full rounded-lg border border-zinc-300 px-4 py-2 text-center text-sm font-medium text-black hover:bg-zinc-100"
+                                    className="block w-full rounded-lg border border-red-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-black transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
                                 >
                                     View Progress
                                 </Link>
                                 <Link
                                     href={`/coach/athletes/${athlete.id}/competition-summary`}
-                                    className="block w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-center text-sm font-semibold text-red-800 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
+                                    className="block w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-center text-sm font-semibold text-red-900 transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
                                 >
                                     Competition Summary
                                 </Link>
