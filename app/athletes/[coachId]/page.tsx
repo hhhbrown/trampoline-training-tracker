@@ -58,6 +58,12 @@ export default async function CoachAthletesPage({ params }: PageProps) {
                     >
                         Conditioning
                     </Link>
+                    <Link
+                        href={`/athletes/${coachId}/daily-drills`}
+                        className="ml-3 mt-8 inline-block rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+                    >
+                        Daily Drills
+                    </Link>
                 </div>
 
             </div>

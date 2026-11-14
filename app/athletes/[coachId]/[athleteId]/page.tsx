@@ -44,6 +44,12 @@ export default async function AthleteDashboardPage({ params }: PageProps) {
             href: `/athletes/${coachId}/conditioning`,
             icon: "conditioning" as const,
         },
+        {
+            title: "Daily Drills",
+            description: "Your drills for each day of the week.",
+            href: `/athletes/${coachId}/daily-drills`,
+            icon: "routines" as const,
+        },
     ];
 
     return (
