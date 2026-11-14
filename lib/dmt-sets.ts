@@ -1,6 +1,8 @@
 import { dmtRepetitionRule } from "./dmt-repetitions";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+export const MAX_DMT_SETS = 2;
+
 export type DmtPassDraft = {
     id: number | null;
     passNumber: number;
@@ -44,7 +46,7 @@ export async function loadDmtSets(client: SupabaseClient, athleteId: number, lev
     if (error) return { drafts: [emptyDmtSet(level)], error: "DMT sets could not be loaded. Check access to dmt_sets, dmt_passes, and dmt_pass_skills." };
     try {
         const records = (data ?? []) as DmtSetRecord[];
-        return { drafts: records.length ? records.map((record, index) => dmtSetDraft({ ...record, name: record.name || `Set ${index + 1}` }, level)) : [emptyDmtSet(level)], error: null };
+        return { drafts: records.length ? records.slice(0, MAX_DMT_SETS).map((record, index) => dmtSetDraft({ ...record, name: record.name || `Set ${index + 1}` }, level)) : [emptyDmtSet(level)], error: null };
     } catch (error) { return { drafts: [emptyDmtSet(level)], error: error instanceof Error ? error.message : "DMT sets could not be loaded." }; }
 }
 

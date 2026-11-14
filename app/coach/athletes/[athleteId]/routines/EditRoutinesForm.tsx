@@ -1,7 +1,7 @@
 "use client";
 
 import DmtSetFields from "@/components/DmtSetFields";
-import { emptyDmtSet, dmtValidation, saveDmtSet, type DmtSetDraft } from "@/lib/dmt-sets";
+import { MAX_DMT_SETS, emptyDmtSet, dmtValidation, saveDmtSet, type DmtSetDraft } from "@/lib/dmt-sets";
 import { competesInEvent } from "@/lib/athlete-events";
 import { useState } from "react";
 import { synchroDraft, synchroDifficulty, synchroPayload, type SynchroRoutine, type SynchroDraft } from "@/lib/synchro-routines";
@@ -92,7 +92,7 @@ export default function EditRoutinesForm({
     function updateSyn(index: number, changes: Partial<SynchroDraft>) {
         setSynDrafts((current) => current.map((draft, i) => i === index ? { ...draft, ...changes } : draft));
     }
-    const [dmtDrafts, setDmtDrafts] = useState(dmtSets);
+    const [dmtDrafts, setDmtDrafts] = useState(dmtSets.slice(0, MAX_DMT_SETS));
     const [skills, setSkills] = useState(routines?.skills ?? "");
     const [notes, setNotes] = useState(routines?.notes ?? "");
 
@@ -230,10 +230,12 @@ export default function EditRoutinesForm({
                 )}
 
                 {competesInEvent(dmtLevel) && <div className="space-y-6">
+                    <p className="text-sm font-semibold text-red-900">The first set is the competitive set printed on the training sheet.</p>
                     {dmtDrafts.map((draft, index) => <DmtSetFields key={index} idPrefix={`dmt-set-${index}`} level={dmtLevel} value={draft}
                         onChange={(value) => setDmtDrafts((current) => current.map((set, i) => i === index ? value : set))}
                         error={dmtError} ddLookup={dmtDDLookup} ddLookupError={dmtDDLookupError} />)}
-                    {!dmtError && <button type="button" onClick={() => setDmtDrafts((current) => {
+                    {!dmtError && dmtDrafts.length < MAX_DMT_SETS && <button type="button" onClick={() => setDmtDrafts((current) => {
+                        if (current.length >= MAX_DMT_SETS) return current;
                         const highest = Math.max(current.length, ...current.map((set) => Number(/^Set (\d+)$/.exec(set.name ?? "")?.[1] ?? 0)));
                         return [...current, emptyDmtSet(dmtLevel, `Set ${highest + 1}`)];
                     })} className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700">+ Add DMT set</button>}
