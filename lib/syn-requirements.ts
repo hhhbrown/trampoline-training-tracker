@@ -1,0 +1,20 @@
+import type { LevelDDRequirement } from "./competition-dd";
+
+export function synParticipationNote(level: string) {
+    const numbered = /^level\s+(\d+)$/i.exec(level.trim());
+    return level.trim().toLowerCase() === "senior" || (numbered != null && Number(numbered[1]) >= 5);
+}
+
+export function synDDCheck(difficulty: number | null | undefined, rule: LevelDDRequirement | undefined) {
+    if (!rule) return { status: "unknown" as const, message: "No matching SYN DD requirements found.", range: null };
+    const minimum = rule.min_dd == null ? null : Number(rule.min_dd);
+    const maximum = rule.max_dd == null ? null : Number(rule.max_dd);
+    const range = minimum != null && maximum != null ? `Level DD range: ${minimum.toFixed(2)}–${maximum.toFixed(2)}`
+        : minimum != null ? `Minimum DD: ${minimum.toFixed(2)}`
+        : maximum != null ? `Maximum DD: ${maximum.toFixed(2)}` : "No DD limits";
+    if (difficulty == null || !Number.isFinite(difficulty) || difficulty < 0) return { status: "unknown" as const, message: "Add the synchro routine and DD in Edit Routines.", range };
+    const actual = Math.round(difficulty * 100);
+    if (minimum != null && actual < Math.round(minimum * 100)) return { status: "under" as const, message: `${((Math.round(minimum * 100) - actual) / 100).toFixed(2)} DD below minimum`, range };
+    if (maximum != null && actual > Math.round(maximum * 100)) return { status: "over" as const, message: `${((actual - Math.round(maximum * 100)) / 100).toFixed(2)} DD above the level range`, range };
+    return { status: "met" as const, message: "Meets DD requirement", range };
+}
