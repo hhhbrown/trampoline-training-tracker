@@ -1,3 +1,4 @@
+import DmtMobilityRequirements from "@/components/DmtMobilityRequirements";
 import { competesInEvent } from "@/lib/athlete-events";
 import DmtNationalTeamRequirements from "@/components/DmtNationalTeamRequirements";
 import NationalTeamRequirements from "@/components/NationalTeamRequirements";
@@ -157,6 +158,7 @@ export default async function CompetitionSummaryPage({ params }: {
                     </section>}
                     {showDmtQualifications && <section aria-labelledby="qualification-dmt-heading" className="mt-8">
                         <h3 id="qualification-dmt-heading" className="text-xl font-bold text-black">DMT</h3>
+                        <DmtMobilityRequirements athlete={athlete} year={season.endYear} />
                         <DmtNationalsRequirements athlete={athlete} year={season.endYear} />
                         <DmtWagcRequirements athlete={athlete} />
                         <DmtNationalTeamRequirements athlete={athlete} year={season.endYear} />

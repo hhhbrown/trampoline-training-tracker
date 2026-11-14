@@ -34,22 +34,23 @@ export function mobilityGender(gender: string | null) {
     return normalized || null;
 }
 
-export function matchingMobilityPaths(requirements: QualificationRequirement[], source: CompetitionLevel, gender: string | null, year: number) {
+export function matchingMobilityPaths(requirements: QualificationRequirement[], source: CompetitionLevel, gender: string | null, year: number, discipline = "TRI") {
     return requirements.filter((requirement) => requirement.qualification_type === "mobility"
         && requirement.ruleset_year === year
-        && source.discipline === "TRI"
+        && source.discipline === discipline
+        && (requirement.discipline == null || requirement.discipline === source.discipline)
         && source.id != null && String(requirement.source_level_id) === String(source.id)
         && (requirement.gender == null || mobilityGender(requirement.gender) === mobilityGender(gender)));
 }
 
-export function mobilityAgeCheck(rule: QualificationRequirement, target: CompetitionLevel | undefined, birthDate: string | null, year: number): MobilityCheck {
+export function mobilityAgeCheck(rule: QualificationRequirement, target: CompetitionLevel | undefined, birthDate: string | null, year: number, discipline = "TRI"): MobilityCheck {
     const age = competitionAge(birthDate, year);
     const title = `Age: ${age ?? "Not available"}`;
     if (age == null) return { title, status: "unknown", detail: "Date of birth required to check age eligibility." };
-    if (!target || target.discipline !== "TRI") return { title, status: "unknown", detail: "Target TRI level could not be found." };
+    if (!target || target.discipline !== discipline) return { title, status: "unknown", detail: `Target ${discipline} level could not be found.` };
     const minimum = Math.max(rule.min_age ?? 0, target.min_age ?? 0);
     const maximum = Math.min(rule.max_age ?? Infinity, target.max_age ?? Infinity);
-    const met = meetsAgeRequirements(age, { name: target.name, discipline: "TRI", min_age: minimum, max_age: maximum === Infinity ? null : maximum });
+    const met = meetsAgeRequirements(age, { name: target.name, discipline, min_age: minimum, max_age: maximum === Infinity ? null : maximum });
     return { title, status: met ? "met" : "unmet", detail: `${maximum === Infinity ? `Required: ${minimum}+ years` : `Required: ${minimum}–${maximum} years`} (December 31, ${year})` };
 }
 
@@ -81,6 +82,8 @@ export function scoreBasisLabel(basis: string) {
         compulsory_plus_optional: "Compulsory + optional from the same competition",
         prelim_including_bonus: "Preliminary score including bonus",
         prelim: "Preliminary score",
+        preliminary: "Two-pass preliminary round",
+        preliminary_or_final: "Two-pass preliminary or final round",
         second_voluntary_or_final: "Second voluntary or final routine",
         any_routine: "Any routine",
         age_based: "Age-based mobility",
@@ -92,24 +95,24 @@ export function ageAppropriateMobilityPaths(paths: QualificationRequirement[], s
     const age = competitionAge(birthDate, year);
     if (source.name.trim().toLowerCase() === "junior") {
         return paths.filter((path) => levels.some((target) => String(target.id) === String(path.target_level_id)
-            && target.discipline === "TRI" && ["level 7", "senior"].includes(target.name.trim().toLowerCase())));
+            && target.discipline === source.discipline && (source.discipline === "DMT" ? ["senior"] : ["level 7", "senior"]).includes(target.name.trim().toLowerCase())));
     }
     if (source.name.trim().toLowerCase() === "novice") {
         return paths.filter((path) => levels.some((target) => String(target.id) === String(path.target_level_id)
-            && target.discipline === "TRI" && target.name.trim().toLowerCase() === "junior"));
+            && target.discipline === source.discipline && target.name.trim().toLowerCase() === "junior"));
     }
     if (!/^level\s+4$/i.test(source.name.trim()) || age == null) return paths;
     return paths.filter((path) => {
-        const target = levels.find((level) => String(level.id) === String(path.target_level_id) && level.discipline === "TRI");
+        const target = levels.find((level) => String(level.id) === String(path.target_level_id) && level.discipline === source.discipline);
         if (target?.name.trim().toLowerCase() === "novice") return age <= (target.max_age ?? path.max_age ?? Infinity);
         if (target?.name.trim().toLowerCase() === "level 5") return age >= (target.min_age ?? path.min_age ?? 0);
         return true;
     });
 }
 
-export function futureMobilitySeason(rule: QualificationRequirement, target: CompetitionLevel | undefined, birthDate: string | null, year: number) {
+export function futureMobilitySeason(rule: QualificationRequirement, target: CompetitionLevel | undefined, birthDate: string | null, year: number, discipline = "TRI") {
     const age = competitionAge(birthDate, year);
-    if (age == null || !target || target.discipline !== "TRI") return null;
+    if (age == null || !target || target.discipline !== discipline) return null;
     const minimum = Math.max(rule.min_age ?? 0, target.min_age ?? 0);
     const maximum = Math.min(rule.max_age ?? Infinity, target.max_age ?? Infinity);
     if (age >= minimum || minimum > maximum) return null;
@@ -120,14 +123,14 @@ export function futureMobilitySeason(rule: QualificationRequirement, target: Com
 export function mobilityCards(paths: QualificationRequirement[], source: CompetitionLevel | undefined, levels: CompetitionLevel[], birthDate: string | null, year: number) {
     const cards = paths.map((path) => ({ path, title: path.pathway_name, destinationNote: null as string | null }));
     if (!source || !/^level\s+5$/i.test(source.name.trim())) return cards;
-    const targetFor = (path: QualificationRequirement) => levels.find((level) => String(level.id) === String(path.target_level_id) && level.discipline === "TRI");
+    const targetFor = (path: QualificationRequirement) => levels.find((level) => String(level.id) === String(path.target_level_id) && level.discipline === source.discipline);
     const junior = paths.find((path) => targetFor(path)?.name.trim().toLowerCase() === "junior");
     const level6 = paths.find((path) => targetFor(path)?.name.trim().toLowerCase() === "level 6");
     if (!junior || !level6) return cards;
     const sameNumber = (a: number | string | null, b: number | string | null) => a == null || b == null ? a === b : Number(a) === Number(b);
     if (!sameNumber(junior.minimum_dd, level6.minimum_dd) || !sameNumber(junior.minimum_score, level6.minimum_score)
         || junior.score_basis !== level6.score_basis || junior.required_skill !== level6.required_skill) return cards;
-    const eligible = [junior, level6].find((path) => mobilityAgeCheck(path, targetFor(path), birthDate, year).status === "met");
+    const eligible = [junior, level6].find((path) => mobilityAgeCheck(path, targetFor(path), birthDate, year, source.discipline).status === "met");
     const selected = eligible ?? junior;
     const age = competitionAge(birthDate, year);
     const destinationNote = eligible ? `Destination: ${targetFor(selected)?.name} (based on season age ${age})`
