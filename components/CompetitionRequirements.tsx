@@ -76,7 +76,7 @@ export default function CompetitionRequirements({ dateOfBirth, profileLevel, gen
                         const dd = routine.difficulty;
                         const missingDD = dd == null || !Number.isFinite(dd) || dd < 0;
                         const assessment = !ddIssue && !missingDD && ddRequirement && level ? assessDD(dd, ddRequirement, level.name) : null;
-                        const ddStatus = !assessment || assessment.status === "over" ? null : assessment.status === "met";
+                        const ddStatus = !assessment || (assessment.status === "over" || assessment.status === "warning") ? null : assessment.status === "met";
                         return <DDRequirementRow
                             key={routine.name}
                             title={`${routine.name} DD: ${missingDD ? "Not set" : dd.toFixed(2)}`}

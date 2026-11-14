@@ -15,20 +15,21 @@ export function matchDDRequirement(requirements: LevelDDRequirement[], levelId: 
         ?? candidates.find((requirement) => requirement.gender == null);
 }
 
-export function assessDD(dd: number, requirement: LevelDDRequirement, levelName: string) {
+export function assessDD(dd: number, requirement: LevelDDRequirement, levelName: string, penaltyCap?: number) {
     const actual = Math.round(dd * 100);
     const minimum = requirement.min_dd == null ? null : Math.round(Number(requirement.min_dd) * 100);
     const maximum = requirement.max_dd == null ? null : Math.round(Number(requirement.max_dd) * 100);
     if (minimum != null && actual < minimum) {
         const shortfall = (minimum - actual) / 100;
+        const penalty = penaltyCap == null ? shortfall : Math.min(shortfall, penaltyCap);
         const warningOnly = /^level\s+[1-4]$/i.test(levelName.trim());
         return {
             status: warningOnly ? "warning" as const : "penalty" as const,
             difference: shortfall,
-            penalty: warningOnly ? 0 : shortfall,
+            penalty: warningOnly ? 0 : penalty,
             message: warningOnly
                 ? `${shortfall.toFixed(2)} DD below minimum. Coach warning only; no penalty for Levels 1–4.`
-                : `${shortfall.toFixed(2)} DD below minimum. Penalty: ${shortfall.toFixed(2)} points.`,
+                : `${shortfall.toFixed(2)} DD below minimum. Penalty: ${penalty.toFixed(2)} points.${penaltyCap == null ? "" : ` Maximum penalty: ${penaltyCap.toFixed(2)} points.`}`,
         };
     }
     if (maximum != null && actual > maximum) {

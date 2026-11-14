@@ -1,4 +1,4 @@
-import type { LevelDDRequirement } from "./competition-dd";
+import { assessDD, type LevelDDRequirement } from "./competition-dd";
 import type { DDLookupEntry } from "./dd";
 import { calculateDmtDD } from "./dmt-dd";
 import type { DmtPassDraft } from "./dmt-sets";
@@ -10,14 +10,9 @@ export function dmtDDRange(rule: LevelDDRequirement) {
     return "No DD limits";
 }
 
-export function checkDmtPassDD(pass: DmtPassDraft, lookup: DDLookupEntry[], rule: LevelDDRequirement) {
+export function checkDmtPassDD(pass: DmtPassDraft, lookup: DDLookupEntry[], rule: LevelDDRequirement, levelName: string) {
     const result = calculateDmtDD(pass, lookup);
     if (!result.complete) return { total: result.total, status: "unknown" as const, message: "Complete both skills to check DD." };
     if (result.unmatched.length) return { total: result.total, status: "unknown" as const, message: `No DD match found for: ${result.unmatched.join(", ")}.` };
-    const dd = Math.round((result.total ?? 0) * 100);
-    const minimum = rule.min_dd == null ? null : Math.round(Number(rule.min_dd) * 100);
-    const maximum = rule.max_dd == null ? null : Math.round(Number(rule.max_dd) * 100);
-    if (minimum != null && dd < minimum) return { total: result.total, status: "under" as const, message: `${((minimum - dd) / 100).toFixed(2)} DD below minimum` };
-    if (maximum != null && dd > maximum) return { total: result.total, status: "over" as const, message: `${((dd - maximum) / 100).toFixed(2)} DD above the level range` };
-    return { total: result.total, status: "met" as const, message: "Meets DD requirement" };
+    return { total: result.total, ...assessDD(result.total ?? 0, rule, levelName, 1) };
 }

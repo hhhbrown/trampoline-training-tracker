@@ -24,13 +24,13 @@ export default async function SynchroRequirements({ athlete }: {
         : { data: [], error: null };
     const rule = matchDDRequirement(rules ?? [], level?.id, athlete.gender);
     const dd = routines?.[0]?.skills?.length ? routines[0].difficulty : null;
-    const check = synDDCheck(dd, rule);
+    const check = synDDCheck(dd, rule, level?.name ?? synLevel);
     const error = /mixed/i.test(synLevel) ? "Mixed SYN is not supported in this application."
         : levelsError || ruleError ? "SYN DD requirements could not be loaded."
         : routineError ? "The shared synchro routine could not be loaded." : null;
     const status = error ? "unknown" : check.status;
     const style = status === "met" ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-        : status === "under" ? "border-red-200 bg-red-50 text-red-900"
+        : status === "penalty" ? "border-red-200 bg-red-50 text-red-900"
         : "border-amber-200 bg-amber-50 text-amber-900";
 
     return (
@@ -38,7 +38,7 @@ export default async function SynchroRequirements({ athlete }: {
             <h2 id="syn-requirements-heading" className="border-b border-red-100 bg-red-50 px-5 py-4 text-2xl font-extrabold tracking-tight text-red-950">SYN {synLevel}</h2>
             <div className="space-y-3 p-5">
                 <div className={`flex items-start gap-3 rounded-xl border p-4 ${style}`}>
-                    <span aria-hidden="true" className="text-xl font-bold">{status === "met" ? "✓" : status === "under" ? "✕" : "!"}</span>
+                    <span aria-hidden="true" className="text-xl font-bold">{status === "met" ? "✓" : status === "penalty" ? "✕" : "!"}</span>
                     <div>
                         <p><span className="text-lg font-bold">DD: {dd != null ? dd.toFixed(2) : "Not set"}</span>{check.range && !error && <> <span className="text-sm font-medium">({check.range})</span></>}</p>
                         <p className="mt-1 text-sm font-semibold">{error ?? check.message}</p>
