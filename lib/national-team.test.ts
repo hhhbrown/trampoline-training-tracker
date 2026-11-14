@@ -27,3 +27,18 @@ test("entry notes preserve the conditional age-out and carry-forward pathways", 
     assert.match(nationalTeamEntryNote("National Team - Development", "Junior"), /January 1/);
     assert.match(nationalTeamEntryNote("National Team - Junior", "Junior"), /Novice scores/);
 });
+
+test("DMT ranking categories include Level 6 and exclude Level 7", () => {
+    for (const level of ["Junior", "Level 6", "Senior"]) assert(supportsNationalTeam(level, "DMT"));
+    for (const level of ["Level 5", "Novice", "Level 7", null]) assert(!supportsNationalTeam(level, "DMT"));
+    assert(!supportsNationalTeam("Level 6", "TRI"));
+});
+
+test("DMT National Team standards use database gender, discipline and age ranges", () => {
+    const dmtRules = rules.map((rule) => ({ ...rule, discipline: "DMT", score_basis: "national_team_ranking" }));
+    assert.deepEqual(nationalTeamRules(dmtRules, "DMT", "Female", "2013-12-31", 2027).map((r) => r.id), [45]);
+    assert.deepEqual(nationalTeamRules(dmtRules, "DMT", "Female", "2010-12-31", 2027).map((r) => r.id), [47,49]);
+    assert.deepEqual(nationalTeamRules(dmtRules, "DMT", "Female", "2005-12-31", 2027).map((r) => r.id), [49]);
+    assert.deepEqual(nationalTeamRules(dmtRules, "DMT", "Male", "2013-12-31", 2027), []);
+    assert.deepEqual(nationalTeamRules(dmtRules, "TRI", "Female", "2013-12-31", 2027), []);
+});

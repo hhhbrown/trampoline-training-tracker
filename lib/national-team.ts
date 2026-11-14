@@ -3,11 +3,11 @@ import { mobilityGender, type QualificationRequirement } from "./mobility";
 
 export const NATIONAL_TEAM_RULESET_YEAR = 2026;
 
-export function supportsNationalTeam(level: string | null) {
-    return /^(junior|level\s+7|senior)$/i.test(level?.trim() ?? "");
+export function supportsNationalTeam(level: string | null, discipline: "TRI" | "TRS" | "DMT" = "TRI") {
+    return (discipline === "DMT" ? /^(junior|level\s+6|senior)$/i : /^(junior|level\s+7|senior)$/i).test(level?.trim() ?? "");
 }
 
-export function nationalTeamRules(requirements: QualificationRequirement[], discipline: "TRI" | "TRS", gender: string | null, birthDate: string | null, year: number) {
+export function nationalTeamRules(requirements: QualificationRequirement[], discipline: "TRI" | "TRS" | "DMT", gender: string | null, birthDate: string | null, year: number) {
     const age = competitionAge(birthDate, year);
     return requirements.filter((rule) => rule.qualification_type === "international"
         && rule.ruleset_year === NATIONAL_TEAM_RULESET_YEAR && rule.discipline === discipline

@@ -1,3 +1,4 @@
+import DmtNationalTeamRequirements from "@/components/DmtNationalTeamRequirements";
 import NationalTeamRequirements from "@/components/NationalTeamRequirements";
 import DmtWagcRequirements from "@/components/DmtWagcRequirements";
 import DmtNationalsRequirements from "@/components/DmtNationalsRequirements";
@@ -113,6 +114,7 @@ export default async function CompetitionSummaryPage({ params }: {
                 />
                 <DmtNationalsRequirements athlete={athlete} year={season.endYear} />
                 <DmtWagcRequirements athlete={athlete} />
+                <DmtNationalTeamRequirements athlete={athlete} year={season.endYear} />
                 <NationalTeamRequirements athlete={athlete} year={season.endYear}
                     routines={[
                         { name: "Optional A", value: routines?.optional_a ?? null, difficulty: routines?.optional_a_difficulty ?? null },

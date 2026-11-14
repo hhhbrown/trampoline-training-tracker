@@ -32,8 +32,8 @@ export default async function NationalTeamRequirements({ athlete, year, routines
     </>;
 }
 
-function TeamSection({ discipline, profileLevel, athlete, year, requirements, routines, error }: {
-    discipline: "TRI" | "TRS"; profileLevel: string | null;
+export function TeamSection({ discipline, profileLevel, athlete, year, requirements, routines, error }: {
+    discipline: "TRI" | "TRS" | "DMT"; profileLevel: string | null;
     athlete: { date_of_birth: string | null; gender: string | null }; year: number;
     requirements: QualificationRequirement[]; routines: MobilityRoutine[]; error?: string;
 }) {
@@ -46,7 +46,7 @@ function TeamSection({ discipline, profileLevel, athlete, year, requirements, ro
         {!rules.length && !error && <p className="mt-4 text-sm text-amber-900">No matching National Team standard for this age and gender category is visible in the database.</p>}
         {rules.map((rule) => {
             const results = routines.filter((routine) => routine.value?.trim()).map((routine) => ({ routine, checks: mobilityRoutineChecks(rule, routine) }));
-            const categoryEligible = nationalTeamCategoryEligible(rule.pathway_name, profileLevel);
+            const categoryEligible = (discipline === "DMT" ? supportsNationalTeam(profileLevel, "DMT") : nationalTeamCategoryEligible(rule.pathway_name, profileLevel));
             const met = categoryEligible && !error && age != null && results.some(({ checks }) => checks.length > 0 && checks.every((check) => check.status === "met"));
             const failed = !categoryEligible || (!error && results.length > 0 && results.every(({ checks }) => checks.some((check) => check.status === "unmet")));
             const style = met ? "bg-emerald-50 text-emerald-950" : failed ? "bg-red-50 text-red-950" : "bg-amber-50 text-amber-950";
@@ -62,8 +62,8 @@ function TeamSection({ discipline, profileLevel, athlete, year, requirements, ro
                     {results.map(({ routine, checks }) => <div key={routine.name}><h3 className="mb-2 font-bold">{routine.name}</h3><ul className="space-y-2">{checks.map((check) => <li key={check.title} className={`rounded-xl border p-3 ${check.status === "met" ? "border-emerald-200 bg-emerald-50 text-emerald-900" : check.status === "unmet" ? "border-red-200 bg-red-50 text-red-900" : "border-amber-200 bg-amber-50 text-amber-900"}`}>
                         <p className="font-bold">{check.status === "met" ? "✓" : check.status === "unmet" ? "✕" : "!"} {check.title}</p><p className="mt-1 text-sm">{check.detail}</p>
                     </li>)}</ul></div>)}
-                    <p className="text-sm leading-6 text-zinc-600">{nationalTeamEntryNote(rule.pathway_name, profileLevel)}</p>
-                    <p className="text-sm leading-6 text-zinc-600">Coach verification required for trial participation, prior mobility, notifications, and eligible carried-forward scores. Saved routines indicate DD readiness; scores and ranking-list entry are not verified by this app.</p>
+                    <p className="text-sm leading-6 text-zinc-600">{discipline === "DMT" ? "Only athletes on the National Team Ranking List are eligible for Junior, Development, or Senior National Team selection and participation as Canadian Team members in FIG World Cups, World Championships, or other FIG-sanctioned events. Competing in Junior, Level 6, or Senior is required; ranking-list membership must be verified by the coach." : nationalTeamEntryNote(rule.pathway_name, profileLevel)}</p>
+                    <p className="text-sm leading-6 text-zinc-600">{discipline === "DMT" ? "Ranking score: best Q1 two-pass total + highest single-pass score + next-highest single-pass score. Both single-pass scores must come from rounds other than the round used for Q1. Bonuses count toward National Team qualification. The DD check uses the two-pass Q1 total; it does not calculate a ranking score." : "Coach verification required for trial participation, prior mobility, notifications, and eligible carried-forward scores."} Saved routines indicate DD readiness; scores and ranking-list entry are not verified by this app.</p>
                     {discipline === "TRS" && <p className="text-sm text-zinc-600">This checks this athlete and the shared routine. Confirm the partner’s eligibility separately. Mixed SYN is not supported.</p>}
                 </div>
             </details>;
