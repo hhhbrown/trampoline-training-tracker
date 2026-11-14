@@ -7,7 +7,7 @@ export default function DmtRepetitions({ set, level }: { set: DmtSetDraft; level
     const complete = set.passes.length > 1 && set.passes.every((pass) => pass.firstCode.trim() && pass.dismountCode.trim());
     return (
         <div aria-live="polite" className="mt-4 space-y-3">
-            {rule !== "unknown" && <p className="text-xs leading-5 text-zinc-600">{rule === "zone" ? "Zone repetition: a skill may repeat in different zones, but not in the same zone. This check covers this set; the rule applies across Preliminary and Finals combined." : "WGYM repetition: four different skills are required within a round. Skills can repeat in a different round. This check covers this set."}</p>}
+            {rule !== "unknown" && <p className="text-xs leading-5 text-zinc-600">{rule === "zone" ? "Zone repetition: a skill may repeat in different zones, but not in the same zone. The rule applies across Preliminary and Finals combined." : "WGYM repetition: four different skills are required within a round. Skills can repeat in a different round."}</p>}
             {!repetitions.length && complete && <p className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900">✓ No repetitions in this set.</p>}
             {repetitions.map((repeat) => (
                 <div key={repeat.code} className={`rounded-xl border px-4 py-3 text-sm leading-6 ${repeat.violation === true ? "border-red-200 bg-red-50 text-red-900" : repeat.violation === false ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-amber-200 bg-amber-50 text-amber-900"}`}>

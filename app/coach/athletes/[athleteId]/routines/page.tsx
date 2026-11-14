@@ -43,12 +43,8 @@ export default async function RoutinesPage({ params }: PageProps) {
         : [{ drafts: [emptyDmtSet()], error: null }, { entries: [], error: null }];
 
     return (
-        <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24 text-zinc-950 sm:px-6">
+        <main className="min-h-screen bg-[#fffaf0] px-4 pb-10 pt-24 text-black sm:px-6" style={{ colorScheme: "light" }}>
             <div className="mx-auto max-w-4xl">
-                <h1 className="text-3xl font-bold text-black">
-                    Edit Routines
-                </h1>
-
                 <EditRoutinesForm
                     coachId={String(coachId)}
                     athleteId={athleteId}

@@ -175,20 +175,23 @@ export default function EditRoutinesForm({
         }
     }
 
-    const fieldStyle = "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base leading-6 text-zinc-950 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-700";
+    const fieldStyle = "w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-base leading-6 text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-red-700";
 
     return (
-        <section className="mt-6">
-            <BackLink href={`/coach/${coachId}/athletes`}>Back</BackLink>
+        <section>
+            <BackLink href={`/coach/${coachId}/athletes`}>Back to athletes</BackLink>
+            <header className="mb-6 mt-6 border-b-2 border-red-700 pb-5">
+                <p className="text-sm font-semibold text-red-800">Edit Routines</p>
+                <h1 className="mt-2 break-words text-3xl font-bold text-black">{athleteName}</h1>
+            </header>
             <fieldset disabled={saving} className="min-w-0 disabled:opacity-70">
-            <h2 className="break-words text-2xl font-bold text-zinc-950">{athleteName}</h2>
 
             <div className="mt-6 space-y-7">
                 <section aria-labelledby="trampoline-edit-heading">
-                    <h3 id="trampoline-edit-heading" className="mb-3 text-xl font-bold text-red-900">Trampoline</h3>
-                    <div className="overflow-hidden rounded-xl border border-red-100 bg-white shadow-sm">
-                        <div className="border-b border-red-100 bg-red-50 px-4 py-3">
-                            <label htmlFor="routine-compulsory" className="text-base font-bold text-red-900">Compulsory</label>
+                    <h2 id="trampoline-edit-heading" className="mb-3 text-xl font-bold text-black">Trampoline</h2>
+                    <div className="overflow-hidden rounded-xl border border-red-200 bg-white shadow-sm">
+                        <div className="border-b border-red-200 bg-red-50 px-4 py-3">
+                            <label htmlFor="routine-compulsory" className="text-base font-bold text-black">Compulsory</label>
                         </div>
                         <div className="p-4">
                         <select id="routine-compulsory" value={compulsory} onChange={(e) => setCompulsory(e.target.value)} className={fieldStyle}>
@@ -197,7 +200,7 @@ export default function EditRoutinesForm({
                         </select>
                         {compulsory === "Level 5+" && (
                             <div className="mt-4">
-                                <label htmlFor="routine-custom-compulsory" className="mb-2 block text-sm font-semibold text-zinc-700">Custom Compulsory</label>
+                                <label htmlFor="routine-custom-compulsory" className="mb-2 block text-sm font-semibold text-black">Custom Compulsory</label>
                                 <textarea id="routine-custom-compulsory" value={customCompulsory} onChange={(e) => setCustomCompulsory(e.target.value)} placeholder="One skill per line" rows={10} className={fieldStyle} />
                             </div>
                         )}
@@ -211,8 +214,8 @@ export default function EditRoutinesForm({
 
                 {synEligible && (
                     <section aria-labelledby="syn-routine-heading">
-                        <h3 id="syn-routine-heading" className="mb-3 text-xl font-bold text-red-900">Synchro</h3>
-                        {synPartnerName && <p className="mb-3 text-sm font-medium text-zinc-600">Shared with {synPartnerName}. Changes apply to both profiles.</p>}
+                        <h2 id="syn-routine-heading" className="mb-3 text-xl font-bold text-black">Synchro</h2>
+                        {synPartnerName && <p className="mb-3 text-sm font-medium text-black">Shared with {synPartnerName}. Changes apply to both profiles.</p>}
                         {synStorageAvailable ? <div className="space-y-4">
                             {synDrafts.map((draft, index) => (
                                 <div key={index} className="space-y-3">
@@ -222,7 +225,7 @@ export default function EditRoutinesForm({
                                         calculationError={ddLookupError} rows={Math.max(10, draft.skills.split("\n").length)} />
                                 </div>
                             ))}
-                        </div> : <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Synchro routines could not be loaded. Check access to synchro_routines and reload.</p>}
+                        </div> : <p className="rounded-xl bg-red-50 p-4 text-sm text-red-900">Synchro routines could not be loaded. Check access to synchro_routines and reload.</p>}
                     </section>
                 )}
 
@@ -237,7 +240,7 @@ export default function EditRoutinesForm({
                 </div>}
 
                 <section aria-labelledby="skills-edit-heading">
-                    <h3 id="skills-edit-heading" className="mb-3 text-xl font-bold text-red-900">Skills & Notes</h3>
+                    <h2 id="skills-edit-heading" className="mb-3 text-xl font-bold text-black">Skills & Notes</h2>
                     <div className="grid gap-4 sm:grid-cols-2">
                         <RoutineEditor id="skills" title="Skills" value={skills} onChange={setSkills} />
                         <RoutineEditor id="notes" title="Notes" value={notes} onChange={setNotes} placeholder="Coaching notes" />
@@ -245,7 +248,7 @@ export default function EditRoutinesForm({
                 </section>
             </div>
 
-            <button type="button" onClick={handleSave} className="mt-6 rounded-lg bg-red-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2">
+            <button type="button" onClick={handleSave} className="mt-6 min-h-11 w-full rounded-lg bg-red-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2 sm:w-auto">
                 {saving ? "Saving…" : "Save Routines"}
             </button>
             </fieldset>
@@ -268,21 +271,21 @@ function RoutineEditor({ id, title, value, onChange, difficulty, onDifficultyCha
     placeholder?: string;
 }) {
     return (
-        <div className="min-w-0 overflow-hidden rounded-xl border border-red-100 bg-white shadow-sm">
-            <div className="border-b border-red-100 bg-red-50 px-4 py-3">
-                <label htmlFor={`routine-${id}`} className="text-base font-bold text-red-900">{title}</label>
+        <div className="min-w-0 overflow-hidden rounded-xl border border-red-200 bg-white shadow-sm">
+            <div className="border-b border-red-200 bg-red-50 px-4 py-3">
+                <label htmlFor={`routine-${id}`} className="text-base font-bold text-black">{title}</label>
             </div>
             <div className="p-4">
-                <textarea id={`routine-${id}`} value={value} onChange={(event) => onChange(event.target.value)} placeholder={calculation ? "One skill per line, or separate with commas" : placeholder} rows={rows} className="w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base leading-7 text-zinc-950 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-700" />
+                <textarea id={`routine-${id}`} value={value} onChange={(event) => onChange(event.target.value)} placeholder={calculation ? "One skill per line, or separate with commas" : placeholder} rows={rows} className="w-full resize-y rounded-lg border border-red-200 bg-white px-3 py-2 text-base leading-7 text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-red-700" />
                 {calculation && (
                     <div aria-live="polite" className="mt-3 space-y-2 text-sm leading-6">
-                        {calculationError ? <p role="alert" className="text-amber-900">{calculationError}</p> : (
+                        {calculationError ? <p role="alert" className="text-red-900">{calculationError}</p> : (
                             <>
-                                <p className="font-semibold text-zinc-700">Calculated DD: {calculation.total?.toFixed(2) ?? "—"}{calculation.unmatched.length > 0 ? " (matched skills only)" : ""}</p>
-                                {calculation.unmatched.map((skill) => <p key={skill} className="rounded-lg bg-amber-50 px-3 py-2 text-amber-900">Calculation done, please note no match was found in our database for skill {skill}.</p>)}
+                                <p className="font-semibold text-black">Calculated DD: {calculation.total?.toFixed(2) ?? "—"}{calculation.unmatched.length > 0 ? " (matched skills only)" : ""}</p>
+                                {calculation.unmatched.map((skill) => <p key={skill} className="rounded-lg bg-red-50 px-3 py-2 text-red-900">Calculation done, please note no match was found in our database for skill {skill}.</p>)}
                             </>
                         )}
-                        {calculation.repeated.map((skill) => <p key={skill} className="rounded-lg bg-amber-50 px-3 py-2 text-amber-900">Repeated skill: {skill}. DD includes every occurrence.</p>)}
+                        {calculation.repeated.map((skill) => <p key={skill} className="rounded-lg bg-red-50 px-3 py-2 text-red-900">Repeated skill: {skill}. DD includes every occurrence.</p>)}
                     </div>
                 )}
                 {onDifficultyChange && (

@@ -8,8 +8,8 @@ export default function DmtPassDifficulty({ pass, lookup, error }: { pass: DmtPa
     return (
         <div aria-live="polite" className="space-y-2">
             <p className="rounded-lg bg-red-50 px-3 py-2 text-base font-bold tabular-nums text-red-900">DD: {error ? "Unavailable" : calculation.total?.toFixed(2) ?? "—"}{!error && qualifier}</p>
-            {error ? <p className="text-sm leading-6 text-amber-900">{error}</p> : calculation.unmatched.map((code) => (
-                <p key={code} className="rounded-lg bg-amber-50 px-3 py-2 text-sm leading-6 text-amber-900">Calculation done, please note no match was found in our database for skill {code}.</p>
+            {error ? <p className="text-sm leading-6 text-red-900">{error}</p> : calculation.unmatched.map((code) => (
+                <p key={code} className="rounded-lg bg-red-50 px-3 py-2 text-sm leading-6 text-red-900">Calculation done, please note no match was found in our database for skill {code}.</p>
             ))}
         </div>
     );
