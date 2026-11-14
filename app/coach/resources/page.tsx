@@ -5,10 +5,17 @@ export default function CoachResourcesPage() {
     const categories = [...new Set(coachResources.map((resource) => resource.category))];
 
     return (
-        <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24 text-zinc-950 sm:px-6">
+        <main
+            className="min-h-screen bg-[#f5efe9] px-4 pb-10 pt-24 text-zinc-950 sm:px-6"
+            style={{
+                colorScheme: "light",
+                backgroundColor: "#f5efe9",
+                backgroundImage: "radial-gradient(ellipse at 0% 0%, #eecdc5 0%, transparent 55%), radial-gradient(ellipse at 100% 85%, #e7d5c5 0%, transparent 50%)",
+            }}
+        >
             <BackLink href="/coach">Back</BackLink>
             <div className="mx-auto max-w-3xl">
-                <header className="mb-8 border-b border-zinc-200 pb-6">
+                <header className="mb-8 border-b-4 border-red-700 pb-6">
                     <p className="text-sm font-semibold uppercase tracking-wide text-red-700">Coaches</p>
                     <h1 className="mt-2 text-3xl font-bold tracking-tight">Resources</h1>
                 </header>
