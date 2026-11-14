@@ -1,6 +1,7 @@
 import { competitionAge, meetsAgeRequirements, type CompetitionLevel } from "./competition-age";
 
 export type QualificationRequirement = {
+    discipline?: string | null;
     id: number | string;
     qualification_type: string;
     source_level_id: number | string | null;
@@ -77,6 +78,7 @@ export function mobilityRoutineChecks(rule: QualificationRequirement, routine: M
 
 export function scoreBasisLabel(basis: string) {
     const labels: Record<string, string> = {
+        compulsory_plus_optional: "Compulsory + optional from the same competition",
         prelim_including_bonus: "Preliminary score including bonus",
         prelim: "Preliminary score",
         second_voluntary_or_final: "Second voluntary or final routine",

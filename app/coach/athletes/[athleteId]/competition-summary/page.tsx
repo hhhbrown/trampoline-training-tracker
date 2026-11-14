@@ -1,3 +1,4 @@
+import NationalsRequirements from "@/components/NationalsRequirements";
 import WagcRequirements from "@/components/WagcRequirements";
 import { WAGC_RULESET_YEAR } from "@/lib/wagc";
 import CompetitionRequirements from "@/components/CompetitionRequirements";
@@ -27,7 +28,7 @@ export default async function CompetitionSummaryPage({ params }: {
         .eq("discipline", "TRI");
     const season = competitionSeason();
     const sourceLevel = matchCompetitionLevel(levels ?? [], athlete.level, "TRI");
-    const [{ data: ddRequirements, error: ddRequirementsError }, { data: routines, error: routinesError }, { data: mobilityRequirements, error: mobilityError }, { data: wagcRequirements, error: wagcError }] = await Promise.all([
+    const [{ data: ddRequirements, error: ddRequirementsError }, { data: routines, error: routinesError }, { data: mobilityRequirements, error: mobilityError }, { data: wagcRequirements, error: wagcError }, { data: nationalsRequirements, error: nationalsError }] = await Promise.all([
         supabase.from("level_dd_requirements").select("level_id, gender, min_dd, max_dd")
             .in("level_id", (levels ?? []).map((level) => level.id)),
         supabase.from("routines").select("compulsory, custom_compulsory, optional_a, optional_a_difficulty, optional_b, optional_b_difficulty")
@@ -45,6 +46,12 @@ export default async function CompetitionSummaryPage({ params }: {
             .eq("qualification_type", "international")
             .eq("ruleset_year", WAGC_RULESET_YEAR)
             .ilike("pathway_name", "%WAGC%")
+            .order("id"),
+        supabase.from("qualification_requirements")
+            .select("id, qualification_type, source_level_id, target_level_id, gender, min_age, max_age, minimum_score, minimum_dd, score_basis, pathway_name, description, required_skill, ruleset_year, discipline")
+            .eq("qualification_type", "nationals")
+            .eq("discipline", "TRI")
+            .eq("ruleset_year", season.endYear)
             .order("id"),
     ]);
 
@@ -81,6 +88,19 @@ export default async function CompetitionSummaryPage({ params }: {
                     ]}
                     error={levelsError ? "Competition levels could not be loaded." : mobilityError ? "Mobility requirements could not be loaded. Check read access to qualification_requirements." : undefined}
                     routinesError={routinesError ? "Saved routines could not be loaded." : undefined}
+                />
+                <NationalsRequirements
+                    profileLevel={athlete.level}
+                    gender={athlete.gender}
+                    levels={levels ?? []}
+                    year={season.endYear}
+                    requirements={nationalsRequirements ?? []}
+                    routines={[
+                        { name: "Optional A", value: routines?.optional_a ?? null, difficulty: routines?.optional_a_difficulty ?? null },
+                        { name: "Optional B", value: routines?.optional_b ?? null, difficulty: routines?.optional_b_difficulty ?? null },
+                    ]}
+                    error={levelsError ? "Competition levels could not be loaded." : nationalsError ? "Canadian Championships standards could not be loaded. Check read access to qualification_requirements." : undefined}
+                    routinesError={routinesError ? "Saved routine DD could not be loaded." : undefined}
                 />
                 <WagcRequirements
                     requirements={wagcRequirements ?? []}
