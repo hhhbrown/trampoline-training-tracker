@@ -8,10 +8,9 @@ export type CoachResource = {
 // Shared across coaches. Add approved competition documents and links here.
 export const coachResources: CoachResource[] = [
     {
-        title: "Current COP",
+        title: "2025–2028 COP",
         url: "https://www.gymnastics.sport/publicdir/rules/files/en_1.1%20-%20TRA%20CoP%202025-2028.pdf",
         category: "Competition Rules & Pathways",
-        description: "2025–2028 Trampoline Gymnastics Code of Points",
     },
     {
         title: "2027 Canadian Pathways",
