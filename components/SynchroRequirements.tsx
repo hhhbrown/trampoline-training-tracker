@@ -35,7 +35,7 @@ export default async function SynchroRequirements({ athlete }: {
 
     return (
         <section aria-labelledby="syn-requirements-heading" className="mt-7 overflow-hidden rounded-2xl border border-red-100 bg-white shadow-sm">
-            <h2 id="syn-requirements-heading" className="border-b border-red-100 bg-red-50 px-5 py-4 text-2xl font-extrabold tracking-tight text-red-950">SYN {synLevel}</h2>
+            <h2 id="syn-requirements-heading" className="border-b border-red-100 bg-red-50 px-5 py-4 text-2xl font-extrabold tracking-tight text-black">SYN {synLevel}</h2>
             <div className="space-y-3 p-5">
                 <div className={`flex items-start gap-3 rounded-xl border p-4 ${style}`}>
                     <span aria-hidden="true" className="text-xl font-bold">{status === "met" ? "✓" : status === "penalty" ? "✕" : "!"}</span>
@@ -44,7 +44,7 @@ export default async function SynchroRequirements({ athlete }: {
                         <p className="mt-1 text-sm font-semibold">{error ?? check.message}</p>
                     </div>
                 </div>
-                {synParticipationNote(synLevel) && <p className="text-sm leading-6 text-zinc-600">Participation in gendered SYN at Level 5 or above means this pair cannot participate in Mixed SYN. This application supports gendered SYN only.</p>}
+                {synParticipationNote(synLevel) && <p className="text-sm leading-6 text-black">Participation in gendered SYN at Level 5 or above means this pair cannot participate in Mixed SYN. This application supports gendered SYN only.</p>}
             </div>
         </section>
     );

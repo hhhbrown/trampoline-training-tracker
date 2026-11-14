@@ -1,16 +1,15 @@
-import { competesInEvent } from "@/lib/athlete-events";
 import { competitionAge } from "@/lib/competition-age";
 import { loadDmtSets } from "@/lib/dmt-sets";
 import { loadDmtDDLookup } from "@/lib/dmt-dd";
 import { dmtWagcRounds } from "@/lib/dmt-nationals";
 import { mobilityRoutineChecks } from "@/lib/mobility";
-import { WAGC_AGE_CUTOFF_YEAR, WAGC_RULESET_YEAR, wagcAgeGroup } from "@/lib/wagc";
+import { WAGC_AGE_CUTOFF_YEAR, WAGC_RULESET_YEAR, wagcAgeGroup, supportsWagc } from "@/lib/wagc";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DmtWagcRequirements({ athlete }: {
     athlete: { id: number; dmt_level: string | null; gender: string | null; date_of_birth: string | null };
 }) {
-    if (!competesInEvent(athlete.dmt_level)) return null;
+    if (!supportsWagc(athlete.dmt_level)) return null;
     const client = await createClient();
     const [requirements, sets, lookup] = await Promise.all([
         client.from("qualification_requirements")

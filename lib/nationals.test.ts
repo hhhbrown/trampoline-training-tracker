@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { nationalsLevelExempt, nationalsRequirement } from "./nationals";
+import { nationalsLevelExempt, nationalsRequirement, supportsNationals } from "./nationals";
 import type { QualificationRequirement } from "./mobility";
 
 const level = { id: 7, name: "Level 6", discipline: "TRI", min_age: 17, max_age: null };
@@ -30,4 +30,9 @@ test("uses gender-neutral requirements where applicable and prefers specific rul
     assert.equal(nationalsRequirement([shared], level, null, 2027), shared);
     assert.equal(nationalsRequirement([shared], level, "Other", 2027), shared);
     assert.equal(nationalsRequirement([shared, rule], level, "Female", 2027), rule);
+});
+
+test("Canadian Championships cards are shown only for Level 5 and above", () => {
+    for (const level of ["Level 1", "Level 2", "Level 3", "Level 4", null, ""]) assert(!supportsNationals(level));
+    for (const level of ["Level 5", "Level 6", "Level 7", "Novice", "Junior", "Senior"]) assert(supportsNationals(level));
 });

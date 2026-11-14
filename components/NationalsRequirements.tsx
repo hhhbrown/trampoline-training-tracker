@@ -1,6 +1,6 @@
 import { matchCompetitionLevel, type CompetitionLevel } from "@/lib/competition-age";
 import { mobilityRoutineChecks, scoreBasisLabel, type MobilityRoutine, type QualificationRequirement } from "@/lib/mobility";
-import { nationalsLevelExempt, nationalsRequirement } from "@/lib/nationals";
+import { nationalsLevelExempt, nationalsRequirement, supportsNationals } from "@/lib/nationals";
 
 export default function NationalsRequirements({ profileLevel, gender, levels, year, requirements, routines, error, routinesError, discipline = "TRI" }: {
     discipline?: "TRI" | "DMT";
@@ -13,6 +13,7 @@ export default function NationalsRequirements({ profileLevel, gender, levels, ye
     error?: string;
     routinesError?: string;
 }) {
+    if (!supportsNationals(profileLevel)) return null;
     const exempt = nationalsLevelExempt(profileLevel);
     const level = matchCompetitionLevel(levels, profileLevel, discipline);
     const rule = nationalsRequirement(requirements, level, gender, year);

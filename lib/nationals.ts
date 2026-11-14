@@ -14,3 +14,10 @@ export function nationalsRequirement(requirements: QualificationRequirement[], l
     return matching.find((rule) => rule.gender != null && mobilityGender(rule.gender) === mobilityGender(gender))
         ?? matching.find((rule) => rule.gender == null);
 }
+
+export function supportsNationals(profileLevel: string | null) {
+    const name = profileLevel?.trim() ?? "";
+    if (/^(novice|junior|senior)$/i.test(name)) return true;
+    const numbered = /^level\s+(\d+)$/i.exec(name);
+    return numbered != null && Number(numbered[1]) >= 5;
+}

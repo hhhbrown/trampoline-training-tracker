@@ -1,3 +1,4 @@
+import { supportsNationals } from "@/lib/nationals";
 import NationalsRequirements from "./NationalsRequirements";
 import { competesInEvent } from "@/lib/athlete-events";
 import { loadDmtSets } from "@/lib/dmt-sets";
@@ -8,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 export default async function DmtNationalsRequirements({ athlete, year }: {
     athlete: { id: number; dmt_level: string | null; gender: string | null }; year: number;
 }) {
-    if (!competesInEvent(athlete.dmt_level)) return null;
+    if (!competesInEvent(athlete.dmt_level) || !supportsNationals(athlete.dmt_level)) return null;
     const client = await createClient();
     const [levels, requirements, sets, lookup] = await Promise.all([
         client.from("competition_levels").select("id, name, discipline, min_age, max_age").eq("discipline", "DMT"),
