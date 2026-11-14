@@ -1,3 +1,5 @@
+import { competesInEvent } from "@/lib/athlete-events";
+import { emptyDmtSet, loadDmtSet } from "@/lib/dmt-sets";
 import { sharedSynchroAthleteIds } from "@/lib/synchro-routines";
 import { canShowSynchroRoutine } from "@/lib/athlete-events";
 import { resolveSynchroPartner } from "@/lib/synchro-partner";
@@ -35,6 +37,9 @@ export default async function RoutinesPage({ params }: PageProps) {
     const { data: synRoutines, error: synSchemaError } = await supabase.from("synchro_routines")
         .select("id, athlete_id, routine_name, skills, difficulty, notes").in("athlete_id", synAthleteIds).order("id").limit(1);
 
+    const dmt = competesInEvent(athlete?.dmt_level)
+        ? await loadDmtSet(supabase, Number(athleteId)) : { draft: emptyDmtSet(), error: null };
+
     return (
         <main className="min-h-screen bg-zinc-50 px-4 pb-10 pt-24 text-zinc-950 sm:px-6">
             <div className="mx-auto max-w-4xl">
@@ -48,6 +53,8 @@ export default async function RoutinesPage({ params }: PageProps) {
                     athleteName={athlete?.name ?? ""}
                     routines={routines}
                     dmtLevel={athlete?.dmt_level ?? null}
+                    dmtSet={dmt.draft}
+                    dmtError={dmt.error}
                     synEligible={athlete ? canShowSynchroRoutine(athlete, pairing) : false}
                     synStorageAvailable={!synSchemaError}
                     synRoutines={synRoutines ?? []}

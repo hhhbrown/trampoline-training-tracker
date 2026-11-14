@@ -1,3 +1,4 @@
+import type { DmtSetDraft } from "@/lib/dmt-sets";
 import { competesInEvent } from "@/lib/athlete-events";
 import { compulsorySkills } from "@/lib/compulsories";
 
@@ -21,7 +22,6 @@ type Routines = {
     optional_a_difficulty: number | null;
     optional_b: string | null;
     optional_b_difficulty: number | null;
-    double_mini_set_a: string | null;
     skills: string | null;
     notes: string | null;
 } | null;
@@ -30,10 +30,14 @@ export default function PrintablePlanSheet({
     athlete,
     planItems,
     routines,
+    dmtSet,
+    dmtError,
 }: {
     athlete: Athlete;
     planItems: PlanItem[];
     routines: Routines;
+    dmtSet: DmtSetDraft;
+    dmtError?: string | null;
 }) {
     const today = new Date().toLocaleDateString("en-CA");
     const rows = Array.from({ length: 15 }, (_, index) => planItems[index]);
@@ -44,7 +48,10 @@ export default function PrintablePlanSheet({
             : compulsorySkills[routines?.compulsory ?? ""] ?? [];
     const optionalA = splitRoutine(routines?.optional_a);
     const optionalB = splitRoutine(routines?.optional_b);
-    const doubleMiniSetA = splitRoutine(routines?.double_mini_set_a);
+    const dmtLines = dmtSet.passes.flatMap((pass) => [
+        `Pass ${pass.passNumber} · ${pass.firstPlacement}: ${pass.firstCode || "—"}`,
+        `Pass ${pass.passNumber} · dismount: ${pass.dismountCode || "—"}`,
+    ]);
 
     return (
         <section className="mx-auto mb-4 w-[7.75in] min-h-[10in] bg-white p-2 text-black print:mb-0 print:break-after-page">
@@ -103,7 +110,7 @@ export default function PrintablePlanSheet({
                             colSpan={3}
                             className="border border-black bg-yellow-300 p-1 text-center font-semibold"
                         >
-                            DMT
+                            DMT · Set 1
                         </td>
                         <td
                             colSpan={2}
@@ -125,7 +132,7 @@ export default function PrintablePlanSheet({
                                 {index + 1}
                             </td>
                             <td colSpan={2} className="border border-black p-1">
-                                {doubleMiniSetA[index] ?? ""}
+                                {dmtError ? index === 0 ? "DMT set unavailable" : "" : dmtLines[index] ?? ""}
                             </td>
                         </tr>
                     ))}

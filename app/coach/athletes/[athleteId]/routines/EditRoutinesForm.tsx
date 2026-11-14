@@ -1,5 +1,7 @@
 "use client";
 
+import DmtSetFields from "@/components/DmtSetFields";
+import { dmtValidation, saveDmtSet, type DmtSetDraft } from "@/lib/dmt-sets";
 import { competesInEvent } from "@/lib/athlete-events";
 import { useState } from "react";
 import { synchroDraft, synchroDifficulty, synchroPayload, type SynchroRoutine, type SynchroDraft } from "@/lib/synchro-routines";
@@ -13,6 +15,8 @@ type EditRoutinesFormProps = {
     athleteId: string;
     athleteName: string;
     dmtLevel: string | null;
+    dmtSet: DmtSetDraft;
+    dmtError?: string | null;
     synEligible: boolean;
     synStorageAvailable: boolean;
     synRoutines: SynchroRoutine[];
@@ -29,10 +33,6 @@ type EditRoutinesFormProps = {
         optional_a_difficulty: number | null;
         optional_b: string | null;
         optional_b_difficulty: number | null;
-        double_mini_set_a: string | null;
-        double_mini_set_a_difficulty: number | null;
-        double_mini_set_b: string | null;
-        double_mini_set_b_difficulty: number | null;
         skills: string | null;
         notes: string | null;
     } | null;
@@ -43,6 +43,8 @@ export default function EditRoutinesForm({
     athleteId,
     athleteName,
     dmtLevel,
+    dmtSet,
+    dmtError,
     synEligible,
     synStorageAvailable,
     synRoutines,
@@ -86,31 +88,24 @@ export default function EditRoutinesForm({
     function updateSyn(index: number, changes: Partial<SynchroDraft>) {
         setSynDrafts((current) => current.map((draft, i) => i === index ? { ...draft, ...changes } : draft));
     }
-    const [doubleMiniSetA, setDoubleMiniSetA] = useState(
-        routines?.double_mini_set_a ?? ""
-    );
-    const [doubleMiniSetADifficulty, setDoubleMiniSetADifficulty] = useState(
-        routines?.double_mini_set_a_difficulty?.toString() ?? ""
-    );
-    const [doubleMiniSetB, setDoubleMiniSetB] = useState(
-        routines?.double_mini_set_b ?? ""
-    );
-    const [doubleMiniSetBDifficulty, setDoubleMiniSetBDifficulty] = useState(
-        routines?.double_mini_set_b_difficulty?.toString() ?? ""
-    );
+    const [dmtDraft, setDmtDraft] = useState(dmtSet);
     const [skills, setSkills] = useState(routines?.skills ?? "");
     const [notes, setNotes] = useState(routines?.notes ?? "");
 
     async function handleSave() {
         if (saving) return;
         const synDDs = showSyn ? synDrafts.map((draft) => synchroDifficulty(draft, ddLookup, ddLookupError)) : [];
-        if ([effectiveA, effectiveB, doubleMiniSetADifficulty, doubleMiniSetBDifficulty, ...synDDs].some((value) => value !== "" && (!Number.isFinite(Number(value)) || Number(value) < 0))) {
+        if ([effectiveA, effectiveB, ...synDDs].some((value) => value !== "" && (!Number.isFinite(Number(value)) || Number(value) < 0))) {
             alert("Enter a valid DD of 0 or more.");
             return;
         }
         if (ddLookupError && ((optionalA.trim() && effectiveA === "") || (optionalB.trim() && effectiveB === "") || (showSyn && synDrafts.some((draft, index) => draft.skills.trim() && synDDs[index] === "")))) {
             alert("Automatic DD calculation is unavailable. Enter DD manually before saving.");
             return;
+        }
+        if (competesInEvent(dmtLevel) && !dmtError) {
+            const validation = dmtValidation(dmtDraft);
+            if (validation) { alert(validation); return; }
         }
         setSaving(true);
         try {
@@ -127,16 +122,6 @@ export default function EditRoutinesForm({
             optional_b: optionalB,
             optional_b_difficulty:
                 effectiveB === "" ? null : Number(effectiveB),
-            double_mini_set_a: doubleMiniSetA,
-            double_mini_set_a_difficulty:
-                doubleMiniSetADifficulty === ""
-                    ? null
-                    : Number(doubleMiniSetADifficulty),
-            double_mini_set_b: doubleMiniSetB,
-            double_mini_set_b_difficulty:
-                doubleMiniSetBDifficulty === ""
-                    ? null
-                    : Number(doubleMiniSetBDifficulty),
             skills,
             notes,
         };
@@ -169,11 +154,14 @@ export default function EditRoutinesForm({
                 }
             }
         }
+        if (competesInEvent(dmtLevel) && !dmtError) {
+            await saveDmtSet(supabase, Number(athleteId), dmtDraft, setDmtDraft);
+        }
         console.log("Saved routine:", data);
         alert("Routines saved!");
         router.push(`/coach/${coachId}/athletes`);
         } catch (error) {
-            alert(`Some routine changes may have saved. Synchro routine save failed: ${error instanceof Error ? error.message : "Try again."}`);
+            alert(`Some routine changes may have saved. Routine save incomplete: ${error instanceof Error ? error.message : "Try again."}`);
         } finally {
             setSaving(false);
         }
@@ -230,15 +218,7 @@ export default function EditRoutinesForm({
                     </section>
                 )}
 
-                {competesInEvent(dmtLevel) && (
-                <section aria-labelledby="double-mini-edit-heading">
-                    <h3 id="double-mini-edit-heading" className="mb-3 text-xl font-bold text-red-900">Double Mini</h3>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <RoutineEditor id="double-mini-a" title="Set A" value={doubleMiniSetA} onChange={setDoubleMiniSetA} difficulty={doubleMiniSetADifficulty} onDifficultyChange={setDoubleMiniSetADifficulty} rows={4} />
-                        <RoutineEditor id="double-mini-b" title="Set B" value={doubleMiniSetB} onChange={setDoubleMiniSetB} difficulty={doubleMiniSetBDifficulty} onDifficultyChange={setDoubleMiniSetBDifficulty} rows={4} />
-                    </div>
-                </section>
-                )}
+                {competesInEvent(dmtLevel) && <DmtSetFields value={dmtDraft} onChange={setDmtDraft} error={dmtError} />}
 
                 <section aria-labelledby="skills-edit-heading">
                     <h3 id="skills-edit-heading" className="mb-3 text-xl font-bold text-red-900">Skills & Notes</h3>

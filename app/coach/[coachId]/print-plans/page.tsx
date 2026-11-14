@@ -1,3 +1,5 @@
+import { competesInEvent } from "@/lib/athlete-events";
+import { emptyDmtSet, loadDmtSet } from "@/lib/dmt-sets";
 import { createClient } from "@/lib/supabase/server";
 import PrintablePlanSheet from "./PrintablePlanSheet";
 
@@ -40,16 +42,20 @@ export default async function PrintPlansPage({ params }: PageProps) {
 
           const { data: routines } = await supabase
             .from("routines")
-            .select("compulsory, custom_compulsory, optional_a, optional_a_difficulty, optional_b, optional_b_difficulty, double_mini_set_a, skills, notes")
+            .select("compulsory, custom_compulsory, optional_a, optional_a_difficulty, optional_b, optional_b_difficulty, skills, notes")
             .eq("athlete_id", athlete.id)
             .maybeSingle();
 
+          const dmt = competesInEvent(athlete.dmt_level)
+            ? await loadDmtSet(supabase, athlete.id) : { draft: emptyDmtSet(), error: null };
           return (
             <PrintablePlanSheet
               key={athlete.id}
               athlete={athlete}
               planItems={planItems ?? []}
               routines={routines}
+              dmtSet={dmt.draft}
+              dmtError={dmt.error}
             />
           );
         })

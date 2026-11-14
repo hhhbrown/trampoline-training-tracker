@@ -1,3 +1,5 @@
+import DmtSetSummary from "@/components/DmtSetSummary";
+import { emptyDmtSet, loadDmtSet } from "@/lib/dmt-sets";
 import { sharedSynchroAthleteIds } from "@/lib/synchro-routines";
 import { resolveSynchroPartner } from "@/lib/synchro-partner";
 import { canShowSynchroRoutine, competesInEvent } from "@/lib/athlete-events";
@@ -43,6 +45,9 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
     const { data: synRoutines, error: synError } = showSyn
         ? await supabase.from("synchro_routines").select("id, athlete_id, routine_name, skills, difficulty, notes").in("athlete_id", synAthleteIds).order("id").limit(1)
         : { data: [], error: null };
+
+    const dmt = competesInEvent(athlete.dmt_level)
+        ? await loadDmtSet(supabase, Number(athleteId)) : { draft: emptyDmtSet(), error: null };
 
     const skills: string[] =
         routines?.compulsory === "Level 5+"
@@ -101,15 +106,7 @@ export default async function AthleteRoutinesPage({ params }: PageProps) {
                         </section>
                     )}
 
-                    {competesInEvent(athlete.dmt_level) && (
-                    <section aria-labelledby="double-mini-heading">
-                        <h2 id="double-mini-heading" className="mb-4 text-xl font-bold text-red-900">Double Mini</h2>
-                        <div className="grid items-start gap-5 md:grid-cols-2">
-                            <RoutineCard title="Set A" value={routines?.double_mini_set_a} difficulty={routines?.double_mini_set_a_difficulty} />
-                            <RoutineCard title="Set B" value={routines?.double_mini_set_b} difficulty={routines?.double_mini_set_b_difficulty} />
-                        </div>
-                    </section>
-                    )}
+                    {competesInEvent(athlete.dmt_level) && <DmtSetSummary set={dmt.draft} error={dmt.error} />}
 
                     <section aria-labelledby="practice-heading">
                         <h2 id="practice-heading" className="mb-4 text-xl font-bold text-red-900">Skills & Notes</h2>
