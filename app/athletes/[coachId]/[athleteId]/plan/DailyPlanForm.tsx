@@ -4,6 +4,8 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
+const MAX_ACTUAL_ATTEMPTS = 10;
+
 type PlanItem = {
     id: number;
     name: string | null;
@@ -78,6 +80,12 @@ export default function DailyPlanForm({
             const actual = actualAttempts[item.id]?.trim() ?? "";
             return actual === "" ? (item.target ?? 1) : Number(actual);
         };
+        if (checkedPlanItems.some((item) =>
+            actualAttempts[item.id]?.trim() && attemptsFor(item) > MAX_ACTUAL_ATTEMPTS
+        )) {
+            alert(`Enter at most ${MAX_ACTUAL_ATTEMPTS} actual attempts per item.`);
+            return;
+        }
         if (checkedPlanItems.some((item) => !Number.isSafeInteger(attemptsFor(item)) || attemptsFor(item) < 0)) {
             alert("Enter a whole-number actual attempt count of 0 or more, or leave it blank to use the suggested count.");
             return;
@@ -227,6 +235,7 @@ export default function DailyPlanForm({
                                                     aria-label={`Actual attempts for ${item.name || "Untitled turn"}`}
                                                     type="number"
                                                     min="0"
+                                                    max={MAX_ACTUAL_ATTEMPTS}
                                                     step="1"
                                                     inputMode="numeric"
                                                     disabled={!checked}
