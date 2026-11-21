@@ -91,7 +91,7 @@ export default function DailyPlanForm({
                     return /\bcompulsory\b/i.test(name);
                 }
 
-                const optional = name.match(/\boptionals?\b(?:\s+([ab])\b)?/i);
+                const optional = name.match(/^optionals?\b(?:\s+([ab])\b)?/i);
                 if (!optional) return false;
 
                 const routineName = optional[1]
